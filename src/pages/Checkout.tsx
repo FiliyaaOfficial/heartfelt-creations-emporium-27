@@ -1,244 +1,249 @@
-import React, { useState } from 'react';
-import { useCart } from '@/contexts/CartContext';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/router';
+import { useCart } from '@/context/CartContext';
+import { ShippingAddress } from '@/types';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
-import { ShippingAddress } from '@/types';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { formatCurrency } from '@/lib/utils';
+import { toJson } from "@/lib/utils";
 
 const Checkout = () => {
-  const { cartItems, subtotal, clearCart } = useCart();
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const navigate = useNavigate();
+  const router = useRouter();
+  const { cartItems, clearCart } = useCart();
   const { toast } = useToast();
 
-  // Form state
-  const [formData, setFormData] = useState<ShippingAddress>({
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [formData, setFormData] = useState({
+    email: '',
+    phone: '',
+  });
+  const [shippingAddress, setShippingAddress] = useState<ShippingAddress>({
     full_name: '',
     street_address: '',
     city: '',
     state: '',
     postal_code: '',
-    country: 'India',
+    country: '',
   });
-  const [contactEmail, setContactEmail] = useState('');
-  const [contactPhone, setContactPhone] = useState('');
-  
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
-  
-  const validateForm = () => {
-    // Basic validation
-    for (const [key, value] of Object.entries(formData)) {
-      if (!value && key !== 'country') {
-        toast({
-          title: "Missing information",
-          description: `Please fill in your ${key.replace('_', ' ')}`,
-          variant: "destructive",
-        });
-        return false;
-      }
-    }
-    
-    if (!contactEmail) {
-      toast({
-        title: "Missing information",
-        description: "Please provide your email address",
-        variant: "destructive",
-      });
-      return false;
-    }
-    
+
+  const cartTotal = cartItems.reduce((total, item) => total + (item.product.price * item.quantity), 0);
+
+  useEffect(() => {
     if (cartItems.length === 0) {
-      toast({
-        title: "Empty cart",
-        description: "Your cart is empty",
-        variant: "destructive",
-      });
-      return false;
+      router.push('/cart');
     }
-    
-    return true;
+  }, [cartItems, router]);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    if (name in shippingAddress) {
+      setShippingAddress(prev => ({ ...prev, [name]: value }));
+    } else {
+      setFormData(prev => ({ ...prev, [name]: value }));
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!validateForm()) return;
-    
-    setIsSubmitting(true);
+    setIsProcessing(true);
     
     try {
-      // Create the order
-      const { data: order, error: orderError } = await supabase
+      // Create the order in Supabase
+      const { data: orderData, error: orderError } = await supabase
         .from('orders')
         .insert({
-          total_amount: subtotal,
-          shipping_address: formData,
-          payment_status: 'pending',
-          contact_email: contactEmail,
-          contact_phone: contactPhone || null
+          contact_email: formData.email,
+          contact_phone: formData.phone,
+          total_amount: cartTotal,
+          shipping_address: toJson(shippingAddress),
+          status: 'pending',
+          payment_status: 'pending'
         })
         .select()
         .single();
-      
+
       if (orderError) throw orderError;
-      
-      // Create order items
-      const orderItems = cartItems.map(item => ({
-        order_id: order!.id,
-        product_id: item.product_id,
-        product_name: item.product.name,
-        product_price: item.product.price,
-        quantity: item.quantity
-      }));
-      
-      const { error: itemsError } = await supabase
-        .from('order_items')
-        .insert(orderItems);
-      
-      if (itemsError) throw itemsError;
-      
-      // Clear cart
-      await clearCart();
-      
-      toast({
-        title: "Order placed successfully!",
-        description: `Your order #${order!.id.slice(0, 8)} has been placed.`,
-      });
-      
-      // Redirect to thank you page or order confirmation
-      navigate(`/order-confirmation/${order!.id}`);
-      
+
+      if (orderData) {
+        // Create order items
+        for (const cartItem of cartItems) {
+          const { error: orderItemError } = await supabase
+            .from('order_items')
+            .insert({
+              order_id: orderData.id,
+              product_id: cartItem.product.id,
+              product_name: cartItem.product.name,
+              product_price: cartItem.product.price,
+              quantity: cartItem.quantity,
+            });
+
+          if (orderItemError) throw orderItemError;
+        }
+
+        // Clear the cart
+        clearCart();
+
+        // Redirect to success page
+        router.push(`/order-confirmation/${orderData.id}`);
+
+        toast({
+          title: 'Order Placed!',
+          description: 'Your order has been successfully placed.',
+        });
+      }
     } catch (error) {
-      console.error('Error placing order:', error);
+      console.error('Error during checkout:', error);
       toast({
-        title: "Error placing your order",
-        description: "Please try again later",
-        variant: "destructive",
+        title: 'Checkout Failed',
+        description: 'There was an error processing your order. Please try again.',
+        variant: 'destructive',
       });
     } finally {
-      setIsSubmitting(false);
+      setIsProcessing(false);
     }
   };
 
+  if (cartItems.length === 0) {
+    return <div className="container mx-auto p-4">Your cart is empty.</div>;
+  }
+
   return (
-    <div className="container mx-auto px-4 py-12 md:py-16">
-      <h1 className="text-3xl md:text-4xl font-serif font-semibold text-center mb-8">Checkout</h1>
-      
-      <form onSubmit={handleSubmit} className="max-w-3xl mx-auto">
-        <div className="space-y-6">
-          {/* Contact Information */}
-          <div>
-            <h2 className="text-xl font-medium mb-3">Contact Information</h2>
-            <Input 
-              type="email" 
-              placeholder="Email Address" 
-              name="contactEmail"
-              value={contactEmail}
-              onChange={(e) => setContactEmail(e.target.value)}
+    <div className="container mx-auto p-4">
+      <h1 className="text-2xl font-semibold mb-4">Checkout</h1>
+      <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Contact Information */}
+        <div>
+          <h2 className="text-lg font-semibold mb-2">Contact Information</h2>
+          <div className="mb-4">
+            <Label htmlFor="email">Email</Label>
+            <Input
+              type="email"
+              id="email"
+              name="email"
+              value={formData.email}
+              onChange={handleInputChange}
               required
-            />
-            <Input 
-              type="tel" 
-              placeholder="Phone Number (optional)" 
-              name="contactPhone"
-              value={contactPhone}
-              onChange={(e) => setContactPhone(e.target.value)}
-              className="mt-3"
+              className="mt-1"
             />
           </div>
-          
-          {/* Shipping Address */}
-          <div>
-            <h2 className="text-xl font-medium mb-3">Shipping Address</h2>
-            <Input 
-              type="text" 
-              placeholder="Full Name" 
+          <div className="mb-4">
+            <Label htmlFor="phone">Phone</Label>
+            <Input
+              type="tel"
+              id="phone"
+              name="phone"
+              value={formData.phone}
+              onChange={handleInputChange}
+              className="mt-1"
+            />
+          </div>
+        </div>
+
+        {/* Shipping Address */}
+        <div>
+          <h2 className="text-lg font-semibold mb-2">Shipping Address</h2>
+          <div className="mb-4">
+            <Label htmlFor="full_name">Full Name</Label>
+            <Input
+              type="text"
+              id="full_name"
               name="full_name"
-              value={formData.full_name}
-              onChange={handleChange}
+              value={shippingAddress.full_name}
+              onChange={handleInputChange}
               required
+              className="mt-1"
             />
-            <Input 
-              type="text" 
-              placeholder="Street Address" 
+          </div>
+          <div className="mb-4">
+            <Label htmlFor="street_address">Street Address</Label>
+            <Input
+              type="text"
+              id="street_address"
               name="street_address"
-              value={formData.street_address}
-              onChange={handleChange}
-              className="mt-3"
+              value={shippingAddress.street_address}
+              onChange={handleInputChange}
               required
+              className="mt-1"
             />
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3">
-              <Input 
-                type="text" 
-                placeholder="City" 
+          </div>
+          <div className="mb-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="city">City</Label>
+              <Input
+                type="text"
+                id="city"
                 name="city"
-                value={formData.city}
-                onChange={handleChange}
+                value={shippingAddress.city}
+                onChange={handleInputChange}
                 required
+                className="mt-1"
               />
-              <Input 
-                type="text" 
-                placeholder="State" 
+            </div>
+            <div>
+              <Label htmlFor="state">State</Label>
+              <Input
+                type="text"
+                id="state"
                 name="state"
-                value={formData.state}
-                onChange={handleChange}
+                value={shippingAddress.state}
+                onChange={handleInputChange}
                 required
+                className="mt-1"
               />
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3">
-              <Input 
-                type="text" 
-                placeholder="Postal Code" 
+          </div>
+          <div className="mb-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="postal_code">Postal Code</Label>
+              <Input
+                type="text"
+                id="postal_code"
                 name="postal_code"
-                value={formData.postal_code}
-                onChange={handleChange}
+                value={shippingAddress.postal_code}
+                onChange={handleInputChange}
                 required
+                className="mt-1"
               />
-              <Input 
-                type="text" 
-                placeholder="Country" 
+            </div>
+            <div>
+              <Label htmlFor="country">Country</Label>
+              <Input
+                type="text"
+                id="country"
                 name="country"
-                value={formData.country}
-                onChange={handleChange}
-                disabled
+                value={shippingAddress.country}
+                onChange={handleInputChange}
+                required
+                className="mt-1"
               />
             </div>
           </div>
-          
-          {/* Order Summary */}
-          <div>
-            <h2 className="text-xl font-medium mb-3">Order Summary</h2>
-            <div className="bg-gray-50 rounded-md p-4">
-              <div className="flex justify-between mb-2">
-                <span>Subtotal:</span>
-                <span>{subtotal}</span>
-              </div>
-              <div className="flex justify-between mb-2">
-                <span>Shipping:</span>
-                <span>Free</span>
-              </div>
-              <div className="border-t border-gray-200 pt-2 mt-2 flex justify-between font-medium">
-                <span>Total:</span>
-                <span>{subtotal}</span>
-              </div>
-            </div>
+        </div>
+
+        {/* Order Summary */}
+        <div className="md:col-span-2">
+          <h2 className="text-lg font-semibold mb-2">Order Summary</h2>
+          <ul className="mb-4">
+            {cartItems.map(item => (
+              <li key={item.product.id} className="flex justify-between items-center py-2 border-b">
+                <span>{item.product.name} ({item.quantity})</span>
+                <span>{formatCurrency(item.product.price * item.quantity)}</span>
+              </li>
+            ))}
+          </ul>
+          <div className="flex justify-between items-center font-semibold">
+            <span>Total:</span>
+            <span>{formatCurrency(cartTotal)}</span>
           </div>
-          
-          {/* Submit Button */}
-          <Button 
-            type="submit" 
-            className="w-full bg-filiyaa-peach-500 hover:bg-filiyaa-peach-600"
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? "Placing Order..." : "Place Order"}
+        </div>
+
+        {/* Submit Button */}
+        <div className="md:col-span-2">
+          <Button type="submit" disabled={isProcessing} className="w-full">
+            {isProcessing ? 'Processing...' : 'Place Order'}
           </Button>
         </div>
       </form>

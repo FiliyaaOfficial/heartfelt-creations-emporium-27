@@ -16,3 +16,8 @@ export function formatCurrency(amount: number): string {
 }
 
 export type Tables<T extends keyof Database['public']['Tables']> = Database['public']['Tables'][T]['Row']
+
+// Helper function to convert objects to Json type for Supabase compatibility
+export function toJson<T>(data: T): Database['public']['Tables']['orders']['Insert']['shipping_address'] {
+  return data as Database['public']['Tables']['orders']['Insert']['shipping_address'];
+}

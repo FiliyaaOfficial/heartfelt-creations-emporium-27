@@ -1,13 +1,23 @@
+
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
+import { Check, Phone, Mail, Clock, MapPin, Send, MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
 import { SupportMessage } from '@/types';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select';
 
 const formSchema = z.object({
   name: z.string().min(2, {
@@ -26,9 +36,19 @@ const formSchema = z.object({
 
 const Support = () => {
   const [submitting, setSubmitting] = useState(false);
+  const [selectedSubject, setSelectedSubject] = useState<string | undefined>(undefined);
   const { toast } = useToast();
   
-  const handleSubmit = async (values: SupportMessage) => {
+  const { register, handleSubmit: hookFormSubmit, formState: { errors }, reset, setValue } = useForm<SupportMessage>({
+    resolver: zodResolver(formSchema),
+  });
+
+  const handleSubjectSelect = (value: string) => {
+    setSelectedSubject(value);
+    setValue('subject', value);
+  };
+  
+  const onSubmit = async (values: SupportMessage) => {
     setSubmitting(true);
     try {
       const { error } = await supabase
@@ -48,6 +68,7 @@ const Support = () => {
       });
       
       reset();
+      setSelectedSubject(undefined);
     } catch (error) {
       console.error("Error sending message:", error);
       toast({
@@ -59,10 +80,6 @@ const Support = () => {
       setSubmitting(false);
     }
   };
-
-  const { register, handleSubmit, formState: { errors }, reset } = useForm<SupportMessage>({
-    resolver: zodResolver(formSchema),
-  });
 
   const faqItems = [
     {
@@ -117,7 +134,7 @@ const Support = () => {
                   </Button>
                 </div>
               ) : (
-                <form onSubmit={handleSubmit} className="space-y-6">
+                <form onSubmit={hookFormSubmit(onSubmit)} className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
                       <Label htmlFor="name">Full Name <span className="text-red-500">*</span></Label>
@@ -134,7 +151,7 @@ const Support = () => {
                   
                   <div className="space-y-2">
                     <Label htmlFor="subject">Subject <span className="text-red-500">*</span></Label>
-                    <Select onValueChange={handleSubjectSelect}>
+                    <Select onValueChange={handleSubjectSelect} value={selectedSubject}>
                       <SelectTrigger className={errors.subject ? "border-red-300" : ""}>
                         <SelectValue placeholder="Select a subject" />
                       </SelectTrigger>
