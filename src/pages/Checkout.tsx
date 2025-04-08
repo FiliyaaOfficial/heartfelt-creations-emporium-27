@@ -1,17 +1,17 @@
+
 import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/router';
-import { useCart } from '@/context/CartContext';
+import { useNavigate } from 'react-router-dom';
+import { useCart } from '@/contexts/CartContext';
 import { ShippingAddress } from '@/types';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { formatCurrency } from '@/lib/utils';
-import { toJson } from "@/lib/utils";
+import { formatCurrency, toJson } from '@/lib/utils';
 
 const Checkout = () => {
-  const router = useRouter();
+  const navigate = useNavigate();
   const { cartItems, clearCart } = useCart();
   const { toast } = useToast();
 
@@ -33,9 +33,9 @@ const Checkout = () => {
 
   useEffect(() => {
     if (cartItems.length === 0) {
-      router.push('/cart');
+      navigate('/cart');
     }
-  }, [cartItems, router]);
+  }, [cartItems, navigate]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -87,7 +87,7 @@ const Checkout = () => {
         clearCart();
 
         // Redirect to success page
-        router.push(`/order-confirmation/${orderData.id}`);
+        navigate(`/order-confirmation/${orderData.id}`);
 
         toast({
           title: 'Order Placed!',

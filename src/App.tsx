@@ -13,6 +13,7 @@ import Categories from "./pages/Categories";
 import Custom from "./pages/Custom";
 import Support from "./pages/Support";
 import Checkout from "./pages/Checkout";
+import OrderConfirmation from "./pages/OrderConfirmation";
 
 const queryClient = new QueryClient();
 
@@ -32,6 +33,7 @@ const App = () => (
             <Route path="/custom" element={<Custom />} />
             <Route path="/support" element={<Support />} />
             <Route path="/checkout" element={<Checkout />} />
+            <Route path="/order-confirmation/:orderId" element={<OrderConfirmation />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
