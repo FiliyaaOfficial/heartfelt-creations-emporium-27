@@ -32,7 +32,7 @@ const Footer = () => {
           <div>
             <h3 className="font-serif text-lg font-medium mb-4">Quick Links</h3>
             <ul className="space-y-2">
-              <li><Link to="/products" className="text-white/80 hover:text-white transition-colors">All Products</Link></li>
+              <li><Link to="/shop" className="text-white/80 hover:text-white transition-colors">All Products</Link></li>
               <li><Link to="/best-sellers" className="text-white/80 hover:text-white transition-colors">Best Sellers</Link></li>
               <li><Link to="/new-arrivals" className="text-white/80 hover:text-white transition-colors">New Arrivals</Link></li>
               <li><Link to="/custom" className="text-white/80 hover:text-white transition-colors">Custom Orders</Link></li>
@@ -44,11 +44,11 @@ const Footer = () => {
           <div>
             <h3 className="font-serif text-lg font-medium mb-4">Categories</h3>
             <ul className="space-y-2">
-              <li><Link to="/categories/chocolates" className="text-white/80 hover:text-white transition-colors">Artisan Chocolates</Link></li>
-              <li><Link to="/categories/bouquets" className="text-white/80 hover:text-white transition-colors">Flower Bouquets</Link></li>
-              <li><Link to="/categories/embroidery" className="text-white/80 hover:text-white transition-colors">Embroidery Art</Link></li>
-              <li><Link to="/categories/memory-books" className="text-white/80 hover:text-white transition-colors">Memory Books</Link></li>
-              <li><Link to="/categories/gift-hampers" className="text-white/80 hover:text-white transition-colors">Gift Hampers</Link></li>
+              <li><Link to="/category/chocolates" className="text-white/80 hover:text-white transition-colors">Artisan Chocolates</Link></li>
+              <li><Link to="/category/bouquets" className="text-white/80 hover:text-white transition-colors">Flower Bouquets</Link></li>
+              <li><Link to="/category/embroidery" className="text-white/80 hover:text-white transition-colors">Embroidery Art</Link></li>
+              <li><Link to="/category/memory-books" className="text-white/80 hover:text-white transition-colors">Memory Books</Link></li>
+              <li><Link to="/category/gift-hampers" className="text-white/80 hover:text-white transition-colors">Gift Hampers</Link></li>
             </ul>
           </div>
 

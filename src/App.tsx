@@ -19,10 +19,6 @@ import Search from "./pages/Search";
 import Wishlist from "./pages/Wishlist";
 import Account from "./pages/Account";
 import { WishlistProvider } from "./contexts/WishlistContext";
-import Products from "./pages/Products";
-import BestSellers from "./pages/BestSellers";
-import NewArrivals from "./pages/NewArrivals";
-import About from "./pages/About";
 
 const queryClient = new QueryClient();
 
@@ -47,10 +43,6 @@ const App = () => (
               <Route path="/search" element={<Layout><Search /></Layout>} />
               <Route path="/wishlist" element={<Layout><Wishlist /></Layout>} />
               <Route path="/account" element={<Layout><Account /></Layout>} />
-              <Route path="/products" element={<Layout><Products /></Layout>} />
-              <Route path="/best-sellers" element={<Layout><BestSellers /></Layout>} />
-              <Route path="/new-arrivals" element={<Layout><NewArrivals /></Layout>} />
-              <Route path="/about" element={<Layout><About /></Layout>} />
               <Route path="*" element={<Layout><NotFound /></Layout>} />
             </Routes>
           </BrowserRouter>
