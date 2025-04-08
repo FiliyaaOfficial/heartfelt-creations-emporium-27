@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from "uuid";
 import { CartItem, Product } from "@/types";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
+import { Tables } from "@/lib/utils";
 
 interface CartContextProps {
   cartItems: CartItem[];
@@ -56,8 +57,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       // Get cart items by session id
       const { data: cartData, error: cartError } = await supabase
-        .from("cart_items")
-        .select("*")
+        .from('cart_items')
+        .select('*')
         .eq("session_id", sessionId);
 
       if (cartError) throw cartError;
@@ -67,8 +68,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const productsData = await Promise.all(
           cartData.map(async (item) => {
             const { data: product, error: productError } = await supabase
-              .from("products")
-              .select("*")
+              .from('products')
+              .select('*')
               .eq("id", item.product_id)
               .single();
 
@@ -108,7 +109,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (existingItem) {
         // Update existing cart item
         const { error } = await supabase
-          .from("cart_items")
+          .from('cart_items')
           .update({
             quantity: existingItem.quantity + quantity,
             updated_at: new Date().toISOString(),
@@ -128,27 +129,30 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       } else {
         // Add new cart item
         const { data, error } = await supabase
-          .from("cart_items")
+          .from('cart_items')
           .insert({
             session_id: sessionId,
             product_id: product.id,
             quantity,
           })
-          .select("*")
+          .select()
           .single();
 
         if (error) throw error;
 
         // Update local state
-        setCartItems((prev) => [
-          ...prev,
-          {
-            id: data.id,
-            product_id: product.id,
-            quantity,
-            product,
-          },
-        ]);
+        if (data) {
+          setCartItems((prev) => [
+            ...prev,
+            {
+              id: data.id,
+              product_id: product.id,
+              quantity,
+              product,
+            },
+          ]);
+        }
+
       }
 
       toast({
@@ -173,7 +177,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     
     try {
       const { error } = await supabase
-        .from("cart_items")
+        .from('cart_items')
         .update({
           quantity,
           updated_at: new Date().toISOString(),
@@ -204,7 +208,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsLoading(true);
     try {
       const { error } = await supabase
-        .from("cart_items")
+        .from('cart_items')
         .delete()
         .eq("id", itemId);
 
@@ -233,7 +237,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsLoading(true);
     try {
       const { error } = await supabase
-        .from("cart_items")
+        .from('cart_items')
         .delete()
         .eq("session_id", sessionId);
 

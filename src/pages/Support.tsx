@@ -1,71 +1,68 @@
-
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
+import * as z from 'zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useToast } from '@/components/ui/use-toast';
+import { SupportMessage } from '@/types';
 import { supabase } from '@/integrations/supabase/client';
-import { MessageCircle, Phone, Mail, Clock, MapPin, Check, Send } from 'lucide-react';
+import { useToast } from '@/components/ui/use-toast';
 
 const formSchema = z.object({
-  name: z.string().min(2, { message: "Name must be at least 2 characters" }),
-  email: z.string().email({ message: "Please enter a valid email address" }),
-  subject: z.string().min(5, { message: "Subject must be at least 5 characters" }),
-  message: z.string().min(10, { message: "Message must be at least 10 characters" }),
+  name: z.string().min(2, {
+    message: "Name must be at least 2 characters.",
+  }),
+  email: z.string().email({
+    message: "Please enter a valid email.",
+  }),
+  subject: z.string().min(5, {
+    message: "Subject must be at least 5 characters.",
+  }),
+  message: z.string().min(10, {
+    message: "Message must be at least 10 characters.",
+  }),
 });
 
-type FormData = z.infer<typeof formSchema>;
-
 const Support = () => {
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const { toast } = useToast();
-  const { register, handleSubmit, formState: { errors }, reset, setValue } = useForm<FormData>({
-    resolver: zodResolver(formSchema),
-  });
-
-  const onSubmit = async (data: FormData) => {
-    setIsSubmitting(true);
-    
+  
+  const handleSubmit = async (values: SupportMessage) => {
+    setSubmitting(true);
     try {
       const { error } = await supabase
         .from('support_messages')
         .insert({
-          name: data.name,
-          email: data.email,
-          subject: data.subject,
-          message: data.message,
+          name: values.name,
+          email: values.email,
+          subject: values.subject,
+          message: values.message
         });
-
+      
       if (error) throw error;
       
-      setIsSubmitted(true);
-      reset();
-      
       toast({
-        title: "Message sent successfully",
-        description: "We'll get back to you as soon as possible.",
+        title: "Message Sent",
+        description: "Thank you for your message. We'll get back to you soon!",
       });
+      
+      reset();
     } catch (error) {
-      console.error('Error sending message:', error);
+      console.error("Error sending message:", error);
       toast({
-        title: "Error sending your message",
-        description: "Please try again later",
+        title: "Error",
+        description: "There was a problem sending your message. Please try again later.",
         variant: "destructive",
       });
     } finally {
-      setIsSubmitting(false);
+      setSubmitting(false);
     }
   };
 
-  const handleSubjectSelect = (value: string) => {
-    setValue("subject", value);
-  };
+  const { register, handleSubmit, formState: { errors }, reset } = useForm<SupportMessage>({
+    resolver: zodResolver(formSchema),
+  });
 
   const faqItems = [
     {
@@ -106,7 +103,7 @@ const Support = () => {
             <div className="bg-white rounded-2xl shadow-sm p-8 border border-gray-100">
               <h2 className="text-2xl font-serif font-medium mb-6">Send Us a Message</h2>
               
-              {isSubmitted ? (
+              {submitting ? (
                 <div className="text-center py-10">
                   <div className="bg-filiyaa-peach-100 w-20 h-20 rounded-full mx-auto flex items-center justify-center mb-6">
                     <Check size={32} className="text-filiyaa-peach-600" />
@@ -115,12 +112,12 @@ const Support = () => {
                   <p className="text-muted-foreground mb-6">
                     Thank you for reaching out. We'll respond to your inquiry within 24 hours.
                   </p>
-                  <Button onClick={() => setIsSubmitted(false)} className="bg-filiyaa-peach-500 hover:bg-filiyaa-peach-600">
+                  <Button onClick={() => setSubmitting(false)} className="bg-filiyaa-peach-500 hover:bg-filiyaa-peach-600">
                     Send Another Message
                   </Button>
                 </div>
               ) : (
-                <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+                <form onSubmit={handleSubmit} className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
                       <Label htmlFor="name">Full Name <span className="text-red-500">*</span></Label>
@@ -172,10 +169,10 @@ const Support = () => {
                   
                   <Button 
                     type="submit" 
-                    disabled={isSubmitting}
+                    disabled={submitting}
                     className="w-full bg-filiyaa-peach-500 hover:bg-filiyaa-peach-600"
                   >
-                    {isSubmitting ? (
+                    {submitting ? (
                       <div className="flex items-center">
                         <div className="animate-spin mr-2 h-4 w-4 border-2 border-white border-t-transparent rounded-full"></div>
                         Sending...

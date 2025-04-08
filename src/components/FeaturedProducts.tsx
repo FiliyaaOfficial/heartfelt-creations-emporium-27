@@ -27,12 +27,12 @@ const FeaturedProducts = ({
       try {
         const { data, error } = await supabase
           .from('products')
-          .select('*')
+          .select()
           .eq('is_featured', true)
           .limit(8);
           
         if (error) throw error;
-        setProducts(data);
+        setProducts(data as ProductType[]);
       } catch (error) {
         console.error('Error fetching featured products:', error);
         toast({

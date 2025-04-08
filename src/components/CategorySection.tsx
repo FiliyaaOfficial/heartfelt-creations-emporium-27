@@ -26,10 +26,10 @@ const CategorySection = () => {
       try {
         const { data, error } = await supabase
           .from('categories')
-          .select('*');
+          .select();
           
         if (error) throw error;
-        setCategories(data);
+        setCategories(data as CategoryType[]);
       } catch (error) {
         console.error('Error fetching categories:', error);
         toast({

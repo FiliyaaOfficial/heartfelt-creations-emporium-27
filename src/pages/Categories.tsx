@@ -29,11 +29,11 @@ const Categories = () => {
       try {
         const { data, error } = await supabase
           .from('categories')
-          .select('*')
+          .select()
           .order('name');
 
         if (error) throw error;
-        setCategories(data);
+        setCategories(data as CategoryType[]);
 
         // If categoryName is provided in URL but not in state, update state
         if (categoryName && !activeCategory) {
@@ -56,7 +56,7 @@ const Categories = () => {
     const fetchProducts = async () => {
       setIsLoading(true);
       try {
-        let query = supabase.from('products').select('*');
+        let query = supabase.from('products').select();
         
         if (activeCategory) {
           query = query.eq('category', activeCategory);
@@ -65,7 +65,7 @@ const Categories = () => {
         const { data, error } = await query.order('created_at', { ascending: false });
 
         if (error) throw error;
-        setProducts(data);
+        setProducts(data as ProductType[]);
       } catch (error) {
         console.error('Error fetching products:', error);
         toast({
