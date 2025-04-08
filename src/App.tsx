@@ -14,30 +14,40 @@ import Custom from "./pages/Custom";
 import Support from "./pages/Support";
 import Checkout from "./pages/Checkout";
 import OrderConfirmation from "./pages/OrderConfirmation";
+import Layout from "./components/Layout";
+import Search from "./pages/Search";
+import Wishlist from "./pages/Wishlist";
+import Account from "./pages/Account";
+import { WishlistProvider } from "./contexts/WishlistContext";
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <CartProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/cart" element={<Cart />} />
-            <Route path="/product/:id" element={<ProductDetail />} />
-            <Route path="/categories" element={<Categories />} />
-            <Route path="/categories/:categoryName" element={<Categories />} />
-            <Route path="/custom" element={<Custom />} />
-            <Route path="/support" element={<Support />} />
-            <Route path="/checkout" element={<Checkout />} />
-            <Route path="/order-confirmation/:orderId" element={<OrderConfirmation />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
+      <WishlistProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<Layout><Index /></Layout>} />
+              <Route path="/cart" element={<Layout><Cart /></Layout>} />
+              <Route path="/product/:id" element={<Layout><ProductDetail /></Layout>} />
+              <Route path="/categories" element={<Layout><Categories /></Layout>} />
+              <Route path="/categories/:categoryName" element={<Layout><Categories /></Layout>} />
+              <Route path="/custom" element={<Layout><Custom /></Layout>} />
+              <Route path="/support" element={<Layout><Support /></Layout>} />
+              <Route path="/checkout" element={<Layout><Checkout /></Layout>} />
+              <Route path="/order-confirmation/:orderId" element={<Layout><OrderConfirmation /></Layout>} />
+              <Route path="/search" element={<Layout><Search /></Layout>} />
+              <Route path="/wishlist" element={<Layout><Wishlist /></Layout>} />
+              <Route path="/account" element={<Layout><Account /></Layout>} />
+              <Route path="*" element={<Layout><NotFound /></Layout>} />
+            </Routes>
+          </BrowserRouter>
+        </TooltipProvider>
+      </WishlistProvider>
     </CartProvider>
   </QueryClientProvider>
 );

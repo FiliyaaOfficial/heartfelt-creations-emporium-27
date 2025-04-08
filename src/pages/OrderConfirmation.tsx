@@ -29,7 +29,7 @@ const OrderConfirmation = () => {
         if (data) {
           const orderWithTypedAddress: Order = {
             ...data,
-            shipping_address: data.shipping_address as ShippingAddress
+            shipping_address: data.shipping_address as unknown as ShippingAddress
           };
           setOrder(orderWithTypedAddress);
         }
