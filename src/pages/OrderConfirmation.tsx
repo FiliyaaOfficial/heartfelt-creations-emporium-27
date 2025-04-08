@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { Order } from '@/types';
+import { Order, ShippingAddress } from '@/types';
 import { formatCurrency } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { CheckCircle } from 'lucide-react';
@@ -24,7 +24,15 @@ const OrderConfirmation = () => {
           .single();
           
         if (error) throw error;
-        setOrder(data as Order);
+        
+        // Convert the shipping_address from Json to ShippingAddress type
+        if (data) {
+          const orderWithTypedAddress: Order = {
+            ...data,
+            shipping_address: data.shipping_address as ShippingAddress
+          };
+          setOrder(orderWithTypedAddress);
+        }
       } catch (error) {
         console.error('Error fetching order details:', error);
       } finally {
