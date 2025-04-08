@@ -1,74 +1,52 @@
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import ProductCard from './ProductCard';
+import { supabase } from '@/integrations/supabase/client';
+import { Product as ProductType } from '@/types';
+import { useToast } from '@/components/ui/use-toast';
 
-const FeaturedProducts = () => {
+interface FeaturedProductsProps {
+  title?: string;
+  subtitle?: string;
+}
+
+const FeaturedProducts = ({ 
+  title = "Our Featured Products", 
+  subtitle = "Explore our most loved handcrafted creations"
+}: FeaturedProductsProps) => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [scrollPosition, setScrollPosition] = useState(0);
+  const [products, setProducts] = useState<ProductType[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const { toast } = useToast();
   
-  const products = [
-    {
-      id: '1',
-      name: 'Assorted Artisanal Chocolates Gift Box',
-      price: 24.99,
-      image: 'https://images.unsplash.com/photo-1599599810769-bcde5a160d32?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
-      category: 'Chocolates',
-      isNew: true
-    },
-    {
-      id: '2',
-      name: 'Spring Bliss Flower Bouquet',
-      price: 39.99,
-      image: 'https://images.unsplash.com/photo-1587556930799-8dca6fad6d41?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
-      category: 'Bouquets',
-      isBestseller: true
-    },
-    {
-      id: '3',
-      name: 'Custom Embroidered Name Hoop',
-      price: 32.50,
-      image: 'https://images.unsplash.com/photo-1528344363875-c5b401a2f18e?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
-      category: 'Embroidery'
-    },
-    {
-      id: '4',
-      name: 'Vintage-Style Memory Scrapbook',
-      price: 45.99,
-      image: 'https://images.unsplash.com/photo-1600003263720-95b45a4035d5?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
-      category: 'Memory Books',
-      isNew: true
-    },
-    {
-      id: '5',
-      name: 'Deluxe Self-Care Gift Hamper',
-      price: 79.99,
-      image: 'https://images.unsplash.com/photo-1562158074-d151fb7a72e7?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
-      category: 'Gift Hampers',
-      isBestseller: true
-    },
-    {
-      id: '6',
-      name: 'Gourmet Chocolate Truffles',
-      price: 19.99,
-      image: 'https://images.unsplash.com/photo-1548907040-4d5e3d4049bd?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
-      category: 'Chocolates'
-    },
-    {
-      id: '7',
-      name: 'Rose & Lily Mixed Bouquet',
-      price: 42.50,
-      image: 'https://images.unsplash.com/photo-1494336934272-f0efcedfc8d7?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
-      category: 'Bouquets'
-    },
-    {
-      id: '8',
-      name: 'Personalized Anniversary Memory Book',
-      price: 49.99,
-      image: 'https://images.unsplash.com/photo-1531346878377-a5be20888e57?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
-      category: 'Memory Books'
-    }
-  ];
+  useEffect(() => {
+    const fetchProducts = async () => {
+      setIsLoading(true);
+      try {
+        const { data, error } = await supabase
+          .from('products')
+          .select('*')
+          .eq('is_featured', true)
+          .limit(8);
+          
+        if (error) throw error;
+        setProducts(data);
+      } catch (error) {
+        console.error('Error fetching featured products:', error);
+        toast({
+          title: "Error fetching products",
+          description: "Please try again later",
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchProducts();
+  }, [toast]);
 
   const scroll = (direction: 'left' | 'right') => {
     if (scrollContainerRef.current) {
@@ -105,8 +83,8 @@ const FeaturedProducts = () => {
     <section className="container-custom">
       <div className="flex justify-between items-center mb-8">
         <div>
-          <h2 className="section-title">Our Featured Products</h2>
-          <p className="text-muted-foreground">Explore our most loved handcrafted creations</p>
+          <h2 className="section-title">{title}</h2>
+          <p className="text-muted-foreground">{subtitle}</p>
         </div>
         <div className="flex gap-2">
           <button 
@@ -128,18 +106,28 @@ const FeaturedProducts = () => {
         </div>
       </div>
       
-      <div 
-        ref={scrollContainerRef}
-        className="flex overflow-x-auto gap-4 pb-4 scrollbar-hide snap-x"
-        onScroll={handleScroll}
-        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-      >
-        {products.map(product => (
-          <div key={product.id} className="min-w-[250px] sm:min-w-[280px] snap-start">
-            <ProductCard {...product} />
-          </div>
-        ))}
-      </div>
+      {isLoading ? (
+        <div className="flex justify-center items-center py-20">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-filiyaa-peach-600"></div>
+        </div>
+      ) : products.length === 0 ? (
+        <div className="text-center py-10">
+          <p>No featured products found.</p>
+        </div>
+      ) : (
+        <div 
+          ref={scrollContainerRef}
+          className="flex overflow-x-auto gap-4 pb-4 scrollbar-hide snap-x"
+          onScroll={handleScroll}
+          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+        >
+          {products.map(product => (
+            <div key={product.id} className="min-w-[250px] sm:min-w-[280px] snap-start">
+              <ProductCard product={product} />
+            </div>
+          ))}
+        </div>
+      )}
     </section>
   );
 };

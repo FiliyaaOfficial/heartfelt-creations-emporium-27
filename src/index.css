@@ -7,44 +7,35 @@
 
 @layer base {
   :root {
-    --background: 30 30% 98%;
+    --background: 15 100% 98%;
     --foreground: 340 40% 20%;
 
-    --card: 30 30% 98%;
+    --card: 15 100% 98%;
     --card-foreground: 340 40% 20%;
 
     --popover: 0 0% 100%;
     --popover-foreground: 340 40% 20%;
 
-    --primary: 343 55% 30%;
+    --primary: 12 100% 60%;
     --primary-foreground: 0 0% 98%;
 
-    --secondary: 0 43% 89%;
-    --secondary-foreground: 343 55% 30%;
+    --secondary: 350 100% 88%;
+    --secondary-foreground: 355 78% 60%;
 
-    --muted: 0 0% 96%;
+    --muted: 15 70% 96%;
     --muted-foreground: 340 10% 40%;
 
-    --accent: 343 33% 70%;
-    --accent-foreground: 340 40% 20%;
+    --accent: 12 100% 94%;
+    --accent-foreground: 12 100% 40%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 344 20% 86%;
-    --input: 344 20% 86%;
-    --ring: 343 55% 30%;
+    --border: 15 60% 90%;
+    --input: 15 60% 90%;
+    --ring: 12 100% 60%;
 
     --radius: 0.75rem;
-
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 240 5.9% 10%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
   }
 
   * {
@@ -62,11 +53,11 @@
 
 @layer components {
   .btn-primary {
-    @apply bg-heartfelt-burgundy text-white px-6 py-3 rounded-md hover:bg-opacity-90 transition-all;
+    @apply bg-filiyaa-peach-500 text-white px-6 py-3 rounded-md hover:bg-opacity-90 transition-all;
   }
   
   .section-title {
-    @apply text-3xl md:text-4xl font-serif font-semibold text-heartfelt-burgundy mb-2;
+    @apply text-3xl md:text-4xl font-serif font-semibold text-filiyaa-peach-700 mb-2;
   }
   
   .section-subtitle {

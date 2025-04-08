@@ -1,86 +1,95 @@
 
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Heart, ShoppingBag, Menu, X, Search } from 'lucide-react';
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button';
+import { Search, ShoppingBag, Heart, Menu, X, User } from 'lucide-react';
+import { useCart } from '@/contexts/CartContext';
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { totalItems } = useCart();
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
 
   return (
-    <nav className="bg-white shadow-sm sticky top-0 z-40">
-      <div className="container mx-auto px-4">
-        <div className="flex justify-between items-center h-16">
-          {/* Logo */}
-          <Link to="/" className="flex items-center">
-            <h1 className="font-serif text-2xl font-bold text-heartfelt-burgundy">
-              Heartfelt<span className="text-heartfelt-mauve">Creations</span>
-            </h1>
+    <header className="sticky top-0 z-40 w-full bg-white/80 backdrop-blur-md border-b border-filiyaa-peach-100">
+      <div className="container mx-auto px-4 flex justify-between items-center h-16 md:h-20">
+        {/* Logo */}
+        <Link to="/" className="flex items-center">
+          <h1 className="text-2xl md:text-3xl font-serif font-bold text-filiyaa-peach-600">Filiyaa</h1>
+        </Link>
+
+        {/* Desktop Navigation */}
+        <nav className="hidden md:flex items-center space-x-8">
+          <Link to="/" className="text-gray-800 hover:text-filiyaa-peach-500 transition-colors">
+            Home
+          </Link>
+          <Link to="/categories" className="text-gray-800 hover:text-filiyaa-peach-500 transition-colors">
+            Shop
+          </Link>
+          <Link to="/custom" className="text-gray-800 hover:text-filiyaa-peach-500 transition-colors">
+            Custom Orders
+          </Link>
+          <Link to="/support" className="text-gray-800 hover:text-filiyaa-peach-500 transition-colors">
+            Support
+          </Link>
+        </nav>
+
+        {/* Right-side icons */}
+        <div className="flex items-center space-x-4">
+          <button className="text-gray-700 hover:text-filiyaa-peach-500 transition-colors p-1" aria-label="Search">
+            <Search size={20} />
+          </button>
+          <Link to="/wishlist" className="text-gray-700 hover:text-filiyaa-peach-500 transition-colors p-1">
+            <Heart size={20} />
+          </Link>
+          <Link to="/cart" className="text-gray-700 hover:text-filiyaa-peach-500 transition-colors p-1 relative">
+            <ShoppingBag size={20} />
+            {totalItems > 0 && (
+              <span className="absolute -top-2 -right-2 bg-filiyaa-peach-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
+                {totalItems > 9 ? '9+' : totalItems}
+              </span>
+            )}
+          </Link>
+          <Link to="/login">
+            <Button variant="ghost" size="icon" className="text-gray-700 hover:text-filiyaa-peach-500 transition-colors">
+              <User size={20} />
+            </Button>
           </Link>
 
-          {/* Desktop Nav */}
-          <div className="hidden md:flex items-center space-x-8">
-            <Link to="/" className="text-foreground hover:text-heartfelt-burgundy transition-colors">Home</Link>
-            <Link to="/shop" className="text-foreground hover:text-heartfelt-burgundy transition-colors">Shop</Link>
-            <Link to="/categories" className="text-foreground hover:text-heartfelt-burgundy transition-colors">Categories</Link>
-            <Link to="/custom" className="text-foreground hover:text-heartfelt-burgundy transition-colors">Custom Order</Link>
-            <Link to="/about" className="text-foreground hover:text-heartfelt-burgundy transition-colors">About</Link>
-          </div>
-
-          {/* Right side icons */}
-          <div className="flex items-center space-x-4">
-            <button aria-label="Search" className="p-1 rounded-full hover:bg-gray-100">
-              <Search size={20} />
-            </button>
-            <button aria-label="Wishlist" className="p-1 rounded-full hover:bg-gray-100">
-              <Heart size={20} />
-            </button>
-            <button aria-label="Cart" className="p-1 rounded-full hover:bg-gray-100 relative">
-              <ShoppingBag size={20} />
-              <span className="absolute -top-1 -right-1 bg-heartfelt-burgundy text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
-                0
-              </span>
-            </button>
-            
-            {/* Mobile menu button */}
-            <button 
-              className="md:hidden p-1 rounded-full hover:bg-gray-100"
-              onClick={toggleMenu}
-              aria-label="Toggle menu"
-            >
-              <Menu size={24} />
-            </button>
-          </div>
+          {/* Mobile menu button */}
+          <button
+            className="md:hidden text-gray-700 hover:text-filiyaa-peach-500 transition-colors p-1"
+            onClick={toggleMenu}
+            aria-label="Menu"
+          >
+            {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
         </div>
       </div>
 
       {/* Mobile menu */}
       {isMenuOpen && (
-        <div className="fixed inset-0 bg-white z-50 md:hidden">
-          <div className="container mx-auto px-4 py-4">
-            <div className="flex justify-between items-center mb-8">
-              <h1 className="font-serif text-2xl font-bold text-heartfelt-burgundy">
-                Heartfelt<span className="text-heartfelt-mauve">Creations</span>
-              </h1>
-              <button onClick={toggleMenu} aria-label="Close menu">
-                <X size={24} />
-              </button>
-            </div>
-            <div className="flex flex-col space-y-6 text-lg">
-              <Link to="/" className="text-foreground hover:text-heartfelt-burgundy transition-colors">Home</Link>
-              <Link to="/shop" className="text-foreground hover:text-heartfelt-burgundy transition-colors">Shop</Link>
-              <Link to="/categories" className="text-foreground hover:text-heartfelt-burgundy transition-colors">Categories</Link>
-              <Link to="/custom" className="text-foreground hover:text-heartfelt-burgundy transition-colors">Custom Order</Link>
-              <Link to="/about" className="text-foreground hover:text-heartfelt-burgundy transition-colors">About</Link>
-            </div>
-          </div>
+        <div className="md:hidden bg-white border-b border-filiyaa-peach-100">
+          <nav className="container mx-auto px-4 py-4 flex flex-col space-y-4">
+            <Link to="/" className="text-gray-800 hover:text-filiyaa-peach-500 py-2 transition-colors" onClick={() => setIsMenuOpen(false)}>
+              Home
+            </Link>
+            <Link to="/categories" className="text-gray-800 hover:text-filiyaa-peach-500 py-2 transition-colors" onClick={() => setIsMenuOpen(false)}>
+              Shop
+            </Link>
+            <Link to="/custom" className="text-gray-800 hover:text-filiyaa-peach-500 py-2 transition-colors" onClick={() => setIsMenuOpen(false)}>
+              Custom Orders
+            </Link>
+            <Link to="/support" className="text-gray-800 hover:text-filiyaa-peach-500 py-2 transition-colors" onClick={() => setIsMenuOpen(false)}>
+              Support
+            </Link>
+          </nav>
         </div>
       )}
-    </nav>
+    </header>
   );
 };
 
