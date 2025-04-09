@@ -27,9 +27,9 @@ const App = () => (
     <CartProvider>
       <WishlistProvider>
         <TooltipProvider>
-          <Toaster />
-          <Sonner />
           <BrowserRouter>
+            <Toaster />
+            <Sonner />
             <Routes>
               <Route path="/" element={<Layout><Index /></Layout>} />
               <Route path="/cart" element={<Layout><Cart /></Layout>} />

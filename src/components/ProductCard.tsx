@@ -32,9 +32,9 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             {product.is_bestseller && (
               <span className="premium-badge bg-heartfelt-pink text-white">Bestseller</span>
             )}
-            {product.discount_percentage > 0 && (
+            {product.discount_percent && product.discount_percent > 0 && (
               <span className="premium-badge bg-heartfelt-dark text-white">
-                -{product.discount_percentage}%
+                -{product.discount_percent}%
               </span>
             )}
           </div>
@@ -49,9 +49,9 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
               {formatCurrency(product.price)}
             </span>
             
-            {product.original_price && product.original_price > product.price && (
+            {product.compare_at_price && product.compare_at_price > product.price && (
               <span className="text-sm line-through text-muted-foreground">
-                {formatCurrency(product.original_price)}
+                {formatCurrency(product.compare_at_price)}
               </span>
             )}
           </div>

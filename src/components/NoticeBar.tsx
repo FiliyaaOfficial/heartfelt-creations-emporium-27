@@ -19,15 +19,15 @@ const NoticeBar = () => {
         </div>
         
         <div className="flex items-center space-x-3">
-          <Link to="#" aria-label="Facebook" className="hover:text-heartfelt-cream transition-colors">
+          <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" aria-label="Facebook" className="hover:text-heartfelt-cream transition-colors">
             <Facebook size={16} />
-          </Link>
-          <Link to="#" aria-label="Instagram" className="hover:text-heartfelt-cream transition-colors">
+          </a>
+          <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="hover:text-heartfelt-cream transition-colors">
             <Instagram size={16} />
-          </Link>
-          <Link to="#" aria-label="Twitter" className="hover:text-heartfelt-cream transition-colors">
+          </a>
+          <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" aria-label="Twitter" className="hover:text-heartfelt-cream transition-colors">
             <Twitter size={16} />
-          </Link>
+          </a>
         </div>
       </div>
     </div>
