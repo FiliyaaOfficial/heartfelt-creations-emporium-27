@@ -5,6 +5,8 @@ import { Link } from 'react-router-dom';
 import { Product } from '@/types';
 import { useCart } from '@/contexts/CartContext';
 import { formatCurrency } from '@/lib/utils';
+import { useWishlist } from '@/contexts/WishlistContext';
+import { useToast } from '@/components/ui/use-toast';
 
 interface ProductCardProps {
   product: Product;
@@ -12,16 +14,34 @@ interface ProductCardProps {
 
 const ProductCard = ({ product }: ProductCardProps) => {
   const { addToCart } = useCart();
+  const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
+  const { toast } = useToast();
+  const inWishlist = isInWishlist(product.id);
   
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     addToCart(product, 1);
+    toast({
+      title: "Added to cart",
+      description: `${product.name} has been added to your cart`,
+    });
+  };
+  
+  const handleToggleWishlist = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (inWishlist) {
+      removeFromWishlist(product.id);
+    } else {
+      addToWishlist(product);
+    }
   };
 
   return (
     <Link to={`/product/${product.id}`}>
-      <div className="group relative rounded-xl overflow-hidden bg-white shadow-sm hover:shadow-md transition-all duration-300">
+      <div className="premium-card group relative h-full flex flex-col">
         {/* Product Image */}
         <div className="aspect-square overflow-hidden relative">
           <img 
@@ -33,24 +53,29 @@ const ProductCard = ({ product }: ProductCardProps) => {
           {/* Badges */}
           <div className="absolute top-2 left-2 flex flex-col gap-2">
             {product.is_new && (
-              <span className="bg-filiyaa-peach-500 text-white text-xs font-medium px-2.5 py-1 rounded">New</span>
+              <span className="premium-badge bg-heartfelt-burgundy text-white">New Arrival</span>
             )}
             {product.is_bestseller && (
-              <span className="bg-filiyaa-cream-500 text-white text-xs font-medium px-2.5 py-1 rounded">Bestseller</span>
+              <span className="premium-badge bg-heartfelt-pink text-white">Bestseller</span>
             )}
           </div>
           
           {/* Quick actions */}
-          <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300">
+          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-3">
             <button 
-              aria-label="Add to wishlist" 
-              className="p-2 bg-white rounded-full hover:bg-filiyaa-pink-200 hover:text-filiyaa-peach-700 transition-all"
+              aria-label={inWishlist ? "Remove from wishlist" : "Add to wishlist"}
+              className={`p-3 rounded-full transition-all transform hover:scale-110 ${
+                inWishlist 
+                  ? "bg-heartfelt-pink text-white" 
+                  : "bg-white text-heartfelt-dark hover:bg-heartfelt-cream"
+              }`}
+              onClick={handleToggleWishlist}
             >
-              <Heart size={18} />
+              <Heart size={18} className={inWishlist ? "fill-white" : ""} />
             </button>
             <button 
               aria-label="Add to cart" 
-              className="p-2 bg-filiyaa-peach-500 text-white rounded-full hover:bg-filiyaa-peach-600 transition-all"
+              className="p-3 bg-heartfelt-burgundy text-white rounded-full transform hover:scale-110 transition-all"
               onClick={handleAddToCart}
             >
               <ShoppingBag size={18} />
@@ -59,10 +84,10 @@ const ProductCard = ({ product }: ProductCardProps) => {
         </div>
         
         {/* Product Details */}
-        <div className="p-4">
+        <div className="p-4 flex-grow flex flex-col">
           <p className="text-xs text-muted-foreground mb-1">{product.category}</p>
-          <h3 className="font-medium text-lg mb-1 line-clamp-1">{product.name}</h3>
-          <p className="font-serif text-filiyaa-peach-600 font-semibold">{formatCurrency(product.price)}</p>
+          <h3 className="font-medium text-lg mb-1 line-clamp-1 group-hover:text-heartfelt-burgundy transition-colors">{product.name}</h3>
+          <p className="font-serif text-heartfelt-burgundy font-semibold mt-auto pt-2">{formatCurrency(product.price)}</p>
         </div>
       </div>
     </Link>

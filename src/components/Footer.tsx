@@ -32,7 +32,7 @@ const Footer = () => {
           <div>
             <h3 className="font-serif text-lg font-medium mb-4">Quick Links</h3>
             <ul className="space-y-2">
-              <li><Link to="/shop" className="text-white/80 hover:text-white transition-colors">All Products</Link></li>
+              <li><Link to="/categories" className="text-white/80 hover:text-white transition-colors">All Products</Link></li>
               <li><Link to="/best-sellers" className="text-white/80 hover:text-white transition-colors">Best Sellers</Link></li>
               <li><Link to="/new-arrivals" className="text-white/80 hover:text-white transition-colors">New Arrivals</Link></li>
               <li><Link to="/custom" className="text-white/80 hover:text-white transition-colors">Custom Orders</Link></li>
@@ -44,11 +44,11 @@ const Footer = () => {
           <div>
             <h3 className="font-serif text-lg font-medium mb-4">Categories</h3>
             <ul className="space-y-2">
-              <li><Link to="/category/chocolates" className="text-white/80 hover:text-white transition-colors">Artisan Chocolates</Link></li>
-              <li><Link to="/category/bouquets" className="text-white/80 hover:text-white transition-colors">Flower Bouquets</Link></li>
-              <li><Link to="/category/embroidery" className="text-white/80 hover:text-white transition-colors">Embroidery Art</Link></li>
-              <li><Link to="/category/memory-books" className="text-white/80 hover:text-white transition-colors">Memory Books</Link></li>
-              <li><Link to="/category/gift-hampers" className="text-white/80 hover:text-white transition-colors">Gift Hampers</Link></li>
+              <li><Link to="/categories/Artisan%20Chocolates" className="text-white/80 hover:text-white transition-colors">Artisan Chocolates</Link></li>
+              <li><Link to="/categories/Flower%20Bouquets" className="text-white/80 hover:text-white transition-colors">Flower Bouquets</Link></li>
+              <li><Link to="/categories/Embroidery%20Art" className="text-white/80 hover:text-white transition-colors">Embroidery Art</Link></li>
+              <li><Link to="/categories/Memory%20Books" className="text-white/80 hover:text-white transition-colors">Memory Books</Link></li>
+              <li><Link to="/categories/Gift%20Hampers" className="text-white/80 hover:text-white transition-colors">Gift Hampers</Link></li>
             </ul>
           </div>
 
@@ -77,7 +77,7 @@ const Footer = () => {
                 />
                 <button 
                   type="submit"
-                  className="bg-white text-heartfelt-burgundy px-3 py-2 text-sm rounded-r-md hover:bg-opacity-90 transition-colors"
+                  className="bg-heartfelt-cream text-heartfelt-burgundy px-3 py-2 text-sm rounded-r-md hover:bg-opacity-90 transition-colors"
                 >
                   Subscribe
                 </button>

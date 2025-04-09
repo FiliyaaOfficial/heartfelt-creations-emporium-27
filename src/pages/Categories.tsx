@@ -83,18 +83,23 @@ const Categories = () => {
 
   return (
     <div className="container mx-auto px-4 py-10 md:py-16">
-      <h1 className="text-3xl md:text-4xl font-serif font-semibold text-center mb-3">
-        {activeCategory || "All Categories"}
-      </h1>
-      <p className="text-center text-muted-foreground max-w-2xl mx-auto mb-12">
-        Explore our handcrafted collections, each made with love and attention to detail.
-      </p>
+      <div className="relative mb-16">
+        <div className="absolute inset-0 bg-heartfelt-cream/30 rounded-2xl -z-10"></div>
+        <div className="py-12 px-6 text-center">
+          <h1 className="text-3xl md:text-5xl font-serif font-semibold text-center mb-3">
+            {activeCategory || "All Categories"}
+          </h1>
+          <p className="text-center text-muted-foreground max-w-2xl mx-auto">
+            Explore our handcrafted collections, each made with love and attention to detail.
+          </p>
+        </div>
+      </div>
 
       {/* Category Pills */}
       <div className="flex flex-wrap justify-center gap-3 mb-10">
         <button
           className={`rounded-full px-5 py-2.5 font-medium text-sm transition-colors flex items-center gap-2
-            ${!activeCategory ? 'bg-filiyaa-peach-500 text-white' : 'bg-gray-100 hover:bg-gray-200 text-gray-800'}`}
+            ${!activeCategory ? 'bg-heartfelt-burgundy text-white' : 'bg-gray-100 hover:bg-gray-200 text-gray-800'}`}
           onClick={() => setActiveCategory(null)}
         >
           All
@@ -105,7 +110,7 @@ const Categories = () => {
             key={category.id}
             className={`rounded-full px-5 py-2.5 font-medium text-sm transition-colors flex items-center gap-2
               ${activeCategory === category.name 
-                ? 'bg-filiyaa-peach-500 text-white' 
+                ? 'bg-heartfelt-burgundy text-white' 
                 : 'bg-gray-100 hover:bg-gray-200 text-gray-800'}`}
             onClick={() => setActiveCategory(category.name)}
           >
@@ -117,11 +122,13 @@ const Categories = () => {
 
       {/* Products Grid */}
       {isLoading ? (
-        <div className="flex justify-center py-20">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-filiyaa-peach-600"></div>
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 lg:gap-8">
+          {[1, 2, 3, 4, 5, 6, 7, 8].map((item) => (
+            <div key={item} className="h-[300px] bg-heartfelt-cream/20 animate-pulse rounded-xl"></div>
+          ))}
         </div>
       ) : products.length === 0 ? (
-        <div className="text-center py-16">
+        <div className="text-center py-16 bg-heartfelt-cream/10 rounded-xl">
           <h3 className="text-xl font-medium mb-2">No products found</h3>
           <p className="text-muted-foreground">
             {activeCategory 
@@ -130,7 +137,7 @@ const Categories = () => {
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 lg:gap-8">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 md:gap-8">
           {products.map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}

@@ -91,10 +91,11 @@ export default {
           800: "#C26C00",
           900: "#9A5500",
         },
-        "heartfelt-burgundy": "#932B77", 
-        "heartfelt-pink": "#FFC0CB",   
-        "heartfelt-cream": "#FAEBD7",  
-        "heartfelt-gold": "#D4AF37",   
+        // New premium color palette
+        "heartfelt-cream": "#EBE8DB",
+        "heartfelt-pink": "#D76C82",
+        "heartfelt-burgundy": "#B03052",
+        "heartfelt-dark": "#3D0301",
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -110,10 +111,20 @@ export default {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: "0" },
         },
+        "fade-in": {
+          "0%": { opacity: "0", transform: "translateY(10px)" },
+          "100%": { opacity: "1", transform: "translateY(0)" },
+        },
+        "fade-out": {
+          "0%": { opacity: "1", transform: "translateY(0)" },
+          "100%": { opacity: "0", transform: "translateY(10px)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "fade-in": "fade-in 0.3s ease-out",
+        "fade-out": "fade-out 0.3s ease-out",
       },
     },
   },
