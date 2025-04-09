@@ -1,5 +1,5 @@
 
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Cormorant+Garamond:wght@400;500;600;700&family=Lora:wght@400;500;600;700&family=Poppins:wght@300;400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Cormorant+Garamond:wght@400;500;600;700&family=Lora:wght@400;500;600;700&family=Poppins:wght@300;400;500;600&family=Montserrat:wght@300;400;500;600;700&family=Libre+Baskerville:wght@400;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -44,12 +44,17 @@
 
   body {
     @apply bg-background text-foreground font-sans;
-    font-family: 'Poppins', sans-serif;
+    font-family: 'Montserrat', 'Poppins', sans-serif;
   }
   
   h1, h2, h3, h4, h5, h6 {
     @apply font-serif;
-    font-family: 'Playfair Display', serif;
+    font-family: 'Libre Baskerville', 'Playfair Display', serif;
+    letter-spacing: -0.01em;
+  }
+
+  p {
+    line-height: 1.7;
   }
 }
 
@@ -119,9 +124,14 @@
 }
 
 .font-sans {
-  font-family: 'Poppins', sans-serif;
+  font-family: 'Montserrat', 'Poppins', sans-serif;
 }
 
 .font-serif {
-  font-family: 'Playfair Display', serif;
+  font-family: 'Libre Baskerville', 'Playfair Display', serif;
+}
+
+/* Improved typography */
+.text-balance {
+  text-wrap: balance;
 }

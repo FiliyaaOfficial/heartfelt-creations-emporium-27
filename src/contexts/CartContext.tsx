@@ -116,7 +116,10 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
           })
           .eq("id", existingItem.id);
 
-        if (error) throw error;
+        if (error) {
+          console.error("Error updating cart item:", error);
+          throw error;
+        }
 
         // Update local state
         setCartItems((prev) =>
@@ -127,7 +130,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
           )
         );
       } else {
-        // Add new cart item
+        // Add new cart item with explicit session_id
         const { data, error } = await supabase
           .from('cart_items')
           .insert({
@@ -138,7 +141,10 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
           .select()
           .single();
 
-        if (error) throw error;
+        if (error) {
+          console.error("Error adding to cart:", error);
+          throw error;
+        }
 
         // Update local state
         if (data) {
@@ -152,7 +158,6 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
             },
           ]);
         }
-
       }
 
       toast({

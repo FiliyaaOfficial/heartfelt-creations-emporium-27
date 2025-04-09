@@ -19,6 +19,7 @@ import Search from "./pages/Search";
 import Wishlist from "./pages/Wishlist";
 import Account from "./pages/Account";
 import { WishlistProvider } from "./contexts/WishlistContext";
+import ScrollToTop from "./components/ScrollToTop";
 
 const queryClient = new QueryClient();
 
@@ -28,6 +29,7 @@ const App = () => (
       <WishlistProvider>
         <TooltipProvider>
           <BrowserRouter>
+            <ScrollToTop />
             <Toaster />
             <Sonner />
             <Routes>

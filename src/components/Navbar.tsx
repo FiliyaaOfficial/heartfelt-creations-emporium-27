@@ -1,15 +1,17 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Search, ShoppingBag, Heart, Menu, X, User } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
 import { Input } from '@/components/ui/input';
 import { useWishlist } from '@/contexts/WishlistContext';
+import { cn } from '@/lib/utils';
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const { totalItems } = useCart();
   const { totalItems: wishlistItems } = useWishlist();
   const navigate = useNavigate();
@@ -18,12 +20,44 @@ const Navbar = () => {
     setIsMenuOpen(!isMenuOpen);
   };
 
+  const toggleSearch = () => {
+    setIsSearchOpen(!isSearchOpen);
+  };
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
       navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+      setIsSearchOpen(false);
     }
   };
+
+  // Close search on ESC key
+  useEffect(() => {
+    const handleEsc = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setIsSearchOpen(false);
+      }
+    };
+    window.addEventListener('keydown', handleEsc);
+    return () => {
+      window.removeEventListener('keydown', handleEsc);
+    };
+  }, []);
+
+  // Close search when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const searchContainer = document.getElementById('search-container');
+      if (isSearchOpen && searchContainer && !searchContainer.contains(event.target as Node)) {
+        setIsSearchOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isSearchOpen]);
 
   return (
     <header className="sticky top-0 z-40 w-full bg-white/80 backdrop-blur-md border-b border-heartfelt-cream">
@@ -32,27 +66,6 @@ const Navbar = () => {
         <Link to="/" className="flex items-center">
           <h1 className="text-2xl md:text-3xl font-serif font-bold text-heartfelt-burgundy">Heartfelt</h1>
         </Link>
-
-        {/* Search Bar - Desktop */}
-        <form onSubmit={handleSearch} className="hidden md:flex items-center flex-1 max-w-md mx-6">
-          <div className="relative w-full">
-            <Input
-              type="search"
-              placeholder="Search products..."
-              className="pr-10"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-            <Button 
-              type="submit" 
-              variant="ghost" 
-              className="absolute right-0 top-0 h-full px-3"
-              aria-label="Search"
-            >
-              <Search size={18} />
-            </Button>
-          </div>
-        </form>
 
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center space-x-8">
@@ -70,15 +83,48 @@ const Navbar = () => {
           </Link>
         </nav>
 
-        {/* Right-side icons */}
+        {/* Right-side icons with Search */}
         <div className="flex items-center space-x-4">
-          <button 
-            onClick={() => navigate('/search')}
-            className="md:hidden text-gray-700 hover:text-heartfelt-burgundy transition-colors p-1" 
-            aria-label="Search"
-          >
-            <Search size={20} />
-          </button>
+          {/* Search button and expandable search bar */}
+          <div id="search-container" className="relative flex items-center">
+            <button 
+              onClick={toggleSearch}
+              className="text-gray-700 hover:text-heartfelt-burgundy transition-colors p-1" 
+              aria-label="Search"
+            >
+              <Search size={20} className={cn(isSearchOpen ? "text-heartfelt-burgundy" : "")} />
+            </button>
+            
+            {/* Expandable search form */}
+            <form 
+              onSubmit={handleSearch} 
+              className={cn(
+                "absolute right-0 top-full mt-2 transition-all duration-300 bg-white shadow-md rounded-md",
+                isSearchOpen ? "opacity-100 visible w-[250px] md:w-[300px]" : "opacity-0 invisible w-0"
+              )}
+            >
+              <div className="flex items-center p-2">
+                <Input
+                  type="search"
+                  placeholder="Search products..."
+                  className="w-full"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  autoFocus={isSearchOpen}
+                />
+                <Button 
+                  type="submit" 
+                  variant="ghost" 
+                  size="icon"
+                  className="ml-1"
+                  aria-label="Submit search"
+                >
+                  <Search size={16} />
+                </Button>
+              </div>
+            </form>
+          </div>
+          
           <Link to="/wishlist" className="text-gray-700 hover:text-heartfelt-burgundy transition-colors p-1 relative group">
             <Heart size={20} className="group-hover:scale-110 transition-transform duration-200" />
             {wishlistItems > 0 && (
@@ -87,6 +133,7 @@ const Navbar = () => {
               </span>
             )}
           </Link>
+          
           <Link to="/cart" className="text-gray-700 hover:text-heartfelt-burgundy transition-colors p-1 relative group">
             <ShoppingBag size={20} className="group-hover:scale-110 transition-transform duration-200" />
             {totalItems > 0 && (
@@ -95,6 +142,7 @@ const Navbar = () => {
               </span>
             )}
           </Link>
+          
           <Link to="/account">
             <Button variant="ghost" size="icon" className="text-gray-700 hover:text-heartfelt-burgundy transition-colors">
               <User size={20} />

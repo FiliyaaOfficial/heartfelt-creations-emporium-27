@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { Product } from "@/types";
@@ -117,7 +116,7 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         return;
       }
 
-      // Add new wishlist item
+      // Add new wishlist item with explicit session_id
       const { data, error } = await supabase
         .from('wishlists')
         .insert({
@@ -127,7 +126,10 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error adding to wishlist:", error);
+        throw error;
+      }
 
       // Update local state
       if (data) {
