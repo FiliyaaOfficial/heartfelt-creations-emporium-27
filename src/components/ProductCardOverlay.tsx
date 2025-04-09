@@ -17,35 +17,51 @@ const ProductCardOverlay: React.FC<ProductCardOverlayProps> = ({ product }) => {
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    addToCart(product, 1);
-    toast.success("Added to cart", {
-      description: `${product.name} has been added to your cart`,
-      action: {
-        label: "View Cart",
-        onClick: () => window.location.href = "/cart"
-      },
-    });
+    
+    try {
+      addToCart(product, 1);
+      toast.success("Added to cart", {
+        description: `${product.name} has been added to your cart`,
+        action: {
+          label: "View Cart",
+          onClick: () => window.location.href = "/cart"
+        },
+      });
+    } catch (error) {
+      console.error("Error adding to cart:", error);
+      toast.error("Could not add to cart", {
+        description: "There was a problem adding this item to your cart"
+      });
+    }
   };
 
   const handleAddToWishlist = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (!isInWishlist(product.id)) {
-      addToWishlist(product);
-      toast.success("Added to wishlist", {
-        description: `${product.name} has been added to your wishlist`,
-        action: {
-          label: "View Wishlist",
-          onClick: () => window.location.href = "/wishlist"
-        },
-      });
-    } else {
-      toast.info("Already in wishlist", {
-        description: `${product.name} is already in your wishlist`,
-        action: {
-          label: "View Wishlist",
-          onClick: () => window.location.href = "/wishlist"
-        },
+    
+    try {
+      if (!isInWishlist(product.id)) {
+        addToWishlist(product);
+        toast.success("Added to wishlist", {
+          description: `${product.name} has been added to your wishlist`,
+          action: {
+            label: "View Wishlist",
+            onClick: () => window.location.href = "/wishlist"
+          },
+        });
+      } else {
+        toast.info("Already in wishlist", {
+          description: `${product.name} is already in your wishlist`,
+          action: {
+            label: "View Wishlist",
+            onClick: () => window.location.href = "/wishlist"
+          },
+        });
+      }
+    } catch (error) {
+      console.error("Error adding to wishlist:", error);
+      toast.error("Could not add to wishlist", {
+        description: "There was a problem adding this item to your wishlist"
       });
     }
   };
