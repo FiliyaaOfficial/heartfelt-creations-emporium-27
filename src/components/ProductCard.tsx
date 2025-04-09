@@ -32,11 +32,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             {product.is_bestseller && (
               <span className="premium-badge bg-heartfelt-pink text-white">Bestseller</span>
             )}
-            {product.discount_percentage > 0 && (
-              <span className="premium-badge bg-heartfelt-dark text-white">
-                -{product.discount_percentage}%
-              </span>
-            )}
+            {/* We're removing the discount badge since discount_percentage doesn't exist in the Product type */}
           </div>
         </div>
         
@@ -49,11 +45,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
               {formatCurrency(product.price)}
             </span>
             
-            {product.original_price && product.original_price > product.price && (
-              <span className="text-sm line-through text-muted-foreground">
-                {formatCurrency(product.original_price)}
-              </span>
-            )}
+            {/* Removing original_price reference since it doesn't exist in the Product type */}
           </div>
         </div>
       </div>
