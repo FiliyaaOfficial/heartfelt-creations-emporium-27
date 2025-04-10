@@ -1,4 +1,3 @@
-
 export interface Product {
   id: string;
   name: string;
@@ -72,4 +71,5 @@ export interface SupportMessage {
   message: string;
   status?: string;
   created_at?: string;
+  order_id?: string;
 }
