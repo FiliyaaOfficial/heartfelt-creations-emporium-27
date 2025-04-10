@@ -90,6 +90,43 @@
   .premium-badge {
     @apply inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium;
   }
+  
+  /* New styles for enhanced UI */
+  .glassmorphism {
+    @apply bg-white/70 backdrop-blur-sm border border-white/50 shadow-sm;
+  }
+  
+  .hover-card {
+    @apply transition-all duration-300 hover:shadow-md hover:-translate-y-1;
+  }
+  
+  .shine-effect {
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .shine-effect::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(
+      to right,
+      rgba(255, 255, 255, 0) 0%,
+      rgba(255, 255, 255, 0.3) 50%,
+      rgba(255, 255, 255, 0) 100%
+    );
+    transform: rotate(30deg);
+    transition: all 0.7s;
+    opacity: 0;
+  }
+  
+  .shine-effect:hover::after {
+    opacity: 1;
+    transition: all 0.7s;
+  }
 }
 
 @keyframes scale-in {
@@ -115,12 +152,28 @@
   }
 }
 
+@keyframes float {
+  0% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+  100% {
+    transform: translateY(0px);
+  }
+}
+
 .animate-scale-in {
   animation: scale-in 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
 }
 
 .animate-pulse-once {
   animation: pulse-once 0.5s ease-in-out;
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
 }
 
 .font-sans {
