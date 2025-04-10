@@ -63,31 +63,35 @@ const CategorySection = () => {
   }
 
   return (
-    <section className="py-16 bg-white relative">
+    <section className="py-20 bg-white relative overflow-hidden">
       {/* Decorative elements */}
-      <div className="absolute top-0 left-0 w-24 h-24 bg-heartfelt-cream rounded-br-full opacity-60"></div>
-      <div className="absolute bottom-0 right-0 w-32 h-32 bg-heartfelt-pink/10 rounded-tl-full"></div>
+      <div className="absolute top-0 left-0 w-32 h-32 bg-heartfelt-cream rounded-br-full opacity-60 transform -translate-x-8"></div>
+      <div className="absolute bottom-0 right-0 w-48 h-48 bg-heartfelt-pink/10 rounded-tl-full transform translate-x-12"></div>
+      <div className="absolute top-1/4 right-1/4 w-16 h-16 rounded-full bg-heartfelt-burgundy/5"></div>
+      <div className="absolute bottom-1/3 left-1/4 w-24 h-24 rounded-full bg-heartfelt-cream/30"></div>
       
       <div className="container mx-auto px-4 relative z-10">
-        <h2 className="section-title text-center">Shop by Category</h2>
-        <p className="section-subtitle text-center">
-          Explore our handcrafted collections, each made with love and attention to detail.
-        </p>
+        <div className="text-center mb-12">
+          <h2 className="section-title">Explore our Collections</h2>
+          <p className="section-subtitle max-w-2xl mx-auto">
+            Each category features unique handcrafted items, made with attention to detail and filled with love.
+          </p>
+        </div>
         
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6 mt-12">
           {categories.map((category) => (
             <Link 
               key={category.id}
-              to={`/categories/${encodeURIComponent(category.name)}`}
-              className="flex flex-col items-center group"
+              to={`/category/${encodeURIComponent(category.name)}`}
+              className="flex flex-col items-center group hover-card"
             >
-              <div className="w-24 h-24 rounded-full bg-heartfelt-cream flex items-center justify-center mb-4 group-hover:bg-heartfelt-burgundy transition-colors duration-300">
+              <div className="w-24 h-24 rounded-full bg-heartfelt-cream shadow-sm flex items-center justify-center mb-4 group-hover:bg-heartfelt-burgundy transition-colors duration-300 shine-effect">
                 <div className="text-heartfelt-burgundy group-hover:text-white transition-colors duration-300">
                   {iconMap[category.icon]}
                 </div>
               </div>
               <h3 className="text-xl font-serif font-medium mb-2 group-hover:text-heartfelt-burgundy transition-colors">{category.name}</h3>
-              <p className="text-gray-700 text-sm text-center">{category.description}</p>
+              <p className="text-gray-700 text-sm text-center line-clamp-2">{category.description}</p>
             </Link>
           ))}
         </div>

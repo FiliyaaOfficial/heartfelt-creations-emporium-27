@@ -1,11 +1,13 @@
 
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { Link, useParams, useNavigate } from 'react-router-dom';
 import { Category as CategoryType, Product as ProductType } from '@/types';
 import { supabase } from '@/integrations/supabase/client';
 import ProductCard from '@/components/ProductCard';
-import { Coffee, Flower, Heart, Book, Gift, Camera } from 'lucide-react';
+import { Coffee, Flower, Heart, Book, Gift, Camera, ArrowRight, Sparkles } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 
 const categoryIcons: { [key: string]: React.ReactNode } = {
   'Artisan Chocolates': <Coffee size={24} />,
@@ -18,58 +20,52 @@ const categoryIcons: { [key: string]: React.ReactNode } = {
 
 const Categories = () => {
   const { categoryName } = useParams<{ categoryName?: string }>();
+  const navigate = useNavigate();
   const [categories, setCategories] = useState<CategoryType[]>([]);
-  const [products, setProducts] = useState<ProductType[]>([]);
+  const [featuredProducts, setFeaturedProducts] = useState<ProductType[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [activeCategory, setActiveCategory] = useState<string | null>(categoryName || null);
   const { toast } = useToast();
 
   useEffect(() => {
-    const fetchCategories = async () => {
+    // If categoryName is provided, redirect to the new CategoryPage
+    if (categoryName) {
+      navigate(`/category/${categoryName}`, { replace: true });
+    }
+  }, [categoryName, navigate]);
+
+  useEffect(() => {
+    const fetchCategoriesAndProducts = async () => {
+      setIsLoading(true);
       try {
-        const { data, error } = await supabase
+        // Fetch categories
+        const { data: categoriesData, error: categoriesError } = await supabase
           .from('categories')
           .select()
           .order('name');
 
-        if (error) throw error;
-        setCategories(data as CategoryType[]);
-
-        // If categoryName is provided in URL but not in state, update state
-        if (categoryName && !activeCategory) {
-          setActiveCategory(categoryName);
-        }
+        if (categoriesError) throw categoriesError;
+        
+        setCategories(categoriesData as CategoryType[]);
+        
+        // Fetch featured products - one from each category
+        const promises = categoriesData.map(async (category) => {
+          const { data } = await supabase
+            .from('products')
+            .select()
+            .eq('category', category.name)
+            .eq('is_featured', true)
+            .limit(1);
+            
+          return data?.[0] as ProductType | undefined;
+        });
+        
+        const results = await Promise.all(promises);
+        setFeaturedProducts(results.filter(Boolean) as ProductType[]);
+        
       } catch (error) {
-        console.error('Error fetching categories:', error);
+        console.error('Error fetching data:', error);
         toast({
           title: "Error fetching categories",
-          description: "Please try again later",
-          variant: "destructive",
-        });
-      }
-    };
-
-    fetchCategories();
-  }, [categoryName, activeCategory, toast]);
-
-  useEffect(() => {
-    const fetchProducts = async () => {
-      setIsLoading(true);
-      try {
-        let query = supabase.from('products').select();
-        
-        if (activeCategory) {
-          query = query.eq('category', activeCategory);
-        }
-        
-        const { data, error } = await query.order('created_at', { ascending: false });
-
-        if (error) throw error;
-        setProducts(data as ProductType[]);
-      } catch (error) {
-        console.error('Error fetching products:', error);
-        toast({
-          title: "Error fetching products",
           description: "Please try again later",
           variant: "destructive",
         });
@@ -78,71 +74,90 @@ const Categories = () => {
       }
     };
 
-    fetchProducts();
-  }, [activeCategory, toast]);
+    fetchCategoriesAndProducts();
+  }, [toast]);
 
   return (
-    <div className="container mx-auto px-4 py-10 md:py-16">
-      <div className="relative mb-16">
-        <div className="absolute inset-0 bg-heartfelt-cream/30 rounded-2xl -z-10"></div>
-        <div className="py-12 px-6 text-center">
-          <h1 className="text-3xl md:text-5xl font-serif font-semibold text-center mb-3">
-            {activeCategory || "All Categories"}
+    <div className="min-h-screen bg-gradient-to-b from-white to-heartfelt-cream/10">
+      {/* Hero Banner */}
+      <div className="relative overflow-hidden bg-gradient-to-r from-heartfelt-cream/40 to-heartfelt-burgundy/5">
+        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1546484396-fb3fc6f95f98?q=80&w=1920')] bg-cover bg-center opacity-5"></div>
+        <div className="container mx-auto px-4 py-20 relative z-10">
+          <h1 className="text-4xl md:text-5xl font-serif font-semibold mb-4 text-center">
+            Our Collections
           </h1>
-          <p className="text-center text-muted-foreground max-w-2xl mx-auto">
-            Explore our handcrafted collections, each made with love and attention to detail.
+          <p className="text-muted-foreground max-w-2xl mx-auto text-center md:text-lg">
+            Explore our handcrafted categories, each made with love and attention to detail.
+            Find the perfect gift for your loved ones or treat yourself to something special.
           </p>
         </div>
       </div>
 
-      {/* Category Pills */}
-      <div className="flex flex-wrap justify-center gap-3 mb-10">
-        <button
-          className={`rounded-full px-5 py-2.5 font-medium text-sm transition-colors flex items-center gap-2
-            ${!activeCategory ? 'bg-heartfelt-burgundy text-white' : 'bg-gray-100 hover:bg-gray-200 text-gray-800'}`}
-          onClick={() => setActiveCategory(null)}
-        >
-          All
-        </button>
-        
-        {categories.map((category) => (
-          <button
-            key={category.id}
-            className={`rounded-full px-5 py-2.5 font-medium text-sm transition-colors flex items-center gap-2
-              ${activeCategory === category.name 
-                ? 'bg-heartfelt-burgundy text-white' 
-                : 'bg-gray-100 hover:bg-gray-200 text-gray-800'}`}
-            onClick={() => setActiveCategory(category.name)}
-          >
-            {categoryIcons[category.name]}
-            {category.name}
-          </button>
-        ))}
+      {/* Categories Section */}
+      <div className="container mx-auto px-4 py-16">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {isLoading ? (
+            Array(6).fill(0).map((_, i) => (
+              <Card key={i} className="h-64 animate-pulse bg-heartfelt-cream/20 border-none"></Card>
+            ))
+          ) : (
+            categories.map((category) => (
+              <Link 
+                key={category.id} 
+                to={`/category/${encodeURIComponent(category.name)}`}
+                className="group"
+              >
+                <Card className="h-full overflow-hidden border-heartfelt-cream/30 hover:border-heartfelt-burgundy/30 transition-all duration-300 hover:shadow-md">
+                  <CardContent className="p-0">
+                    <div className="relative h-40 bg-gradient-to-r from-heartfelt-cream/40 to-white overflow-hidden">
+                      <div className="absolute bottom-0 right-0 w-32 h-32 opacity-20 transform translate-x-8 translate-y-8">
+                        {categoryIcons[category.name]}
+                      </div>
+                      <div className="absolute inset-0 flex items-center justify-start p-6">
+                        <div>
+                          <div className="flex items-center mb-2">
+                            <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center mr-4 shadow-sm">
+                              <span className="text-heartfelt-burgundy">{categoryIcons[category.name]}</span>
+                            </div>
+                            <h3 className="text-2xl font-serif font-semibold">{category.name}</h3>
+                          </div>
+                          <p className="text-muted-foreground line-clamp-2">{category.description}</p>
+                          <span className="mt-3 inline-flex items-center text-sm font-medium text-heartfelt-burgundy group-hover:text-heartfelt-dark transition-colors">
+                            Browse Collection <ArrowRight size={16} className="ml-1 group-hover:translate-x-1 transition-transform" />
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* Featured product from this category */}
+                    {featuredProducts.find(p => p.category === category.name) && (
+                      <div className="p-4 border-t border-heartfelt-cream/30">
+                        <div className="flex items-center">
+                          <div className="w-16 h-16 rounded-md overflow-hidden mr-3 bg-gray-100">
+                            <img 
+                              src={featuredProducts.find(p => p.category === category.name)?.image_url || '/placeholder.svg'} 
+                              alt="Featured product"
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                          <div>
+                            <span className="text-xs flex items-center font-medium text-heartfelt-burgundy mb-1">
+                              <Sparkles size={12} className="mr-1" /> Featured
+                            </span>
+                            <p className="font-medium line-clamp-1">
+                              {featuredProducts.find(p => p.category === category.name)?.name}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </Link>
+            ))
+          )}
+        </div>
       </div>
-
-      {/* Products Grid */}
-      {isLoading ? (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 lg:gap-8">
-          {[1, 2, 3, 4, 5, 6, 7, 8].map((item) => (
-            <div key={item} className="h-[300px] bg-heartfelt-cream/20 animate-pulse rounded-xl"></div>
-          ))}
-        </div>
-      ) : products.length === 0 ? (
-        <div className="text-center py-16 bg-heartfelt-cream/10 rounded-xl">
-          <h3 className="text-xl font-medium mb-2">No products found</h3>
-          <p className="text-muted-foreground">
-            {activeCategory 
-              ? `There are currently no products in the ${activeCategory} category.` 
-              : "There are currently no products available."}
-          </p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 md:gap-8">
-          {products.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
-        </div>
-      )}
     </div>
   );
 };

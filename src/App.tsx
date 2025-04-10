@@ -10,6 +10,7 @@ import { CartProvider } from "@/contexts/CartContext";
 import Cart from "./pages/Cart";
 import ProductDetail from "./pages/ProductDetail";
 import Categories from "./pages/Categories";
+import CategoryPage from "./pages/CategoryPage";
 import Custom from "./pages/Custom";
 import Support from "./pages/Support";
 import Checkout from "./pages/Checkout";
@@ -38,6 +39,7 @@ const App = () => (
               <Route path="/product/:id" element={<Layout><ProductDetail /></Layout>} />
               <Route path="/categories" element={<Layout><Categories /></Layout>} />
               <Route path="/categories/:categoryName" element={<Layout><Categories /></Layout>} />
+              <Route path="/category/:categoryName" element={<Layout><CategoryPage /></Layout>} />
               <Route path="/custom" element={<Layout><Custom /></Layout>} />
               <Route path="/support" element={<Layout><Support /></Layout>} />
               <Route path="/checkout" element={<Layout><Checkout /></Layout>} />

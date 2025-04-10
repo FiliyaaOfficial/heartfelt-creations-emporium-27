@@ -42,6 +42,10 @@
     @apply border-border;
   }
 
+  html {
+    scroll-behavior: smooth;
+  }
+
   body {
     @apply bg-background text-foreground font-sans;
     font-family: 'Montserrat', 'Poppins', sans-serif;
@@ -55,6 +59,23 @@
 
   p {
     line-height: 1.7;
+  }
+
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-heartfelt-burgundy/20 rounded-full;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-heartfelt-burgundy/30;
   }
 }
 
@@ -91,7 +112,7 @@
     @apply inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium;
   }
   
-  /* New styles for enhanced UI */
+  /* Enhanced UI styles */
   .glassmorphism {
     @apply bg-white/70 backdrop-blur-sm border border-white/50 shadow-sm;
   }
@@ -126,6 +147,39 @@
   .shine-effect:hover::after {
     opacity: 1;
     transition: all 0.7s;
+  }
+
+  /* Modern card with hover effects */
+  .modern-card {
+    @apply bg-white rounded-xl border border-gray-100 overflow-hidden transition-all duration-300 hover:shadow-lg hover:border-heartfelt-burgundy/20;
+    transform: translateY(0);
+  }
+  
+  .modern-card:hover {
+    transform: translateY(-5px);
+  }
+  
+  /* Gradient backgrounds */
+  .bg-gradient-soft {
+    @apply bg-gradient-to-r from-heartfelt-cream/20 to-white;
+  }
+  
+  .bg-gradient-accent {
+    @apply bg-gradient-to-r from-heartfelt-burgundy to-heartfelt-pink;
+  }
+  
+  /* Animated underline for links */
+  .animated-link {
+    @apply relative inline-block;
+  }
+  
+  .animated-link::after {
+    content: '';
+    @apply absolute bottom-0 left-0 w-0 h-0.5 bg-heartfelt-burgundy transition-all duration-300;
+  }
+  
+  .animated-link:hover::after {
+    @apply w-full;
   }
 }
 
@@ -164,6 +218,17 @@
   }
 }
 
+@keyframes slide-in {
+  0% {
+    transform: translateX(-20px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
 .animate-scale-in {
   animation: scale-in 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
 }
@@ -174,6 +239,10 @@
 
 .animate-float {
   animation: float 3s ease-in-out infinite;
+}
+
+.animate-slide-in {
+  animation: slide-in 0.5s ease-out forwards;
 }
 
 .font-sans {
@@ -187,4 +256,9 @@
 /* Improved typography */
 .text-balance {
   text-wrap: balance;
+}
+
+/* Enhanced focus styles */
+*:focus-visible {
+  @apply outline-none ring-2 ring-heartfelt-burgundy/70 ring-offset-2 ring-offset-white;
 }
