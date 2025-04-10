@@ -253,14 +253,16 @@ const Account = () => {
                     </Button>
                   </li>
                   <li>
+                    {/* Fix: Changed from 'as={Link}' to 'asChild' and wrapped with Link */}
                     <Button 
-                      as={Link}
-                      to="/wishlist"
                       variant="ghost" 
                       className="w-full justify-start rounded-lg h-10 px-3 font-normal text-gray-800"
+                      asChild
                     >
-                      <Heart size={18} className="mr-3 text-heartfelt-burgundy" />
-                      Wishlist
+                      <Link to="/wishlist">
+                        <Heart size={18} className="mr-3 text-heartfelt-burgundy" />
+                        Wishlist
+                      </Link>
                     </Button>
                   </li>
                   <li>
