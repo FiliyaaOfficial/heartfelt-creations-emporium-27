@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -7,6 +6,7 @@ import { useCart } from '@/contexts/CartContext';
 import { Input } from '@/components/ui/input';
 import { useWishlist } from '@/contexts/WishlistContext';
 import { cn } from '@/lib/utils';
+import NavCategoriesMenu from './NavCategoriesMenu';
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -32,7 +32,6 @@ const Navbar = () => {
     }
   };
 
-  // Close search on ESC key
   useEffect(() => {
     const handleEsc = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
@@ -45,7 +44,6 @@ const Navbar = () => {
     };
   }, []);
 
-  // Close search when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const searchContainer = document.getElementById('search-container');
@@ -62,19 +60,15 @@ const Navbar = () => {
   return (
     <header className="sticky top-0 z-40 w-full bg-white/80 backdrop-blur-md border-b border-heartfelt-cream">
       <div className="container mx-auto px-4 flex justify-between items-center h-16 md:h-20">
-        {/* Logo */}
         <Link to="/" className="flex items-center">
           <h1 className="text-2xl md:text-3xl font-serif font-bold text-heartfelt-burgundy">Heartfelt</h1>
         </Link>
 
-        {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center space-x-8">
           <Link to="/" className="text-gray-800 hover:text-heartfelt-burgundy transition-colors font-medium">
             Home
           </Link>
-          <Link to="/categories" className="text-gray-800 hover:text-heartfelt-burgundy transition-colors font-medium">
-            Shop
-          </Link>
+          <NavCategoriesMenu />
           <Link to="/custom" className="text-gray-800 hover:text-heartfelt-burgundy transition-colors font-medium">
             Custom Orders
           </Link>
@@ -83,9 +77,7 @@ const Navbar = () => {
           </Link>
         </nav>
 
-        {/* Right-side icons with Search */}
         <div className="flex items-center space-x-4">
-          {/* Search button and expandable search bar */}
           <div id="search-container" className="relative flex items-center">
             <button 
               onClick={toggleSearch}
@@ -95,7 +87,6 @@ const Navbar = () => {
               <Search size={20} className={cn(isSearchOpen ? "text-heartfelt-burgundy" : "")} />
             </button>
             
-            {/* Expandable search form */}
             <form 
               onSubmit={handleSearch} 
               className={cn(
@@ -149,7 +140,6 @@ const Navbar = () => {
             </Button>
           </Link>
 
-          {/* Mobile menu button */}
           <button
             className="md:hidden text-gray-700 hover:text-heartfelt-burgundy transition-colors p-1"
             onClick={toggleMenu}
@@ -160,7 +150,6 @@ const Navbar = () => {
         </div>
       </div>
 
-      {/* Mobile menu */}
       {isMenuOpen && (
         <div className="md:hidden bg-white border-b border-heartfelt-cream">
           <div className="container mx-auto px-4 py-4">
@@ -189,7 +178,7 @@ const Navbar = () => {
                 Home
               </Link>
               <Link to="/categories" className="text-gray-800 hover:text-heartfelt-burgundy py-2 transition-colors font-medium" onClick={() => setIsMenuOpen(false)}>
-                Shop
+                Categories
               </Link>
               <Link to="/custom" className="text-gray-800 hover:text-heartfelt-burgundy py-2 transition-colors font-medium" onClick={() => setIsMenuOpen(false)}>
                 Custom Orders
