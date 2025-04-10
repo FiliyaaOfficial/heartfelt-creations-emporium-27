@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { Product } from "@/types";
@@ -113,7 +114,7 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           description: `${product.name} is already in your wishlist`,
         });
         setIsLoading(false);
-        return;
+        return Promise.resolve();
       }
 
       // Add new wishlist item with explicit session_id
@@ -147,6 +148,9 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         title: "Added to wishlist",
         description: `${product.name} has been added to your wishlist`,
       });
+      
+      // Successfully added
+      return Promise.resolve();
     } catch (error) {
       console.error("Error adding to wishlist:", error);
       toast({
@@ -154,6 +158,7 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         description: "Please try again later",
         variant: "destructive",
       });
+      return Promise.reject(error);
     } finally {
       setIsLoading(false);
     }

@@ -23,5 +23,11 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABL
   },
   db: {
     schema: 'public'
+  },
+  // Ensure we don't run into throttling issues
+  realtime: {
+    params: {
+      eventsPerSecond: 10
+    }
   }
 });

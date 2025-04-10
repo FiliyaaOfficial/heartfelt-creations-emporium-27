@@ -164,6 +164,9 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         title: "Added to cart",
         description: `${product.name} has been added to your cart`,
       });
+      
+      // Return the toast to be visible
+      return Promise.resolve();
     } catch (error) {
       console.error("Error adding to cart:", error);
       toast({
@@ -171,6 +174,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         description: "Please try again later",
         variant: "destructive",
       });
+      return Promise.reject(error);
     } finally {
       setIsLoading(false);
     }
