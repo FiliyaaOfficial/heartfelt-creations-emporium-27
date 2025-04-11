@@ -45,21 +45,21 @@ export const useProductFilters = () => {
     const fetchProducts = async () => {
       setIsLoading(true);
       try {
-        // Create base query
-        let query = supabase.from('products').select();
+        // Build query in stages to avoid deep type instantiation
+        let query = supabase.from('products').select('*');
         
-        // Apply filters sequentially to avoid deep instantiation error
+        // Apply category filter
         if (selectedCategories.length > 0) {
           query = query.in('category', selectedCategories);
         }
         
+        // Apply customizable filter
         if (showCustomizable) {
           query = query.eq('is_customizable', true);
         }
         
-        // Price range filter
-        query = query.gte('price', priceRange[0]);
-        query = query.lte('price', priceRange[1]);
+        // Apply price filters
+        query = query.gte('price', priceRange[0]).lte('price', priceRange[1]);
         
         // Apply sorting
         if (sortBy === 'newest') {
@@ -70,6 +70,7 @@ export const useProductFilters = () => {
           query = query.order('price', { ascending: false });
         }
         
+        // Execute the query
         const { data, error } = await query;
         
         if (error) throw error;

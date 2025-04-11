@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Product as ProductType, Category as CategoryType } from '@/types';
@@ -54,8 +53,8 @@ const CategoryPage = () => {
           setCategory(categoryData as CategoryType);
         }
         
-        // Fetch products with filters
-        let query = supabase.from('products');
+        // Fetch products with filters - build query in stages to avoid type issues
+        let query = supabase.from('products').select('*');
         
         // Apply category filter
         if (selectedCategories.length > 0) {
@@ -70,9 +69,8 @@ const CategoryPage = () => {
           query = query.eq('is_customizable', true);
         }
         
-        // Apply price filter
-        query = query.gte('price', priceRange[0]);
-        query = query.lte('price', priceRange[1]);
+        // Apply price filter - chain directly to avoid type issues
+        query = query.gte('price', priceRange[0]).lte('price', priceRange[1]);
         
         // Apply sorting
         if (sortBy === 'newest') {
@@ -84,7 +82,7 @@ const CategoryPage = () => {
         }
         
         // Execute the query
-        const { data: productsData, error: productsError } = await query.select();
+        const { data: productsData, error: productsError } = await query;
         
         if (productsError) throw productsError;
         setProducts(productsData as ProductType[]);
