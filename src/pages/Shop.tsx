@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Product as ProductType } from '@/types';
@@ -65,32 +66,41 @@ const Shop = () => {
     const fetchProducts = async () => {
       setIsLoading(true);
       try {
-        // First, build the base query
-        let queryBuilder = supabase.from('products').select('*');
+        // Create base query with explicit typing
+        const query = supabase
+          .from('products')
+          .select();
         
-        // Apply filters one by one
-        if (selectedCategories.length > 0) {
-          queryBuilder = queryBuilder.in('category', selectedCategories);
-        }
+        // Apply filters in separate steps
+        // Category filter
+        const withCategoryFilter = selectedCategories.length > 0 
+          ? query.in('category', selectedCategories)
+          : query;
         
-        if (showCustomizable) {
-          queryBuilder = queryBuilder.eq('is_customizable', true);
-        }
+        // Customizable filter
+        const withCustomizableFilter = showCustomizable 
+          ? withCategoryFilter.eq('is_customizable', true) 
+          : withCategoryFilter;
         
-        // Apply price range
-        queryBuilder = queryBuilder.gte('price', priceRange[0]).lte('price', priceRange[1]);
+        // Price range filter
+        const withPriceFilter = withCustomizableFilter
+          .gte('price', priceRange[0])
+          .lte('price', priceRange[1]);
         
-        // Apply sorting as the final step
+        // Sorting
+        let finalQuery;
         if (sortBy === 'newest') {
-          queryBuilder = queryBuilder.order('created_at', { ascending: false });
+          finalQuery = withPriceFilter.order('created_at', { ascending: false });
         } else if (sortBy === 'price-low') {
-          queryBuilder = queryBuilder.order('price', { ascending: true });
+          finalQuery = withPriceFilter.order('price', { ascending: true });
         } else if (sortBy === 'price-high') {
-          queryBuilder = queryBuilder.order('price', { ascending: false });
+          finalQuery = withPriceFilter.order('price', { ascending: false });
+        } else {
+          finalQuery = withPriceFilter;
         }
         
-        // Execute the query
-        const { data, error } = await queryBuilder;
+        // Execute query
+        const { data, error } = await finalQuery;
         
         if (error) throw error;
         
