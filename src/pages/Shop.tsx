@@ -147,7 +147,7 @@ const Shop = () => {
                       key={product.id} 
                       product={{
                         ...product,
-                        badges: product.is_customizable ? ['customizable'] : undefined
+                        badges: product.is_customizable ? ['customizable', ...(product.badges || [])] : product.badges
                       }} 
                     />
                   ))}

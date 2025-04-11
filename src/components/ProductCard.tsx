@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { Product } from '@/types';
 import { formatCurrency } from '@/lib/utils';
 import ProductCardOverlay from './ProductCardOverlay';
+import { Badge } from '@/components/ui/badge';
 
 interface ProductCardProps {
   product: Product;
@@ -32,7 +33,12 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             {product.is_bestseller && (
               <span className="premium-badge bg-heartfelt-pink text-white">Bestseller</span>
             )}
-            {/* We're removing the discount badge since discount_percentage doesn't exist in the Product type */}
+            {product.is_customizable && (
+              <span className="premium-badge bg-heartfelt-cream text-heartfelt-burgundy">Customizable</span>
+            )}
+            {product.badges && product.badges.map((badge) => (
+              <span key={badge} className="premium-badge bg-heartfelt-dark text-white">{badge}</span>
+            ))}
           </div>
         </div>
         
@@ -44,8 +50,6 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             <span className="font-semibold text-lg text-heartfelt-burgundy">
               {formatCurrency(product.price)}
             </span>
-            
-            {/* Removing original_price reference since it doesn't exist in the Product type */}
           </div>
         </div>
       </div>

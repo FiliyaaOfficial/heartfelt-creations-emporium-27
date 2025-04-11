@@ -205,12 +205,14 @@ export type Database = {
       }
       products: {
         Row: {
+          badges: string[] | null
           category: string
           created_at: string
           description: string
           id: string
           image_url: string
           is_bestseller: boolean | null
+          is_customizable: boolean | null
           is_featured: boolean | null
           is_new: boolean | null
           name: string
@@ -219,12 +221,14 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          badges?: string[] | null
           category: string
           created_at?: string
           description: string
           id?: string
           image_url: string
           is_bestseller?: boolean | null
+          is_customizable?: boolean | null
           is_featured?: boolean | null
           is_new?: boolean | null
           name: string
@@ -233,12 +237,14 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          badges?: string[] | null
           category?: string
           created_at?: string
           description?: string
           id?: string
           image_url?: string
           is_bestseller?: boolean | null
+          is_customizable?: boolean | null
           is_featured?: boolean | null
           is_new?: boolean | null
           name?: string

@@ -46,17 +46,13 @@ export const useProductFilters = () => {
       setIsLoading(true);
       try {
         // Create base query
-        let query: any = supabase.from('products').select();
+        let query = supabase.from('products').select();
         
-        // Apply filters one by one using explicit assignments
-        // This avoids the deep type instantiation error
-        
-        // Category filter
+        // Apply filters sequentially to avoid deep instantiation error
         if (selectedCategories.length > 0) {
           query = query.in('category', selectedCategories);
         }
         
-        // Customizable filter
         if (showCustomizable) {
           query = query.eq('is_customizable', true);
         }
@@ -74,11 +70,9 @@ export const useProductFilters = () => {
           query = query.order('price', { ascending: false });
         }
         
-        // Execute query
         const { data, error } = await query;
         
         if (error) throw error;
-        
         setProducts(data as Product[]);
         
         // Find max price for slider
