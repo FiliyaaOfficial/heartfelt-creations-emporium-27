@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Product as ProductType } from '@/types';
@@ -67,7 +66,7 @@ const Shop = () => {
       setIsLoading(true);
       try {
         // Start building query
-        let query = supabase.from('products').select();
+        let query = supabase.from('products').select('*');
         
         // Apply category filter
         if (selectedCategories.length > 0) {
@@ -458,8 +457,7 @@ const Shop = () => {
                       key={product.id} 
                       product={{
                         ...product,
-                        // Add a badge for customizable products
-                        badges: product.is_customizable ? ['customizable'] : []
+                        badges: product.is_customizable ? ['customizable'] : undefined
                       }} 
                     />
                   ))}

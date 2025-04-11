@@ -8,9 +8,11 @@ export interface Product {
   is_featured: boolean;
   is_new: boolean;
   is_bestseller: boolean;
+  is_customizable?: boolean;
   stock_quantity: number;
   created_at: string;
   updated_at: string;
+  badges?: string[];
 }
 
 export interface Category {

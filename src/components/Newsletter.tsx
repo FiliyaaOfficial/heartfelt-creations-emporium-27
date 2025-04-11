@@ -1,10 +1,10 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Mail, CheckCircle, AlertCircle } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { cn } from '@/lib/utils';
+import { Link } from 'react-router-dom';
 
 interface NewsletterProps {
   className?: string;
@@ -20,7 +20,6 @@ const Newsletter = ({ className, variant = 'default' }: NewsletterProps) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Basic email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       toast({
@@ -34,7 +33,6 @@ const Newsletter = ({ className, variant = 'default' }: NewsletterProps) => {
     setIsSubmitting(true);
     
     try {
-      // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000));
       
       setIsSubscribed(true);
@@ -45,7 +43,6 @@ const Newsletter = ({ className, variant = 'default' }: NewsletterProps) => {
       });
       setEmail('');
       
-      // Reset success message after a delay
       setTimeout(() => {
         setIsSubscribed(false);
       }, 5000);
@@ -61,7 +58,6 @@ const Newsletter = ({ className, variant = 'default' }: NewsletterProps) => {
     }
   };
 
-  // Styles based on variant
   if (variant === 'sidebar') {
     return (
       <div className={cn("bg-white p-5 rounded-lg shadow-sm", className)}>
@@ -138,7 +134,6 @@ const Newsletter = ({ className, variant = 'default' }: NewsletterProps) => {
     );
   }
 
-  // Default variant
   return (
     <div className={cn("bg-heartfelt-burgundy/10 py-14 px-4", className)}>
       <div className="container mx-auto max-w-4xl text-center">
