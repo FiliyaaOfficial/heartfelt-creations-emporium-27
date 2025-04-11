@@ -65,33 +65,39 @@ const Shop = () => {
     const fetchProducts = async () => {
       setIsLoading(true);
       try {
-        // Start building query
-        let query = supabase.from('products').select('*');
+        // Create a type-safe query
+        const query = supabase.from('products');
+        
+        // Apply filters
+        let filteredQuery = query.select('*');
         
         // Apply category filter
         if (selectedCategories.length > 0) {
-          query = query.in('category', selectedCategories);
+          filteredQuery = filteredQuery.in('category', selectedCategories);
         }
         
         // Apply customizable filter
         if (showCustomizable) {
-          // Assuming there's a boolean field for customizable products
-          query = query.eq('is_customizable', true);
+          filteredQuery = filteredQuery.eq('is_customizable', true);
         }
         
         // Apply price range filter
-        query = query.gte('price', priceRange[0]).lte('price', priceRange[1]);
+        filteredQuery = filteredQuery.gte('price', priceRange[0]).lte('price', priceRange[1]);
         
         // Apply sorting
+        let sortedQuery;
         if (sortBy === 'newest') {
-          query = query.order('created_at', { ascending: false });
+          sortedQuery = filteredQuery.order('created_at', { ascending: false });
         } else if (sortBy === 'price-low') {
-          query = query.order('price', { ascending: true });
+          sortedQuery = filteredQuery.order('price', { ascending: true });
         } else if (sortBy === 'price-high') {
-          query = query.order('price', { ascending: false });
+          sortedQuery = filteredQuery.order('price', { ascending: false });
+        } else {
+          sortedQuery = filteredQuery;
         }
         
-        const { data, error } = await query;
+        // Execute query
+        const { data, error } = await sortedQuery;
         
         if (error) throw error;
         
@@ -435,7 +441,7 @@ const Shop = () => {
             {/* Products grid */}
             {isLoading ? (
               <div className="flex items-center justify-center py-20">
-                <Loader2 className="h-8 w-8 animate-spin text-heartfelt-burgundy" />
+                <Loader2 className="h-8 w-8 animate-spin text-heartfelt-burgundy mr-2" />
                 <span className="ml-2 text-lg text-muted-foreground">Loading products...</span>
               </div>
             ) : products.length === 0 ? (
