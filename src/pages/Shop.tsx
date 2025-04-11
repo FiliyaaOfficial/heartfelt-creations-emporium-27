@@ -65,39 +65,32 @@ const Shop = () => {
     const fetchProducts = async () => {
       setIsLoading(true);
       try {
-        // Create a type-safe query
-        const query = supabase.from('products');
+        // First, build the base query
+        let queryBuilder = supabase.from('products').select('*');
         
-        // Apply filters
-        let filteredQuery = query.select('*');
-        
-        // Apply category filter
+        // Apply filters one by one
         if (selectedCategories.length > 0) {
-          filteredQuery = filteredQuery.in('category', selectedCategories);
+          queryBuilder = queryBuilder.in('category', selectedCategories);
         }
         
-        // Apply customizable filter
         if (showCustomizable) {
-          filteredQuery = filteredQuery.eq('is_customizable', true);
+          queryBuilder = queryBuilder.eq('is_customizable', true);
         }
         
-        // Apply price range filter
-        filteredQuery = filteredQuery.gte('price', priceRange[0]).lte('price', priceRange[1]);
+        // Apply price range
+        queryBuilder = queryBuilder.gte('price', priceRange[0]).lte('price', priceRange[1]);
         
-        // Apply sorting
-        let sortedQuery;
+        // Apply sorting as the final step
         if (sortBy === 'newest') {
-          sortedQuery = filteredQuery.order('created_at', { ascending: false });
+          queryBuilder = queryBuilder.order('created_at', { ascending: false });
         } else if (sortBy === 'price-low') {
-          sortedQuery = filteredQuery.order('price', { ascending: true });
+          queryBuilder = queryBuilder.order('price', { ascending: true });
         } else if (sortBy === 'price-high') {
-          sortedQuery = filteredQuery.order('price', { ascending: false });
-        } else {
-          sortedQuery = filteredQuery;
+          queryBuilder = queryBuilder.order('price', { ascending: false });
         }
         
-        // Execute query
-        const { data, error } = await sortedQuery;
+        // Execute the query
+        const { data, error } = await queryBuilder;
         
         if (error) throw error;
         
