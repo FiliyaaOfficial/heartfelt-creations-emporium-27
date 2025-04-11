@@ -53,44 +53,52 @@ const CategoryPage = () => {
           setCategory(categoryData as CategoryType);
         }
         
-        // Fetch products with filters - build query in stages to avoid type issues
-        let query = supabase.from('products').select('*');
+        // Fetch products with filters
+        let productQuery = supabase.from('products').select();
         
         // Apply category filter
         if (selectedCategories.length > 0) {
-          query = query.in('category', selectedCategories);
+          productQuery = productQuery.in('category', selectedCategories);
         } else if (categoryName) {
           // If no categories are explicitly selected, use the URL parameter
-          query = query.eq('category', categoryName);
+          productQuery = productQuery.eq('category', categoryName);
         }
         
         // Apply customizable filter
         if (showCustomizable) {
-          query = query.eq('is_customizable', true);
+          productQuery = productQuery.eq('is_customizable', true);
         }
         
-        // Apply price filter - chain directly to avoid type issues
-        query = query.gte('price', priceRange[0]).lte('price', priceRange[1]);
+        // Apply price filter
+        productQuery = productQuery
+          .gte('price', priceRange[0])
+          .lte('price', priceRange[1]);
         
         // Apply sorting
         if (sortBy === 'newest') {
-          query = query.order('created_at', { ascending: false });
+          productQuery = productQuery.order('created_at', { ascending: false });
         } else if (sortBy === 'price-low') {
-          query = query.order('price', { ascending: true });
+          productQuery = productQuery.order('price', { ascending: true });
         } else if (sortBy === 'price-high') {
-          query = query.order('price', { ascending: false });
+          productQuery = productQuery.order('price', { ascending: false });
         }
         
         // Execute the query
-        const { data: productsData, error: productsError } = await query;
+        const { data: productsData, error: productsError } = await productQuery;
         
         if (productsError) throw productsError;
-        setProducts(productsData as ProductType[]);
+        console.log('Category page products:', productsData?.length || 0);
         
-        // Set max price for slider
-        if (productsData.length > 0) {
-          const highest = Math.max(...productsData.map((p: any) => p.price));
-          setMaxPrice(Math.max(highest, 500)); // Set at least 500 for range
+        if (productsData) {
+          setProducts(productsData as ProductType[]);
+          
+          // Set max price for slider
+          if (productsData.length > 0) {
+            const highest = Math.max(...productsData.map(p => p.price));
+            setMaxPrice(Math.max(highest, 500)); // Set at least 500 for range
+          }
+        } else {
+          setProducts([]);
         }
       } catch (error) {
         console.error('Error fetching data:', error);

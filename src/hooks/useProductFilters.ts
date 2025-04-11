@@ -45,54 +45,53 @@ export const useProductFilters = () => {
     const fetchProducts = async () => {
       setIsLoading(true);
       try {
-        // First, create the base query
-        const query = supabase.from('products').select('*');
+        // Create a proper query with type safety
+        let productQuery = supabase.from('products').select();
         
-        // Apply filters using a technique that avoids deep type instantiation
-        let filteredQuery = query;
-        
-        // Apply category filter if any categories are selected
+        // Apply filters
         if (selectedCategories.length > 0) {
-          filteredQuery = filteredQuery.in('category', selectedCategories);
+          productQuery = productQuery.in('category', selectedCategories);
         }
         
-        // Apply customizable filter if enabled
         if (showCustomizable) {
-          filteredQuery = filteredQuery.eq('is_customizable', true);
+          productQuery = productQuery.eq('is_customizable', true);
         }
         
         // Apply price range filter
-        filteredQuery = filteredQuery.gte('price', priceRange[0]).lte('price', priceRange[1]);
+        productQuery = productQuery.gte('price', priceRange[0]).lte('price', priceRange[1]);
         
-        // Apply sorting based on the selected option
-        let sortedQuery;
+        // Apply sorting
         if (sortBy === 'newest') {
-          sortedQuery = filteredQuery.order('created_at', { ascending: false });
+          productQuery = productQuery.order('created_at', { ascending: false });
         } else if (sortBy === 'price-low') {
-          sortedQuery = filteredQuery.order('price', { ascending: true });
+          productQuery = productQuery.order('price', { ascending: true });
         } else if (sortBy === 'price-high') {
-          sortedQuery = filteredQuery.order('price', { ascending: false });
-        } else {
-          sortedQuery = filteredQuery;
+          productQuery = productQuery.order('price', { ascending: false });
         }
         
-        // Execute the final query
-        const { data, error } = await sortedQuery;
+        // Execute the query
+        const { data, error } = await productQuery;
         
         if (error) {
           throw error;
         }
         
         console.log('Fetched products:', data?.length || 0);
-        setProducts(data as Product[]);
         
-        // Find max price for slider
-        if (data && data.length > 0) {
-          const highest = Math.max(...data.map((p: any) => p.price));
-          setMaxPrice(Math.max(highest, 500)); // Set at least 500 for range
+        if (data) {
+          setProducts(data);
+          
+          // Find max price for slider
+          if (data.length > 0) {
+            const highest = Math.max(...data.map(p => p.price));
+            setMaxPrice(Math.max(highest, 500)); // Set at least 500 for range
+          }
+        } else {
+          setProducts([]);
         }
       } catch (error) {
         console.error('Error fetching products:', error);
+        setProducts([]);
       } finally {
         setIsLoading(false);
       }
