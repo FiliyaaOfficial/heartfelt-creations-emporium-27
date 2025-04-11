@@ -41,7 +41,7 @@ const Blog = () => {
           {
             id: '2',
             title: 'The Perfect Gift Guide for Every Occasion',
-            excerpt: 'From birthdays to anniversaries, find the ideal handmade gift for any special moment in your loved ones' lives.',
+            excerpt: "From birthdays to anniversaries, find the ideal handmade gift for any special moment in your loved ones' lives.",
             content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
             cover_image: 'https://images.unsplash.com/photo-1513885535751-8b9238bd345a?q=80&w=1200&auto=format&fit=crop',
             author: 'Michael Chen',
