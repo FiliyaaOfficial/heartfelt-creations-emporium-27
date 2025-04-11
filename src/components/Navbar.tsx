@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -61,16 +62,22 @@ const Navbar = () => {
     <header className="sticky top-0 z-40 w-full bg-white/80 backdrop-blur-md border-b border-heartfelt-cream">
       <div className="container mx-auto px-4 flex justify-between items-center h-16 md:h-20">
         <Link to="/" className="flex items-center">
-          <h1 className="text-2xl md:text-3xl font-serif font-bold text-heartfelt-burgundy">Heartfelt</h1>
+          <h1 className="text-2xl md:text-3xl font-serif font-bold text-heartfelt-burgundy">Filiyaa</h1>
         </Link>
 
         <nav className="hidden md:flex items-center space-x-8">
           <Link to="/" className="text-gray-800 hover:text-heartfelt-burgundy transition-colors font-medium">
             Home
           </Link>
+          <Link to="/shop" className="text-gray-800 hover:text-heartfelt-burgundy transition-colors font-medium">
+            Shop
+          </Link>
           <NavCategoriesMenu />
           <Link to="/custom" className="text-gray-800 hover:text-heartfelt-burgundy transition-colors font-medium">
             Custom Orders
+          </Link>
+          <Link to="/blog" className="text-gray-800 hover:text-heartfelt-burgundy transition-colors font-medium">
+            Blog
           </Link>
           <Link to="/support" className="text-gray-800 hover:text-heartfelt-burgundy transition-colors font-medium">
             Support
@@ -177,11 +184,17 @@ const Navbar = () => {
               <Link to="/" className="text-gray-800 hover:text-heartfelt-burgundy py-2 transition-colors font-medium" onClick={() => setIsMenuOpen(false)}>
                 Home
               </Link>
+              <Link to="/shop" className="text-gray-800 hover:text-heartfelt-burgundy py-2 transition-colors font-medium" onClick={() => setIsMenuOpen(false)}>
+                Shop
+              </Link>
               <Link to="/categories" className="text-gray-800 hover:text-heartfelt-burgundy py-2 transition-colors font-medium" onClick={() => setIsMenuOpen(false)}>
                 Categories
               </Link>
               <Link to="/custom" className="text-gray-800 hover:text-heartfelt-burgundy py-2 transition-colors font-medium" onClick={() => setIsMenuOpen(false)}>
                 Custom Orders
+              </Link>
+              <Link to="/blog" className="text-gray-800 hover:text-heartfelt-burgundy py-2 transition-colors font-medium" onClick={() => setIsMenuOpen(false)}>
+                Blog
               </Link>
               <Link to="/support" className="text-gray-800 hover:text-heartfelt-burgundy py-2 transition-colors font-medium" onClick={() => setIsMenuOpen(false)}>
                 Support

@@ -21,6 +21,12 @@ import Wishlist from "./pages/Wishlist";
 import Account from "./pages/Account";
 import { WishlistProvider } from "./contexts/WishlistContext";
 import ScrollToTop from "./components/ScrollToTop";
+import Shop from "./pages/Shop";
+import Blog from "./pages/Blog";
+import BlogPost from "./pages/BlogPost";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import TermsOfService from "./pages/TermsOfService";
+import ShippingInfo from "./pages/ShippingInfo";
 
 const queryClient = new QueryClient();
 
@@ -47,6 +53,12 @@ const App = () => (
               <Route path="/search" element={<Layout><Search /></Layout>} />
               <Route path="/wishlist" element={<Layout><Wishlist /></Layout>} />
               <Route path="/account" element={<Layout><Account /></Layout>} />
+              <Route path="/shop" element={<Layout><Shop /></Layout>} />
+              <Route path="/blog" element={<Layout><Blog /></Layout>} />
+              <Route path="/blog/:slug" element={<Layout><BlogPost /></Layout>} />
+              <Route path="/privacy" element={<Layout><PrivacyPolicy /></Layout>} />
+              <Route path="/terms" element={<Layout><TermsOfService /></Layout>} />
+              <Route path="/shipping" element={<Layout><ShippingInfo /></Layout>} />
               <Route path="*" element={<Layout><NotFound /></Layout>} />
             </Routes>
           </BrowserRouter>
