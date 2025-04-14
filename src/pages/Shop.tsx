@@ -24,6 +24,9 @@ const Shop = () => {
     selectedCategories,
     sortBy,
     showCustomizable,
+    setShowCustomizable,
+    setPriceRange,
+    setSortBy,
     handleCategoryToggle,
     handlePriceRangeChange,
     handleClearFilters
@@ -55,7 +58,7 @@ const Shop = () => {
             maxPrice={maxPrice}
             handlePriceRangeChange={handlePriceRangeChange}
             showCustomizable={showCustomizable}
-            setShowCustomizable={filters => filters.setShowCustomizable}
+            setShowCustomizable={setShowCustomizable}
             handleClearFilters={handleClearFilters}
           />
           
@@ -68,12 +71,12 @@ const Shop = () => {
               handleCategoryToggle={handleCategoryToggle}
               priceRange={priceRange}
               maxPrice={maxPrice}
-              setPriceRange={filters => filters.setPriceRange}
+              setPriceRange={setPriceRange}
               showCustomizable={showCustomizable}
-              setShowCustomizable={filters => filters.setShowCustomizable}
+              setShowCustomizable={setShowCustomizable}
               handleClearFilters={handleClearFilters}
               sortBy={sortBy}
-              setSortBy={filters => filters.setSortBy}
+              setSortBy={setSortBy}
             />
             
             {isLoading ? (

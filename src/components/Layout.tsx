@@ -6,6 +6,7 @@ import NoticeBar from './NoticeBar';
 import ScrollToTop from './ScrollToTop';
 import PromoBar from './PromoBar';
 import CartNotification from './CartNotification';
+import CategoryCircles from './CategoryCircles';
 
 interface LayoutProps {
   children: React.ReactNode;

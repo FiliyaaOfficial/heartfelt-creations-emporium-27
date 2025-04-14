@@ -7,9 +7,15 @@ import { Button } from '@/components/ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const CartNotification = () => {
-  const { totalItems, totalPrice } = useCart();
+  const { totalItems, cartItems } = useCart();
   const [isVisible, setIsVisible] = useState(false);
   const [lastTotal, setLastTotal] = useState(totalItems);
+  
+  // Calculate total price from cart items
+  const totalPrice = cartItems.reduce(
+    (sum, item) => sum + item.product.price * item.quantity, 
+    0
+  );
 
   useEffect(() => {
     if (totalItems > 0 && totalItems > lastTotal) {

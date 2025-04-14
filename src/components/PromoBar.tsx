@@ -5,7 +5,7 @@ import { toast } from 'sonner';
 
 const PromoBar = () => {
   const [isVisible, setIsVisible] = useState(true);
-  const promoCode = "FILIYAA50";
+  const promoCode = "NHBDAY50";
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(promoCode);
