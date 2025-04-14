@@ -2,13 +2,27 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { Order, ShippingAddress } from '@/types';
+import { ShippingAddress } from '@/types';
 import { formatCurrency } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { CheckCircle } from 'lucide-react';
 
+// Define a simplified order type for this component
+interface OrderWithoutItems {
+  id: string;
+  created_at: string;
+  updated_at: string;
+  shipping_address: ShippingAddress;
+  status: string;
+  total_amount: number;
+  payment_status: string;
+  contact_email: string;
+  contact_phone?: string;
+  user_id?: string;
+}
+
 const OrderConfirmation = () => {
-  const [order, setOrder] = useState<Order | null>(null);
+  const [order, setOrder] = useState<OrderWithoutItems | null>(null);
   const [loading, setLoading] = useState(true);
   const { orderId } = useParams();
 
@@ -27,7 +41,7 @@ const OrderConfirmation = () => {
         
         // Convert the shipping_address from Json to ShippingAddress type
         if (data) {
-          const orderWithTypedAddress: Order = {
+          const orderWithTypedAddress: OrderWithoutItems = {
             ...data,
             shipping_address: data.shipping_address as unknown as ShippingAddress
           };

@@ -1,4 +1,3 @@
-
 export interface Product {
   id: string;
   name: string;
@@ -57,11 +56,11 @@ export interface Category {
 export interface CartItem {
   id: string;
   product_id: string;
-  name: string;
-  price: number;
   quantity: number;
+  product: Product;
+  name?: string;   // Make these optional since we're deriving them from product
+  price?: number;
   image_url?: string;
-  product: Product; // Add this to fix errors
   selected_options?: {
     [key: string]: string;
   };
@@ -132,8 +131,8 @@ export interface Review {
 export interface User {
   id: string;
   email: string;
-  first_name: string;
-  last_name: string;
+  first_name?: string;
+  last_name?: string;
   phone?: string;
   default_shipping_address?: Address;
   default_billing_address?: Address;
@@ -168,6 +167,7 @@ export interface SupportMessage {
   status: string;
   created_at: string;
   user_id?: string;
+  order_id?: string; // Add this field
 }
 
 export interface AuthState {

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '@/contexts/CartContext';
@@ -29,7 +28,6 @@ const Checkout = () => {
     phone: '',
   });
 
-  // Set initial values if we have user data
   useEffect(() => {
     if (user) {
       setShippingInfo(prev => ({
@@ -39,7 +37,6 @@ const Checkout = () => {
     }
   }, [user]);
 
-  // Handle city and state update from PIN code
   const handleCityStateChange = (city: string, state: string) => {
     setShippingInfo(prev => ({
       ...prev,
@@ -64,7 +61,6 @@ const Checkout = () => {
       return;
     }
 
-    // Validation
     const requiredFields = ['full_name', 'street_address', 'city', 'state', 'postal_code', 'phone'];
     const missingFields = requiredFields.filter(field => !shippingInfo[field as keyof ShippingAddress]);
     
@@ -75,12 +71,13 @@ const Checkout = () => {
 
     setLoading(true);
     try {
-      // Create order in Supabase
+      const shippingAddressJson = JSON.parse(JSON.stringify(shippingInfo));
+      
       const { data: order, error } = await supabase
         .from('orders')
         .insert({
           user_id: user?.id,
-          shipping_address: shippingInfo,
+          shipping_address: shippingAddressJson,
           total_amount: subtotal,
           status: 'pending',
           payment_status: 'pending',
@@ -92,7 +89,6 @@ const Checkout = () => {
 
       if (error) throw error;
 
-      // Create order items
       const orderItems = cartItems.map(item => ({
         order_id: order.id,
         product_id: item.product.id,
@@ -107,7 +103,6 @@ const Checkout = () => {
 
       if (itemsError) throw itemsError;
 
-      // Clear cart and redirect to confirmation page
       clearCart();
       navigate(`/order-confirmation/${order.id}`);
       
@@ -134,8 +129,8 @@ const Checkout = () => {
     );
   }
 
-  const shippingCost = 0; // Free shipping
-  const tax = subtotal * 0.18; // 18% GST
+  const shippingCost = 0;
+  const tax = subtotal * 0.18;
   const total = subtotal + shippingCost + tax;
 
   return (
@@ -153,7 +148,6 @@ const Checkout = () => {
       </div>
       
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Billing & Shipping Information */}
         <div className="col-span-2">
           <div className="bg-white p-6 rounded-lg shadow-sm border mb-8">
             <h2 className="text-lg font-medium mb-4">Shipping Information</h2>
@@ -314,7 +308,6 @@ const Checkout = () => {
           </div>
         </div>
         
-        {/* Order Summary */}
         <div className="col-span-1">
           <div className="bg-white p-6 rounded-lg shadow-sm border sticky top-24">
             <h2 className="text-lg font-medium mb-4">Order Summary</h2>

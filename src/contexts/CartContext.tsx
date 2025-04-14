@@ -4,7 +4,6 @@ import { v4 as uuidv4 } from "uuid";
 import { CartItem, Product } from "@/types";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
-import { Tables } from "@/lib/utils";
 
 interface CartContextProps {
   cartItems: CartItem[];
@@ -74,12 +73,16 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
               .single();
 
             if (productError) throw productError;
-            return {
+            
+            // Make sure we create a proper CartItem
+            const cartItem: CartItem = {
               id: item.id,
               product_id: item.product_id,
               quantity: item.quantity,
-              product: product as Product,
+              product: product as Product
             };
+            
+            return cartItem;
           })
         );
         setCartItems(productsData);
@@ -148,15 +151,15 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
         // Update local state
         if (data) {
-          setCartItems((prev) => [
-            ...prev,
-            {
-              id: data.id,
-              product_id: product.id,
-              quantity,
-              product,
-            },
-          ]);
+          // Create a properly typed CartItem
+          const newCartItem: CartItem = {
+            id: data.id,
+            product_id: product.id,
+            quantity,
+            product
+          };
+          
+          setCartItems((prev) => [...prev, newCartItem]);
         }
       }
 
