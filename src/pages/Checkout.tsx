@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '@/contexts/CartContext';
 import { Button } from '@/components/ui/button';
@@ -7,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { IndianRupee, Truck, CreditCard, ShoppingBag, ArrowLeft, Shield, Loader2 } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
 import { toast } from 'sonner';
-import { ShippingAddress } from '@/types';
+import { ShippingAddress, User } from '@/types';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -30,9 +31,13 @@ const Checkout = () => {
 
   useEffect(() => {
     if (user) {
+      // Safely combine first and last name with optional chaining
+      const firstName = user.first_name || '';
+      const lastName = user.last_name || '';
+      
       setShippingInfo(prev => ({
         ...prev,
-        full_name: `${user.first_name || ''} ${user.last_name || ''}`.trim(),
+        full_name: `${firstName} ${lastName}`.trim()
       }));
     }
   }, [user]);
