@@ -1,8 +1,11 @@
 
 import React from 'react';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
-import NoticeBar from '@/components/NoticeBar';
+import Navbar from './Navbar';
+import Footer from './Footer';
+import NoticeBar from './NoticeBar';
+import ScrollToTop from './ScrollToTop';
+import PromoBar from './PromoBar';
+import CartNotification from './CartNotification';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -10,14 +13,15 @@ interface LayoutProps {
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   return (
-    <div className="min-h-screen flex flex-col">
+    <>
+      <ScrollToTop />
+      <PromoBar />
       <NoticeBar />
       <Navbar />
-      <main className="flex-grow">
-        {children}
-      </main>
+      <main>{children}</main>
       <Footer />
-    </div>
+      <CartNotification />
+    </>
   );
 };
 

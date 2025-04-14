@@ -5,6 +5,7 @@ import CategorySection from '@/components/CategorySection';
 import FeaturedProducts from '@/components/FeaturedProducts';
 import Testimonials from '@/components/Testimonials';
 import CustomOrderCta from '@/components/CustomOrderCta';
+import CategoryFeaturedSection from '@/components/CategoryFeaturedSection';
 import { supabase } from '@/integrations/supabase/client';
 import { Product as ProductType } from '@/types';
 import ProductCard from '@/components/ProductCard';
@@ -12,6 +13,7 @@ import { Link } from 'react-router-dom';
 import { ArrowRight, Star, Sparkles, Clock, TrendingUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
+import CategoryCircles from '@/components/CategoryCircles';
 
 const Index = () => {
   const [newArrivals, setNewArrivals] = useState<ProductType[]>([]);
@@ -108,6 +110,7 @@ const Index = () => {
   return (
     <div className="bg-white">
       <Hero />
+      <CategoryCircles />
       <CategorySection />
       <FeaturedProducts />
       
@@ -127,6 +130,7 @@ const Index = () => {
         <TrendingUp size={24} className="text-heartfelt-burgundy" />
       )}
       
+      <CategoryFeaturedSection />
       <Testimonials />
       <CustomOrderCta />
     </div>

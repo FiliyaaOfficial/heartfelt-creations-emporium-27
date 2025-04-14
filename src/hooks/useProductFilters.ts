@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Product } from '@/types';
+import { PostgrestFilterBuilder } from '@supabase/postgrest-js';
 
 export const useProductFilters = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -45,32 +46,36 @@ export const useProductFilters = () => {
     const fetchProducts = async () => {
       setIsLoading(true);
       try {
-        // Create a proper query with type safety
-        let productQuery = supabase.from('products').select();
+        // Start with base query
+        let query = supabase.from('products').select();
         
-        // Apply filters
+        // Apply filters safely
         if (selectedCategories.length > 0) {
-          productQuery = productQuery.in('category', selectedCategories);
+          // Apply category filter
+          query = query.in('category', selectedCategories);
         }
         
         if (showCustomizable) {
-          productQuery = productQuery.eq('is_customizable', true);
+          // Apply customizable filter
+          query = query.eq('is_customizable', true);
         }
         
         // Apply price range filter
-        productQuery = productQuery.gte('price', priceRange[0]).lte('price', priceRange[1]);
+        query = query
+          .gte('price', priceRange[0])
+          .lte('price', priceRange[1]);
         
         // Apply sorting
         if (sortBy === 'newest') {
-          productQuery = productQuery.order('created_at', { ascending: false });
+          query = query.order('created_at', { ascending: false });
         } else if (sortBy === 'price-low') {
-          productQuery = productQuery.order('price', { ascending: true });
+          query = query.order('price', { ascending: true });
         } else if (sortBy === 'price-high') {
-          productQuery = productQuery.order('price', { ascending: false });
+          query = query.order('price', { ascending: false });
         }
         
         // Execute the query
-        const { data, error } = await productQuery;
+        const { data, error } = await query;
         
         if (error) {
           throw error;
