@@ -3,7 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import { CartProvider } from "@/contexts/CartContext";
@@ -20,7 +20,6 @@ import Search from "./pages/Search";
 import Wishlist from "./pages/Wishlist";
 import Account from "./pages/Account";
 import { WishlistProvider } from "./contexts/WishlistContext";
-import ScrollToTop from "./components/ScrollToTop";
 import Shop from "./pages/Shop";
 import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
@@ -35,35 +34,32 @@ const App = () => (
     <CartProvider>
       <WishlistProvider>
         <TooltipProvider>
-          <BrowserRouter>
-            <ScrollToTop />
-            <Toaster />
-            <Sonner />
-            <Routes>
-              <Route path="/" element={<Layout><Index /></Layout>} />
-              <Route path="/cart" element={<Layout><Cart /></Layout>} />
-              <Route path="/product/:id" element={<Layout><ProductDetail /></Layout>} />
-              <Route path="/categories" element={<Layout><Categories /></Layout>} />
-              <Route path="/categories/:categoryName" element={<Layout><Categories /></Layout>} />
-              <Route path="/category/:categoryName" element={<Layout><CategoryPage /></Layout>} />
-              <Route path="/custom" element={<Layout><Custom /></Layout>} />
-              <Route path="/support" element={<Layout><Support /></Layout>} />
-              <Route path="/checkout" element={<Layout><Checkout /></Layout>} />
-              <Route path="/order-confirmation/:orderId" element={<Layout><OrderConfirmation /></Layout>} />
-              <Route path="/search" element={<Layout><Search /></Layout>} />
-              <Route path="/wishlist" element={<Layout><Wishlist /></Layout>} />
-              <Route path="/account" element={<Layout><Account /></Layout>} />
-              <Route path="/shop" element={<Layout><Shop /></Layout>} />
-              <Route path="/blog" element={<Layout><Blog /></Layout>} />
-              <Route path="/blog/:slug" element={<Layout><BlogPost /></Layout>} />
-              <Route path="/privacy" element={<Layout><PrivacyPolicy /></Layout>} />
-              <Route path="/terms" element={<Layout><TermsOfService /></Layout>} />
-              <Route path="/shipping" element={<Layout><ShippingInfo /></Layout>} />
-              <Route path="/new-arrivals" element={<Layout><Shop /></Layout>} />
-              <Route path="/best-sellers" element={<Layout><Shop /></Layout>} />
-              <Route path="*" element={<Layout><NotFound /></Layout>} />
-            </Routes>
-          </BrowserRouter>
+          <Toaster />
+          <Sonner />
+          <Routes>
+            <Route path="/" element={<Layout><Index /></Layout>} />
+            <Route path="/cart" element={<Layout><Cart /></Layout>} />
+            <Route path="/product/:id" element={<Layout><ProductDetail /></Layout>} />
+            <Route path="/categories" element={<Layout><Categories /></Layout>} />
+            <Route path="/categories/:categoryName" element={<Layout><Categories /></Layout>} />
+            <Route path="/category/:categoryName" element={<Layout><CategoryPage /></Layout>} />
+            <Route path="/custom" element={<Layout><Custom /></Layout>} />
+            <Route path="/support" element={<Layout><Support /></Layout>} />
+            <Route path="/checkout" element={<Layout><Checkout /></Layout>} />
+            <Route path="/order-confirmation/:orderId" element={<Layout><OrderConfirmation /></Layout>} />
+            <Route path="/search" element={<Layout><Search /></Layout>} />
+            <Route path="/wishlist" element={<Layout><Wishlist /></Layout>} />
+            <Route path="/account" element={<Layout><Account /></Layout>} />
+            <Route path="/shop" element={<Layout><Shop /></Layout>} />
+            <Route path="/blog" element={<Layout><Blog /></Layout>} />
+            <Route path="/blog/:slug" element={<Layout><BlogPost /></Layout>} />
+            <Route path="/privacy" element={<Layout><PrivacyPolicy /></Layout>} />
+            <Route path="/terms" element={<Layout><TermsOfService /></Layout>} />
+            <Route path="/shipping" element={<Layout><ShippingInfo /></Layout>} />
+            <Route path="/new-arrivals" element={<Layout><Shop /></Layout>} />
+            <Route path="/best-sellers" element={<Layout><Shop /></Layout>} />
+            <Route path="*" element={<Layout><NotFound /></Layout>} />
+          </Routes>
         </TooltipProvider>
       </WishlistProvider>
     </CartProvider>
