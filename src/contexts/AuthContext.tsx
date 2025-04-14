@@ -73,37 +73,67 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const signInWithGoogle = async () => {
-    await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: window.location.origin + '/auth/callback',
+    try {
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: window.location.origin + '/auth/callback'
+        }
+      });
+      
+      if (error) {
+        console.error("Google sign-in error:", error);
+        toast.error('Google sign in failed', { 
+          description: error.message 
+        });
       }
-    });
+    } catch (error) {
+      console.error("Unexpected error during Google sign-in:", error);
+      toast.error('An unexpected error occurred during Google sign in');
+    }
   };
 
   const signInWithOtp = async (email: string) => {
     try {
+      console.log("Sending OTP to:", email);
       const { error } = await supabase.auth.signInWithOtp({
         email,
         options: {
           shouldCreateUser: true,
         }
       });
+      
+      if (error) {
+        console.error("OTP send error:", error);
+      } else {
+        console.log("OTP sent successfully");
+      }
+      
       return { error };
     } catch (error) {
+      console.error("Unexpected error sending OTP:", error);
       return { error };
     }
   };
 
   const verifyOtp = async (email: string, token: string) => {
     try {
+      console.log("Verifying OTP for:", email);
       const { error } = await supabase.auth.verifyOtp({
         email,
         token,
         type: 'magiclink'
       });
+      
+      if (error) {
+        console.error("OTP verification error:", error);
+      } else {
+        console.log("OTP verified successfully");
+      }
+      
       return { error };
     } catch (error) {
+      console.error("Unexpected error verifying OTP:", error);
       return { error };
     }
   };
