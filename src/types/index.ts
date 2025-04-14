@@ -4,13 +4,14 @@ export interface Product {
   name: string;
   description?: string;
   price: number;
-  compare_at_price?: number; // Adding the missing field
+  compare_at_price?: number;
   image_url?: string;
   category: string;
   is_featured?: boolean;
   is_new?: boolean;
   is_bestseller?: boolean;
   is_customizable?: boolean;
+  stock_quantity: number;
   inventory_count?: number;
   created_at?: string;
   updated_at?: string;
@@ -24,6 +25,7 @@ export interface Product {
   materials?: string[];
   care_instructions?: string;
   tags?: string[];
+  icon?: string; // Added for category icons
 }
 
 export interface ProductVariant {
@@ -48,6 +50,8 @@ export interface Category {
   description?: string;
   image_url?: string;
   slug?: string;
+  icon?: string; // Add icon property
+  background_color?: string;
 }
 
 export interface CartItem {
@@ -57,6 +61,7 @@ export interface CartItem {
   price: number;
   quantity: number;
   image_url?: string;
+  product: Product; // Add this to fix errors
   selected_options?: {
     [key: string]: string;
   };
@@ -70,19 +75,35 @@ export interface WishlistItem {
   product: Product;
 }
 
+export interface ShippingAddress {
+  full_name: string;
+  street_address: string;
+  city: string;
+  state: string;
+  postal_code: string;
+  country: string;
+  phone?: string;
+}
+
 export interface Order {
   id: string;
   user_id?: string;
   items: CartItem[];
   status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
-  shipping_address: Address;
-  billing_address: Address;
+  shipping_address: ShippingAddress;
+  billing_address: ShippingAddress;
   payment_method: string;
   subtotal: number;
   shipping_cost: number;
   tax: number;
   total: number;
+  total_amount?: number;
   placed_at: string;
+  created_at?: string;
+  updated_at?: string;
+  payment_status?: string;
+  contact_email?: string;
+  contact_phone?: string;
 }
 
 export interface Address {
@@ -136,4 +157,21 @@ export interface FilterState {
   priceRange: [number, number];
   customizable: boolean;
   sortBy: string;
+}
+
+export interface SupportMessage {
+  id: string;
+  name: string;
+  email: string;
+  subject: string;
+  message: string;
+  status: string;
+  created_at: string;
+  user_id?: string;
+}
+
+export interface AuthState {
+  user: User | null;
+  isAuthenticated: boolean;
+  loading: boolean;
 }

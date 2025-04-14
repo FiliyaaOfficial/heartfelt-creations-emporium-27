@@ -1,11 +1,11 @@
 
 import React, { useState, useEffect } from 'react';
-import { Copy, X } from 'lucide-react';
+import { Copy, X, IndianRupee } from 'lucide-react';
 import { toast } from 'sonner';
 
 const PromoBar = () => {
   const [isVisible, setIsVisible] = useState(true);
-  const promoCode = "NHBDAY50";
+  const promoCode = "INDIA50";
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(promoCode);
@@ -31,9 +31,9 @@ const PromoBar = () => {
       <div className="container mx-auto flex flex-col sm:flex-row items-center justify-center sm:justify-between text-center sm:text-left">
         <div className="mb-2 sm:mb-0">
           <p className="text-sm font-medium">
-            Get Flat 50% OFF on your Order
+            Get Flat 50% OFF on your First Order
             <span className="hidden sm:inline"> • </span>
-            <span className="block sm:inline text-xs sm:text-sm">Min Order of Rs.799</span>
+            <span className="block sm:inline text-xs sm:text-sm">Min Order of <IndianRupee size={12} className="inline" /> 799</span>
           </p>
         </div>
         

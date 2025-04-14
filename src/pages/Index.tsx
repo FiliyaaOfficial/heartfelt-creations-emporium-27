@@ -13,7 +13,7 @@ import { Link } from 'react-router-dom';
 import { ArrowRight, Star, Sparkles, Clock, TrendingUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
-import CategoryCircles from '@/components/CategoryCircles';
+import ProductPromoBanner from '@/components/ProductPromoBanner';
 
 const Index = () => {
   const [newArrivals, setNewArrivals] = useState<ProductType[]>([]);
@@ -61,12 +61,12 @@ const Index = () => {
     link: string,
     icon: React.ReactNode
   ) => (
-    <section className="py-16 bg-white relative overflow-hidden">
+    <section className="py-16 bg-white relative overflow-hidden px-4">
       {/* Decorative elements */}
       <div className="absolute top-40 left-0 w-64 h-64 rounded-full bg-heartfelt-cream/20 blur-3xl -z-10"></div>
       <div className="absolute bottom-20 right-0 w-80 h-80 rounded-full bg-heartfelt-burgundy/5 blur-3xl -z-10"></div>
       
-      <div className="container mx-auto px-4">
+      <div className="container mx-auto">
         <div className="flex justify-between items-center mb-10">
           <div>
             <div className="flex items-center gap-2 mb-2">
@@ -110,7 +110,7 @@ const Index = () => {
   return (
     <div className="bg-white">
       <Hero />
-      <CategoryCircles />
+      <ProductPromoBanner />
       <CategorySection />
       <FeaturedProducts />
       

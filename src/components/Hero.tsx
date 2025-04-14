@@ -2,7 +2,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
-import { ChevronRight, ChevronLeft, ShoppingBag, Gift } from 'lucide-react';
+import { ChevronRight, ShoppingBag, Gift } from 'lucide-react';
 import { 
   Carousel, 
   CarouselContent, 
@@ -10,11 +10,12 @@ import {
   CarouselNext, 
   CarouselPrevious 
 } from '@/components/ui/carousel';
+import { useEffect, useState, useRef } from 'react';
 
 const heroSlides = [
   {
-    title: "Heartfelt Gifts for Every Occasion",
-    subtitle: "Discover unique handcrafted gifts that convey emotions words cannot express. Created with love, delivered with care.",
+    title: "Handcrafted Gifts for Every Occasion",
+    subtitle: "Discover unique Indian artisan crafts that convey emotions words cannot express. Created with love, delivered across India.",
     image: "https://images.unsplash.com/photo-1549465220-1a8b9238cd48?ixlib=rb-1.2.1&auto=format&fit=crop&w=1000&q=80",
     primaryLink: "/categories",
     primaryText: "Shop Now",
@@ -42,13 +43,30 @@ const heroSlides = [
 ];
 
 const Hero = () => {
+  const [api, setApi] = useState<any>(null);
+  const intervalRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (!api) return;
+    
+    // Auto advance every 10 seconds
+    intervalRef.current = window.setInterval(() => {
+      api.scrollNext();
+    }, 10000);
+    
+    // Cleanup interval on unmount
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
+  }, [api]);
+
   return (
     <section className="relative bg-gradient-to-b from-heartfelt-cream to-white overflow-hidden">
-      <Carousel className="w-full" opts={{ loop: true }}>
+      <Carousel className="w-full px-6" opts={{ loop: true }} setApi={setApi}>
         <CarouselContent>
           {heroSlides.map((slide, index) => (
             <CarouselItem key={index}>
-              <div className="container mx-auto px-4 py-16 md:py-24">
+              <div className="container mx-auto py-16 md:py-24">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
                   {/* Content */}
                   <div className="order-2 md:order-1 text-center md:text-left">
