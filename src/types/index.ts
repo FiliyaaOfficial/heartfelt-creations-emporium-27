@@ -119,8 +119,8 @@ export interface Order {
 export interface User {
   id: string;
   email: string;
-  first_name?: string;  // Make these optional to match existing usage
-  last_name?: string;   // Make these optional to match existing usage
+  first_name?: string;  
+  last_name?: string;   
   phone?: string;
   default_shipping_address?: Address;
   default_billing_address?: Address;
