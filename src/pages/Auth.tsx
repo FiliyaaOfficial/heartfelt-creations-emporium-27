@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate, Navigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -15,12 +14,13 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
-import { Mail, Lock, User, Gift, ArrowRight, Loader2, Google } from 'lucide-react';
+import { Mail, Lock, User, Gift, ArrowRight, Loader2 } from 'lucide-react';
 import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import GoogleIcon from '@/components/icons/GoogleIcon';
 
 const loginSchema = z.object({
   email: z.string().email({ message: 'Please enter a valid email address' }),
@@ -171,7 +171,6 @@ const Auth = () => {
     }
   };
 
-  // Redirect if already authenticated
   if (isAuthenticated) {
     return <Navigate to="/" />;
   }
@@ -191,7 +190,6 @@ const Auth = () => {
             <TabsTrigger value="otp">Login with OTP</TabsTrigger>
           </TabsList>
 
-          {/* Login Tab */}
           <TabsContent value="login">
             <Card>
               <CardHeader>
@@ -264,14 +262,13 @@ const Auth = () => {
                   className="w-full"
                   onClick={handleGoogleSignIn}
                 >
-                  <Google className="mr-2 h-4 w-4" />
-                  Google
+                  <GoogleIcon />
+                  <span className="ml-2">Google</span>
                 </Button>
               </CardContent>
             </Card>
           </TabsContent>
 
-          {/* Signup Tab */}
           <TabsContent value="signup">
             <Card>
               <CardHeader>
@@ -375,14 +372,13 @@ const Auth = () => {
                   className="w-full"
                   onClick={handleGoogleSignIn}
                 >
-                  <Google className="mr-2 h-4 w-4" />
-                  Google
+                  <GoogleIcon />
+                  <span className="ml-2">Google</span>
                 </Button>
               </CardContent>
             </Card>
           </TabsContent>
 
-          {/* OTP Tab */}
           <TabsContent value="otp">
             <Card>
               <CardHeader>
