@@ -30,7 +30,7 @@ const Checkout = () => {
 
   useEffect(() => {
     if (user) {
-      // Safely combine first and last name with optional chaining
+      // Safely combine first and last name with proper type checking
       const firstName = user.first_name || '';
       const lastName = user.last_name || '';
       
