@@ -28,17 +28,17 @@ const PromoBar = () => {
 
   return (
     <div className="bg-heartfelt-burgundy text-white py-2 px-4 relative">
-      <div className="container mx-auto flex flex-col sm:flex-row items-center justify-center sm:justify-between text-center sm:text-left">
-        <div className="mb-2 sm:mb-0">
-          <p className="text-sm font-medium">
+      <div className="container mx-auto flex flex-col sm:flex-row items-center justify-center sm:justify-between text-center sm:text-left gap-2">
+        <div className="w-full sm:w-auto">
+          <p className="text-sm font-medium leading-tight">
             Get Flat 50% OFF on your First Order
             <span className="hidden sm:inline"> • </span>
-            <span className="block sm:inline text-xs sm:text-sm">Min Order of <IndianRupee size={12} className="inline" /> 799</span>
+            <span className="block sm:inline text-xs sm:text-sm mt-0.5 sm:mt-0">Min Order of <IndianRupee size={12} className="inline" /> 799</span>
           </p>
         </div>
         
-        <div className="flex items-center gap-2">
-          <span className="text-sm font-medium">Use Code</span>
+        <div className="flex items-center justify-center sm:justify-end gap-2 w-full sm:w-auto">
+          <span className="text-sm font-medium hidden xs:inline">Use Code</span>
           <div 
             className="border border-dashed border-white/70 px-2 py-1 rounded flex items-center cursor-pointer group"
             onClick={copyToClipboard}

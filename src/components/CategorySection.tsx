@@ -63,7 +63,7 @@ const CategorySection = () => {
   }
 
   return (
-    <section className="py-20 bg-white relative overflow-hidden">
+    <section className="py-12 md:py-20 bg-white relative overflow-hidden">
       {/* Decorative elements */}
       <div className="absolute top-0 left-0 w-32 h-32 bg-heartfelt-cream rounded-br-full opacity-60 transform -translate-x-8"></div>
       <div className="absolute bottom-0 right-0 w-48 h-48 bg-heartfelt-pink/10 rounded-tl-full transform translate-x-12"></div>
@@ -71,32 +71,36 @@ const CategorySection = () => {
       <div className="absolute bottom-1/3 left-1/4 w-24 h-24 rounded-full bg-heartfelt-cream/30"></div>
       
       <div className="container mx-auto px-4 relative z-10">
-        <div className="text-center mb-12">
+        <div className="text-center mb-10 md:mb-12">
           <h2 className="section-title">Explore our Collections</h2>
-          <p className="section-subtitle max-w-2xl mx-auto">
+          <p className="section-subtitle max-w-2xl mx-auto px-2">
             Each category features unique handcrafted items, made with attention to detail and filled with love.
           </p>
         </div>
         
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6 mt-12">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 sm:gap-6 mt-8 md:mt-12">
           {categories.map((category) => (
             <Link 
               key={category.id}
               to={`/category/${encodeURIComponent(category.name)}`}
               className="flex flex-col items-center group hover-card"
             >
-              <div className="w-24 h-24 rounded-full bg-heartfelt-cream shadow-sm flex items-center justify-center mb-4 group-hover:bg-heartfelt-burgundy transition-colors duration-300 shine-effect">
+              <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded-full bg-heartfelt-cream shadow-sm flex items-center justify-center mb-3 md:mb-4 group-hover:bg-heartfelt-burgundy transition-colors duration-300 shine-effect">
                 <div className="text-heartfelt-burgundy group-hover:text-white transition-colors duration-300">
-                  {iconMap[category.icon]}
+                  {iconMap[category.icon] || <Gift size={36} />}
                 </div>
               </div>
-              <h3 className="text-xl font-serif font-medium mb-2 group-hover:text-heartfelt-burgundy transition-colors">{category.name}</h3>
-              <p className="text-gray-700 text-sm text-center line-clamp-2">{category.description}</p>
+              <h3 className="text-base md:text-xl font-serif font-medium mb-1 md:mb-2 group-hover:text-heartfelt-burgundy transition-colors text-center">
+                {category.name}
+              </h3>
+              <p className="text-gray-700 text-xs md:text-sm text-center line-clamp-2 px-1">
+                {category.description}
+              </p>
             </Link>
           ))}
         </div>
         
-        <div className="mt-12 text-center">
+        <div className="mt-10 md:mt-12 text-center">
           <Link to="/categories">
             <Button className="bg-heartfelt-burgundy hover:bg-heartfelt-dark">
               Browse All Categories
