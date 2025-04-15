@@ -30,13 +30,15 @@ const Checkout = () => {
 
   useEffect(() => {
     if (user) {
-      // Safely handle potentially undefined first_name and last_name
-      const firstName = user?.first_name ?? '';
-      const lastName = user?.last_name ?? '';
+      // Safely handle user data - first_name and last_name might not exist
+      // We need to use any type here since TypeScript doesn't know about these properties
+      const userAny = user as any;
+      const firstName = userAny?.first_name || '';
+      const lastName = userAny?.last_name || '';
       
       setShippingInfo(prev => ({
         ...prev,
-        full_name: `${firstName} ${lastName}`.trim()
+        full_name: `${firstName} ${lastName}`.trim() || user.email?.split('@')[0] || ''
       }));
     }
   }, [user]);

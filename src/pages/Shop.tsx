@@ -10,6 +10,7 @@ import MobileFilters from '@/components/shop/MobileFilters';
 import { useToast } from '@/components/ui/use-toast';
 import { useProductFilters } from '@/hooks/useProductFilters';
 import CategoryCircles from '@/components/CategoryCircles';
+import { supabase } from '@/integrations/supabase/client';
 
 const Shop = () => {
   const [searchParams] = useSearchParams();
@@ -31,6 +32,35 @@ const Shop = () => {
     handlePriceRangeChange,
     handleClearFilters
   } = useProductFilters();
+
+  useEffect(() => {
+    // Log to verify products are loading
+    console.log("Products in Shop page:", products);
+    
+    // If no products are loaded after filters are applied, check if there are any products in the database
+    if (!isLoading && products.length === 0) {
+      const checkProducts = async () => {
+        try {
+          const { data, error, count } = await supabase
+            .from('products')
+            .select('*', { count: 'exact' })
+            .limit(1);
+            
+          if (error) throw error;
+          
+          if (!data || data.length === 0) {
+            console.log("No products found in database");
+          } else {
+            console.log(`Found ${count} products in database`);
+          }
+        } catch (error) {
+          console.error("Error checking products:", error);
+        }
+      };
+      
+      checkProducts();
+    }
+  }, [products, isLoading]);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-heartfelt-cream/10">

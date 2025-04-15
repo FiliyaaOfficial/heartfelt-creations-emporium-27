@@ -41,9 +41,15 @@ const CategoryItem = React.forwardRef<
 });
 CategoryItem.displayName = "CategoryItem";
 
-const NavCategoriesMenu = () => {
+interface NavCategoriesMenuProps {
+  activePath?: string;
+}
+
+const NavCategoriesMenu = ({ activePath }: NavCategoriesMenuProps) => {
   const [categories, setCategories] = useState<CategoryType[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  
+  const isActiveCategory = activePath?.startsWith('/categories') || activePath?.startsWith('/category');
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -69,7 +75,12 @@ const NavCategoriesMenu = () => {
     <NavigationMenu>
       <NavigationMenuList>
         <NavigationMenuItem>
-          <NavigationMenuTrigger className="text-gray-800 hover:text-heartfelt-burgundy transition-colors font-medium">
+          <NavigationMenuTrigger 
+            className={cn(
+              "text-sm lg:text-base text-gray-800 hover:text-heartfelt-burgundy transition-colors font-medium px-2 py-1",
+              isActiveCategory ? "text-heartfelt-burgundy font-semibold" : ""
+            )}
+          >
             Categories
           </NavigationMenuTrigger>
           <NavigationMenuContent>
