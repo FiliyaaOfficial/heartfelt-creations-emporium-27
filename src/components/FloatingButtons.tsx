@@ -34,7 +34,7 @@ const FloatingButtons = () => {
     
     if (isMobile) {
       // Direct WhatsApp link for mobile devices
-      window.location.href = `whatsapp://send?phone=${phoneNumber}&text=${message}`;
+      window.open(`whatsapp://send?phone=${phoneNumber}&text=${message}`, '_blank');
     } else {
       // Web WhatsApp for desktop
       window.open(`https://wa.me/${phoneNumber}?text=${message}`, '_blank');

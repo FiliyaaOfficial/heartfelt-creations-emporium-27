@@ -4,9 +4,10 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Star, User } from 'lucide-react';
+import { Star, User, Check, AlertCircle } from 'lucide-react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { toast as sonnerToast } from "sonner";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 // Sample review data (in a real app, this would come from the database)
 const sampleReviews = [
@@ -17,6 +18,7 @@ const sampleReviews = [
     date: '2023-11-15',
     comment: 'Absolutely love this product! The quality is outstanding and it arrived much faster than I expected. Will definitely buy more items from this store.',
     avatar: 'https://i.pravatar.cc/150?img=1',
+    verified: true,
   },
   {
     id: '2',
@@ -25,6 +27,7 @@ const sampleReviews = [
     date: '2023-10-28',
     comment: 'Very good craftsmanship. The attention to detail is impressive. Giving 4 stars only because shipping took a bit longer than expected.',
     avatar: 'https://i.pravatar.cc/150?img=2',
+    verified: true,
   },
   {
     id: '3',
@@ -33,6 +36,7 @@ const sampleReviews = [
     date: '2023-09-12',
     comment: 'This item exceeded my expectations. The colors are vibrant and the material is of premium quality. Highly recommend!',
     avatar: 'https://i.pravatar.cc/150?img=3',
+    verified: true,
   },
 ];
 
@@ -49,6 +53,7 @@ const ProductReviews: React.FC<ProductReviewsProps> = ({ productId }) => {
     comment: '',
   });
   const [hoveredRating, setHoveredRating] = useState(0);
+  const [hasOrdered, setHasOrdered] = useState(true); // This would come from your API in a real app
   
   const handleSubmitReview = (e: React.FormEvent) => {
     e.preventDefault();
@@ -82,7 +87,7 @@ const ProductReviews: React.FC<ProductReviewsProps> = ({ productId }) => {
     <div className="space-y-8">
       <div className="flex flex-col md:flex-row gap-8">
         <div className="md:w-1/3">
-          <div className="bg-heartfelt-cream/30 p-6 rounded-lg">
+          <div className="bg-white shadow-sm border border-heartfelt-cream p-6 rounded-lg">
             <h3 className="text-xl font-serif font-semibold mb-4">Customer Reviews</h3>
             <div className="flex items-center mb-2">
               <div className="flex mr-2">
@@ -108,7 +113,7 @@ const ProductReviews: React.FC<ProductReviewsProps> = ({ productId }) => {
                     <span className="w-10">{rating} star</span>
                     <div className="flex-1 mx-3 h-2 bg-gray-200 rounded-full overflow-hidden">
                       <div 
-                        className="bg-heartfelt-burgundy h-full" 
+                        className="bg-heartfelt-burgundy h-full rounded-full" 
                         style={{ width: `${percentage}%` }}
                       ></div>
                     </div>
@@ -123,15 +128,23 @@ const ProductReviews: React.FC<ProductReviewsProps> = ({ productId }) => {
         <div className="md:w-2/3">
           <div className="space-y-6">
             {reviews.map((review) => (
-              <Card key={review.id} className="border-heartfelt-cream">
+              <Card key={review.id} className="border-heartfelt-cream shadow-sm">
                 <CardHeader className="pb-2">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-heartfelt-burgundy/10 flex items-center justify-center">
-                        <User size={16} className="text-heartfelt-burgundy" />
+                      <div className="w-10 h-10 rounded-full bg-heartfelt-cream flex items-center justify-center">
+                        <User size={18} className="text-heartfelt-burgundy" />
                       </div>
                       <div>
-                        <p className="font-medium">{review.name}</p>
+                        <div className="flex items-center">
+                          <p className="font-medium">{review.name}</p>
+                          {review.verified && (
+                            <span className="ml-2 inline-flex items-center bg-green-50 text-green-700 text-xs px-2 py-0.5 rounded-full">
+                              <Check size={12} className="mr-1" />
+                              Verified Purchase
+                            </span>
+                          )}
+                        </div>
                         <p className="text-xs text-muted-foreground">
                           {new Date(review.date).toLocaleDateString('en-US', { 
                             year: 'numeric', 
@@ -163,67 +176,80 @@ const ProductReviews: React.FC<ProductReviewsProps> = ({ productId }) => {
       
       <div className="mt-10 border-t border-heartfelt-cream pt-8">
         <h3 className="text-xl font-serif font-semibold mb-6">Write a Review</h3>
-        <form onSubmit={handleSubmitReview} className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <Label htmlFor="name">Your Name</Label>
-              <Input 
-                id="name" 
-                name="name" 
-                value={newReview.name} 
-                onChange={handleInputChange}
-                required 
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="email">Your Email</Label>
-              <Input 
-                id="email" 
-                name="email" 
-                type="email" 
-                value={newReview.email} 
-                onChange={handleInputChange}
-                required 
-              />
-            </div>
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="rating">Rating</Label>
-            <div className="flex items-center" id="rating">
-              {[1, 2, 3, 4, 5].map(rating => (
-                <Star 
-                  key={rating} 
-                  size={24} 
-                  className={`cursor-pointer transition-all ${
-                    (hoveredRating || newReview.rating) >= rating 
-                      ? "fill-heartfelt-burgundy text-heartfelt-burgundy" 
-                      : "text-gray-300"
-                  }`}
-                  onClick={() => setNewReview(prev => ({ ...prev, rating }))}
-                  onMouseEnter={() => setHoveredRating(rating)}
-                  onMouseLeave={() => setHoveredRating(0)}
+        
+        {!hasOrdered ? (
+          <Alert variant="default" className="bg-amber-50 text-amber-800 border-amber-200">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              You need to purchase this product before leaving a review. Only verified buyers can submit reviews.
+            </AlertDescription>
+          </Alert>
+        ) : (
+          <form onSubmit={handleSubmitReview} className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <Label htmlFor="name">Your Name</Label>
+                <Input 
+                  id="name" 
+                  name="name" 
+                  value={newReview.name} 
+                  onChange={handleInputChange}
+                  required 
+                  className="border-heartfelt-cream"
                 />
-              ))}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="email">Your Email</Label>
+                <Input 
+                  id="email" 
+                  name="email" 
+                  type="email" 
+                  value={newReview.email} 
+                  onChange={handleInputChange}
+                  required 
+                  className="border-heartfelt-cream"
+                />
+              </div>
             </div>
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="comment">Your Review</Label>
-            <Textarea 
-              id="comment" 
-              name="comment" 
-              value={newReview.comment} 
-              onChange={handleInputChange}
-              rows={4} 
-              required 
-            />
-          </div>
-          
-          <Button type="submit" className="bg-heartfelt-burgundy hover:bg-heartfelt-dark">
-            Submit Review
-          </Button>
-        </form>
+            
+            <div className="space-y-2">
+              <Label htmlFor="rating">Rating</Label>
+              <div className="flex items-center" id="rating">
+                {[1, 2, 3, 4, 5].map(rating => (
+                  <Star 
+                    key={rating} 
+                    size={24} 
+                    className={`cursor-pointer transition-all ${
+                      (hoveredRating || newReview.rating) >= rating 
+                        ? "fill-heartfelt-burgundy text-heartfelt-burgundy" 
+                        : "text-gray-300"
+                    }`}
+                    onClick={() => setNewReview(prev => ({ ...prev, rating }))}
+                    onMouseEnter={() => setHoveredRating(rating)}
+                    onMouseLeave={() => setHoveredRating(0)}
+                  />
+                ))}
+              </div>
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="comment">Your Review</Label>
+              <Textarea 
+                id="comment" 
+                name="comment" 
+                value={newReview.comment} 
+                onChange={handleInputChange}
+                rows={4} 
+                required 
+                className="border-heartfelt-cream"
+              />
+            </div>
+            
+            <Button type="submit" className="bg-heartfelt-burgundy hover:bg-heartfelt-dark">
+              Submit Review
+            </Button>
+          </form>
+        )}
       </div>
     </div>
   );
