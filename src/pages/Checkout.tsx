@@ -30,9 +30,9 @@ const Checkout = () => {
 
   useEffect(() => {
     if (user) {
-      // Safely combine first and last name with proper type checking
-      const firstName = user.first_name || '';
-      const lastName = user.last_name || '';
+      // Safely handle potentially undefined first_name and last_name
+      const firstName = user?.first_name ?? '';
+      const lastName = user?.last_name ?? '';
       
       setShippingInfo(prev => ({
         ...prev,
