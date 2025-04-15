@@ -119,8 +119,8 @@ export interface Order {
 export interface User {
   id: string;
   email: string;
-  first_name?: string;  
-  last_name?: string;   
+  first_name?: string;  // Added first_name as optional
+  last_name?: string;   // Added last_name as optional
   phone?: string;
   default_shipping_address?: Address;
   default_billing_address?: Address;
