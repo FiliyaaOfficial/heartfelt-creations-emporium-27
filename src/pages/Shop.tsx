@@ -46,12 +46,30 @@ const Shop = () => {
             .select('*', { count: 'exact' })
             .limit(1);
             
-          if (error) throw error;
+          if (error) {
+            console.error("Error fetching products:", error);
+            toast({
+              title: "Error checking products",
+              description: error.message,
+              variant: "destructive"
+            });
+            throw error;
+          }
           
           if (!data || data.length === 0) {
             console.log("No products found in database");
+            toast({
+              title: "No products found",
+              description: "There are no products in the database. Please add some products.",
+              variant: "destructive"
+            });
           } else {
             console.log(`Found ${count} products in database`);
+            toast({
+              title: "Products found",
+              description: `Found ${count} products in database, but none match your current filters.`,
+              variant: "default"
+            });
           }
         } catch (error) {
           console.error("Error checking products:", error);
@@ -60,7 +78,7 @@ const Shop = () => {
       
       checkProducts();
     }
-  }, [products, isLoading]);
+  }, [products, isLoading, toast]);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-heartfelt-cream/10">

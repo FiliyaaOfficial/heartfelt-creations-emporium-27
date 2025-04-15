@@ -30,11 +30,10 @@ const Checkout = () => {
 
   useEffect(() => {
     if (user) {
-      // Safely handle user data - first_name and last_name might not exist
-      // We need to use any type here since TypeScript doesn't know about these properties
-      const userAny = user as any;
-      const firstName = userAny?.first_name || '';
-      const lastName = userAny?.last_name || '';
+      // Extract user metadata safely
+      const userMetadata = user.user_metadata || {};
+      const firstName = userMetadata.first_name || '';
+      const lastName = userMetadata.last_name || '';
       
       setShippingInfo(prev => ({
         ...prev,

@@ -1,6 +1,7 @@
 
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
+import FloatingButtons from "./FloatingButtons";
 
 export default function ScrollToTop() {
   const { pathname } = useLocation();
@@ -9,5 +10,5 @@ export default function ScrollToTop() {
     window.scrollTo(0, 0);
   }, [pathname]);
   
-  return null;
+  return <FloatingButtons />;
 }

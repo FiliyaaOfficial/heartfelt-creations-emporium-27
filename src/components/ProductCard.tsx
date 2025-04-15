@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Product } from '@/types';
@@ -19,6 +18,9 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const [isAddingToWishlist, setIsAddingToWishlist] = useState(false);
   
   const inWishlist = isInWishlist(product.id);
+  
+  const discountPercentage = product.compare_at_price && product.price ? 
+    Math.round((1 - (product.price / product.compare_at_price)) * 100) : 0;
   
   const handleWishlistToggle = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -114,6 +116,13 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           {/* Badges */}
           {renderBadges()}
           
+          {/* Discount badge */}
+          {discountPercentage > 0 && (
+            <div className="absolute top-2 right-12 bg-heartfelt-pink text-white text-xs font-bold px-2 py-1 rounded-md">
+              {discountPercentage}% OFF
+            </div>
+          )}
+          
           {/* Wishlist button */}
           <button 
             onClick={handleWishlistToggle}
@@ -142,11 +151,11 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           <div className="flex justify-between items-center mb-2">
             {product.compare_at_price && product.compare_at_price > product.price ? (
               <div className="flex gap-2 items-center">
-                <span className="font-semibold text-heartfelt-burgundy">${product.price.toFixed(2)}</span>
-                <span className="text-gray-500 text-sm line-through">${product.compare_at_price.toFixed(2)}</span>
+                <span className="font-semibold text-heartfelt-burgundy">₹{product.price.toFixed(2)}</span>
+                <span className="text-gray-500 text-sm line-through">₹{product.compare_at_price.toFixed(2)}</span>
               </div>
             ) : (
-              <span className="font-semibold">${product.price.toFixed(2)}</span>
+              <span className="font-semibold">₹{product.price.toFixed(2)}</span>
             )}
           </div>
         </div>
