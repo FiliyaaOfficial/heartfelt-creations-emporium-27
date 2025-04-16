@@ -1,14 +1,39 @@
+
+# Heartfelt Creations Emporium - robots.txt
+# Updated: 2025-04-16
+
+# Allow all bots full access
+User-agent: *
+Allow: /
+
+# Sitemap location
+Sitemap: https://heartfelt-creations-emporium.com/sitemap.xml
+
+# Special directives for specific crawlers
 User-agent: Googlebot
 Allow: /
 
 User-agent: Bingbot
 Allow: /
 
-User-agent: Twitterbot
+User-agent: Slurp
 Allow: /
 
-User-agent: facebookexternalhit
+User-agent: DuckDuckBot
 Allow: /
 
-User-agent: *
+User-agent: Baiduspider
 Allow: /
+
+User-agent: Yandex
+Allow: /
+
+# Disallow admin areas
+Disallow: /admin/
+Disallow: /checkout/
+Disallow: /cart/
+Disallow: /auth/
+Disallow: /account/
+
+# Crawl delay for all bots
+Crawl-delay: 10

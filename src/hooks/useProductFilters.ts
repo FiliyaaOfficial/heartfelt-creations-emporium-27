@@ -3,7 +3,6 @@ import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Product } from '@/types';
-import { PostgrestFilterBuilder } from '@supabase/postgrest-js';
 
 export const useProductFilters = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -33,7 +32,8 @@ export const useProductFilters = () => {
           .order('name');
         
         if (error) throw error;
-        setCategories(data.map(cat => cat.name));
+        console.log('Categories fetched:', data?.length || 0);
+        setCategories(data?.map(cat => cat.name) || []);
       } catch (error) {
         console.error('Error fetching categories:', error);
       }
@@ -46,10 +46,20 @@ export const useProductFilters = () => {
     const fetchProducts = async () => {
       setIsLoading(true);
       try {
+        // First, fetch all products to determine max price
+        const { data: allProducts } = await supabase
+          .from('products')
+          .select('price');
+        
+        if (allProducts && allProducts.length > 0) {
+          const highest = Math.max(...allProducts.map(p => p.price));
+          setMaxPrice(Math.max(highest, 500)); // Set at least 500 for range
+        }
+
         // Start with base query
         let query = supabase.from('products').select();
         
-        // Apply filters safely
+        // Apply filters only if they are actually selected
         if (selectedCategories.length > 0) {
           // Apply category filter
           query = query.in('category', selectedCategories);
@@ -60,10 +70,12 @@ export const useProductFilters = () => {
           query = query.eq('is_customizable', true);
         }
         
-        // Apply price range filter
-        query = query
-          .gte('price', priceRange[0])
-          .lte('price', priceRange[1]);
+        // Apply price range filter only if it's not the default range
+        if (priceRange[0] > 0 || priceRange[1] < maxPrice) {
+          query = query
+            .gte('price', priceRange[0])
+            .lte('price', priceRange[1]);
+        }
         
         // Apply sorting
         if (sortBy === 'newest') {
@@ -85,12 +97,6 @@ export const useProductFilters = () => {
         
         if (data) {
           setProducts(data);
-          
-          // Find max price for slider
-          if (data.length > 0) {
-            const highest = Math.max(...data.map(p => p.price));
-            setMaxPrice(Math.max(highest, 500)); // Set at least 500 for range
-          }
         } else {
           setProducts([]);
         }
@@ -103,7 +109,7 @@ export const useProductFilters = () => {
     };
     
     fetchProducts();
-  }, [selectedCategories, priceRange, sortBy, showCustomizable]);
+  }, [selectedCategories, priceRange, sortBy, showCustomizable, maxPrice]);
 
   const handleCategoryToggle = (category: string) => {
     setSelectedCategories(prev => 

@@ -3,7 +3,8 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { useEffect } from "react";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import { CartProvider } from "@/contexts/CartContext";
@@ -30,10 +31,27 @@ import ShippingInfo from "./pages/ShippingInfo";
 import Auth from "./pages/Auth";
 import AuthCallback from "./pages/AuthCallback";
 import { useAuth } from "./contexts/AuthContext";
-import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { initGA, pageview } from "@/utils/analytics";
 
 const queryClient = new QueryClient();
+
+// Google Analytics tracker component
+const AnalyticsTracker = () => {
+  const location = useLocation();
+  
+  useEffect(() => {
+    // Initialize Google Analytics
+    initGA();
+  }, []);
+  
+  useEffect(() => {
+    // Track page views when route changes
+    pageview(location.pathname + location.search);
+  }, [location]);
+  
+  return null;
+};
 
 // Protected route component
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -65,6 +83,7 @@ const App = () => (
           <TooltipProvider>
             <Toaster />
             <Sonner />
+            <AnalyticsTracker />
             <Routes>
               <Route path="/" element={<Layout><Index /></Layout>} />
               <Route path="/cart" element={<Layout><Cart /></Layout>} />

@@ -27,18 +27,16 @@ const FloatingButtons = () => {
   };
 
   // Open WhatsApp chat
-  const openWhatsApp = () => {
+  const openWhatsApp = (e: React.MouseEvent) => {
     // Replace with your actual WhatsApp number and pre-filled message
     const phoneNumber = '919876543210'; // format: country code + number without +
     const message = encodeURIComponent('Hello! I have a question about your products.');
     
-    if (isMobile) {
-      // Direct WhatsApp link for mobile devices
-      window.open(`whatsapp://send?phone=${phoneNumber}&text=${message}`, '_blank');
-    } else {
-      // Web WhatsApp for desktop
-      window.open(`https://wa.me/${phoneNumber}?text=${message}`, '_blank');
-    }
+    // Always open in a new tab to avoid issues with app handling
+    window.open(`https://wa.me/${phoneNumber}?text=${message}`, '_blank', 'noopener,noreferrer');
+    
+    // Prevent default to avoid any navigation issues
+    e.preventDefault();
   };
 
   return (
