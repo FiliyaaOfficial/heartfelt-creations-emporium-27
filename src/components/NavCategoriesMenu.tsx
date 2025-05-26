@@ -17,12 +17,13 @@ import { cn } from '@/lib/utils';
 const CategoryItem = React.forwardRef<
   React.ElementRef<"a">,
   React.ComponentPropsWithoutRef<"a">
->(({ className, title, children, ...props }, ref) => {
+>(({ className, title, children, href, ...props }, ref) => {
   return (
     <li>
       <NavigationMenuLink asChild>
-        <a
+        <Link
           ref={ref}
+          to={href || '#'}
           className={cn(
             "block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
             className
@@ -33,7 +34,7 @@ const CategoryItem = React.forwardRef<
           <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
             {children}
           </p>
-        </a>
+        </Link>
       </NavigationMenuLink>
     </li>
   );
@@ -57,17 +58,19 @@ const NavCategoriesMenu = ({ activePath }: NavCategoriesMenuProps) => {
         const { data, error } = await supabase
           .from('categories')
           .select('*')
-          .limit(6); // Limit to prevent an overly large dropdown
+          .order('name')
+          .limit(8); // Increased limit slightly
           
         if (error) {
           console.error('Error fetching categories:', error);
-          throw error;
+          setCategories([]);
+        } else {
+          console.log('Fetched categories for navbar:', data);
+          setCategories(data || []);
         }
-        
-        console.log('Fetched categories for navbar:', data);
-        setCategories(data as CategoryType[]);
       } catch (error) {
         console.error('Error fetching categories:', error);
+        setCategories([]);
       } finally {
         setIsLoading(false);
       }
@@ -89,7 +92,7 @@ const NavCategoriesMenu = ({ activePath }: NavCategoriesMenuProps) => {
             Categories
           </NavigationMenuTrigger>
           <NavigationMenuContent>
-            <ul className="grid gap-3 p-4 md:w-[400px] lg:w-[500px] lg:grid-cols-2 bg-white border border-heartfelt-cream/50 shadow-md">
+            <ul className="grid gap-3 p-6 md:w-[400px] lg:w-[500px] lg:grid-cols-2">
               {isLoading ? (
                 <li className="col-span-2 flex items-center justify-center p-4">
                   <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-heartfelt-burgundy"></div>
@@ -121,7 +124,7 @@ const NavCategoriesMenu = ({ activePath }: NavCategoriesMenuProps) => {
                 </>
               ) : (
                 <li className="col-span-2 flex items-center justify-center p-4">
-                  <p className="text-sm text-muted-foreground">No categories available</p>
+                  <p className="text-sm text-muted-foreground">No categories found</p>
                 </li>
               )}
             </ul>
