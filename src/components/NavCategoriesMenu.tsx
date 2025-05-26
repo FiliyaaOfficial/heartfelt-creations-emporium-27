@@ -13,7 +13,6 @@ import {
 import { Category as CategoryType } from '@/types';
 import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
-import { Grid3x3, FolderOpen, BookOpen } from 'lucide-react';
 
 const CategoryItem = React.forwardRef<
   React.ElementRef<"a">,
@@ -54,12 +53,18 @@ const NavCategoriesMenu = ({ activePath }: NavCategoriesMenuProps) => {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
+        console.log('Fetching categories for navbar...');
         const { data, error } = await supabase
           .from('categories')
-          .select()
+          .select('*')
           .limit(6); // Limit to prevent an overly large dropdown
           
-        if (error) throw error;
+        if (error) {
+          console.error('Error fetching categories:', error);
+          throw error;
+        }
+        
+        console.log('Fetched categories for navbar:', data);
         setCategories(data as CategoryType[]);
       } catch (error) {
         console.error('Error fetching categories:', error);
@@ -89,7 +94,7 @@ const NavCategoriesMenu = ({ activePath }: NavCategoriesMenuProps) => {
                 <li className="col-span-2 flex items-center justify-center p-4">
                   <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-heartfelt-burgundy"></div>
                 </li>
-              ) : (
+              ) : categories.length > 0 ? (
                 <>
                   {categories.map((category) => (
                     <CategoryItem
@@ -97,7 +102,7 @@ const NavCategoriesMenu = ({ activePath }: NavCategoriesMenuProps) => {
                       title={category.name}
                       href={`/category/${encodeURIComponent(category.name)}`}
                     >
-                      {category.description}
+                      {category.description || 'Discover beautiful handcrafted items in this category'}
                     </CategoryItem>
                   ))}
                   <li className="col-span-2">
@@ -114,6 +119,10 @@ const NavCategoriesMenu = ({ activePath }: NavCategoriesMenuProps) => {
                     </div>
                   </li>
                 </>
+              ) : (
+                <li className="col-span-2 flex items-center justify-center p-4">
+                  <p className="text-sm text-muted-foreground">No categories available</p>
+                </li>
               )}
             </ul>
           </NavigationMenuContent>

@@ -21,7 +21,13 @@ const Navbar = () => {
   const location = useLocation();
   
   const isActivePath = (path: string) => {
-    return location.pathname === path || location.pathname.startsWith(`${path}/`);
+    if (path === '/' && location.pathname === '/') {
+      return true;
+    }
+    if (path !== '/' && location.pathname.startsWith(path)) {
+      return true;
+    }
+    return false;
   };
 
   const toggleMenu = () => {
@@ -70,7 +76,7 @@ const Navbar = () => {
     if (isMenuOpen) {
       setIsMenuOpen(false);
     }
-  }, [navigate]);
+  }, [location.pathname]);
 
   return (
     <header className="sticky top-0 z-40 w-full bg-white/80 backdrop-blur-md border-b border-heartfelt-cream">
@@ -84,9 +90,7 @@ const Navbar = () => {
             to="/" 
             className={cn(
               "text-sm lg:text-base text-gray-800 hover:text-heartfelt-burgundy transition-colors font-medium px-2 py-1",
-              isActivePath('/') && !isActivePath('/shop') && !isActivePath('/blog') && !isActivePath('/custom') && !isActivePath('/support') 
-                ? "text-heartfelt-burgundy font-semibold" 
-                : ""
+              isActivePath('/') ? "text-heartfelt-burgundy font-semibold" : ""
             )}
           >
             Home
@@ -231,9 +235,7 @@ const Navbar = () => {
                 to="/" 
                 className={cn(
                   "text-base font-medium text-gray-800 hover:text-heartfelt-burgundy py-2 transition-colors border-b border-gray-100",
-                  isActivePath('/') && !isActivePath('/shop') && !isActivePath('/blog') && !isActivePath('/custom') && !isActivePath('/support')
-                    ? "text-heartfelt-burgundy font-semibold" 
-                    : ""
+                  isActivePath('/') ? "text-heartfelt-burgundy font-semibold" : ""
                 )}
                 onClick={toggleMenu}
               >

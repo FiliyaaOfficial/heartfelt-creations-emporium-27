@@ -16,7 +16,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       <ScrollToTop />
       <PromoBar />
       <Navbar />
-      <main className="px-4">{children}</main>
+      <main>{children}</main>
       <Footer />
       <CartNotification />
     </>
