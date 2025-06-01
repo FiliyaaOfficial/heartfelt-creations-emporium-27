@@ -1,7 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
 import { ShippingAddress } from '@/types';
 import { formatCurrency } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -11,14 +10,9 @@ import { CheckCircle } from 'lucide-react';
 interface OrderWithoutItems {
   id: string;
   created_at: string;
-  updated_at: string;
   shipping_address: ShippingAddress;
-  status: string;
-  total_amount: number;
-  payment_status: string;
-  contact_email: string;
-  contact_phone?: string;
-  user_id?: string;
+  total: number;
+  items: any[];
 }
 
 const OrderConfirmation = () => {
@@ -31,21 +25,11 @@ const OrderConfirmation = () => {
       if (!orderId) return;
       
       try {
-        const { data, error } = await supabase
-          .from('orders')
-          .select('*')
-          .eq('id', orderId)
-          .single();
-          
-        if (error) throw error;
-        
-        // Convert the shipping_address from Json to ShippingAddress type
-        if (data) {
-          const orderWithTypedAddress: OrderWithoutItems = {
-            ...data,
-            shipping_address: data.shipping_address as unknown as ShippingAddress
-          };
-          setOrder(orderWithTypedAddress);
+        // Get order from localStorage temporarily
+        const orderData = localStorage.getItem(`order_${orderId}`);
+        if (orderData) {
+          const order = JSON.parse(orderData);
+          setOrder(order);
         }
       } catch (error) {
         console.error('Error fetching order details:', error);
@@ -106,11 +90,11 @@ const OrderConfirmation = () => {
           </div>
           <div className="flex justify-between mb-2">
             <span className="font-medium">Total Amount:</span>
-            <span>{formatCurrency(order.total_amount)}</span>
+            <span>{formatCurrency(order.total)}</span>
           </div>
           <div className="flex justify-between">
             <span className="font-medium">Status:</span>
-            <span className="capitalize">{order.status}</span>
+            <span className="capitalize">pending</span>
           </div>
         </div>
 
@@ -130,8 +114,8 @@ const OrderConfirmation = () => {
           <Link to="/">
             <Button variant="outline">Continue Shopping</Button>
           </Link>
-          <Link to={`/account/orders/${order.id}`}>
-            <Button>Track Order</Button>
+          <Link to="/account">
+            <Button>View Account</Button>
           </Link>
         </div>
       </div>

@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
 import { ShippingAddress } from '@/types';
-import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import ShippingForm from '@/components/checkout/ShippingForm';
 import PaymentMethodSelector from '@/components/checkout/PaymentMethodSelector';
@@ -76,40 +75,27 @@ const Checkout = () => {
 
     setLoading(true);
     try {
-      const shippingAddressJson = JSON.parse(JSON.stringify(shippingInfo));
+      // For now, just simulate order creation without database
+      console.log('Order would be created with:', {
+        shipping: shippingInfo,
+        items: cartItems,
+        total: subtotal
+      });
       
-      const { data: order, error } = await supabase
-        .from('orders')
-        .insert({
-          user_id: user?.id,
-          shipping_address: shippingAddressJson,
-          total_amount: subtotal,
-          status: 'pending',
-          payment_status: 'pending',
-          contact_email: user?.email || '',
-          contact_phone: shippingInfo.phone
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
-
-      const orderItems = cartItems.map(item => ({
-        order_id: order.id,
-        product_id: item.product.id,
-        product_name: item.product.name,
-        product_price: item.product.price,
-        quantity: item.quantity
-      }));
-
-      const { error: itemsError } = await supabase
-        .from('order_items')
-        .insert(orderItems);
-
-      if (itemsError) throw itemsError;
-
+      // Store order in localStorage temporarily
+      const orderId = Date.now().toString();
+      const order = {
+        id: orderId,
+        shipping_address: shippingInfo,
+        items: cartItems,
+        total: subtotal,
+        created_at: new Date().toISOString()
+      };
+      
+      localStorage.setItem(`order_${orderId}`, JSON.stringify(order));
+      
       clearCart();
-      navigate(`/order-confirmation/${order.id}`);
+      navigate(`/order-confirmation/${orderId}`);
       
     } catch (error) {
       console.error('Error creating order:', error);
