@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -7,7 +8,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { SupportMessage } from '@/types';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
 import { 
@@ -34,8 +34,14 @@ const formSchema = z.object({
   message: z.string().min(10, {
     message: "Message must be at least 10 characters.",
   }),
-  order_id: z.string().optional(), // Updated to match our type definition
 });
+
+type SupportMessage = {
+  name: string;
+  email: string;
+  subject: string;
+  message: string;
+};
 
 type OrderType = {
   id: string;
@@ -72,7 +78,8 @@ const Support = () => {
         return;
       }
 
-      const { data, error } = await supabase
+      // Use type assertion for the table that doesn't exist in types yet
+      const { data, error } = await (supabase as any)
         .from('orders')
         .select('*')
         .order('created_at', { ascending: false });
@@ -99,14 +106,14 @@ const Support = () => {
   const onSubmit = async (values: SupportMessage) => {
     setSubmitting(true);
     try {
-      const { error } = await supabase
+      // Use type assertion for the table that doesn't exist in types yet
+      const { error } = await (supabase as any)
         .from('support_messages')
         .insert({
           name: values.name,
           email: values.email,
           subject: values.subject,
           message: values.message,
-          order_id: selectedOrderId || undefined
         });
       
       if (error) throw error;
@@ -133,7 +140,6 @@ const Support = () => {
 
   const handleSelectOrder = (orderId: string) => {
     setSelectedOrderId(orderId);
-    setValue('order_id', orderId);
     setActiveTab('contact');
     setValue('subject', 'Order Issue');
     setSelectedSubject('Order Issue');
@@ -320,7 +326,7 @@ const Support = () => {
                         </div>
                         <div>
                           <h3 className="font-medium mb-1">Phone Support</h3>
-                          <p className="text-muted-foreground">+91 9876543210</p>
+                          <p className="text-muted-foreground">+91 7050682347</p>
                           <p className="text-sm text-muted-foreground mt-1">Monday to Saturday, 9am-6pm IST</p>
                         </div>
                       </div>

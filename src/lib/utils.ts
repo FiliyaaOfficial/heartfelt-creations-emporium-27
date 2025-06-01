@@ -1,7 +1,6 @@
 
-import { clsx, type ClassValue } from "clsx"
+import { type ClassValue, clsx } from "clsx"
 import { twMerge } from "tailwind-merge"
-import type { Database } from "@/integrations/supabase/types"
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -11,13 +10,20 @@ export function formatCurrency(amount: number): string {
   return new Intl.NumberFormat('en-IN', {
     style: 'currency',
     currency: 'INR',
-    maximumFractionDigits: 0,
+    minimumFractionDigits: 0,
   }).format(amount);
 }
 
-export type Tables<T extends keyof Database['public']['Tables']> = Database['public']['Tables'][T]['Row']
+// Since Supabase types haven't updated yet, we'll use type assertions
+export function getOrdersFromSupabase() {
+  // This will be updated once types are regenerated
+  return (window as any).supabase?.from('orders');
+}
 
-// Helper function to convert objects to Json type for Supabase compatibility
-export function toJson<T>(data: T): Database['public']['Tables']['orders']['Insert']['shipping_address'] {
-  return data as Database['public']['Tables']['orders']['Insert']['shipping_address'];
+export function getCustomOrdersFromSupabase() {
+  return (window as any).supabase?.from('custom_orders');
+}
+
+export function getSupportMessagesFromSupabase() {
+  return (window as any).supabase?.from('support_messages');
 }

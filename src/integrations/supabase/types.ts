@@ -86,6 +86,69 @@ export type Database = {
         }
         Relationships: []
       }
+      custom_orders: {
+        Row: {
+          budget: number | null
+          created_at: string
+          description: string
+          email: string
+          id: string
+          name: string
+          phone: string | null
+          status: string | null
+          timeline: string | null
+        }
+        Insert: {
+          budget?: number | null
+          created_at?: string
+          description: string
+          email: string
+          id?: string
+          name: string
+          phone?: string | null
+          status?: string | null
+          timeline?: string | null
+        }
+        Update: {
+          budget?: number | null
+          created_at?: string
+          description?: string
+          email?: string
+          id?: string
+          name?: string
+          phone?: string | null
+          status?: string | null
+          timeline?: string | null
+        }
+        Relationships: []
+      }
+      orders: {
+        Row: {
+          created_at: string
+          customer_email: string
+          customer_name: string
+          id: string
+          status: string | null
+          total_amount: number
+        }
+        Insert: {
+          created_at?: string
+          customer_email: string
+          customer_name: string
+          id?: string
+          status?: string | null
+          total_amount: number
+        }
+        Update: {
+          created_at?: string
+          customer_email?: string
+          customer_name?: string
+          id?: string
+          status?: string | null
+          total_amount?: number
+        }
+        Relationships: []
+      }
       products: {
         Row: {
           badges: string[] | null
@@ -161,6 +224,36 @@ export type Database = {
           tags?: string[] | null
           updated_at?: string
           weight?: string | null
+        }
+        Relationships: []
+      }
+      support_messages: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          message: string
+          name: string
+          status: string | null
+          subject: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          message: string
+          name: string
+          status?: string | null
+          subject: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          message?: string
+          name?: string
+          status?: string | null
+          subject?: string
         }
         Relationships: []
       }
