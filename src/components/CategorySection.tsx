@@ -3,12 +3,18 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Gift, Coffee, Heart, Book, Camera, Flower } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import { Category as CategoryType } from '@/types';
 import { useToast } from '@/components/ui/use-toast';
 import { Button } from './ui/button';
 
+interface Category {
+  id: string;
+  name: string;
+  description?: string;
+  icon?: string;
+}
+
 const CategorySection = () => {
-  const [categories, setCategories] = useState<CategoryType[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
@@ -25,12 +31,24 @@ const CategorySection = () => {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
+        console.log('Fetching categories for section...');
         const { data, error } = await supabase
           .from('categories')
-          .select();
+          .select('*')
+          .order('name');
           
-        if (error) throw error;
-        setCategories(data as CategoryType[]);
+        console.log('Categories section query result:', { data, error });
+        
+        if (error) {
+          console.error('Error fetching categories:', error);
+          toast({
+            title: "Error fetching categories",
+            description: "Please try again later",
+            variant: "destructive",
+          });
+        } else {
+          setCategories(data || []);
+        }
       } catch (error) {
         console.error('Error fetching categories:', error);
         toast({
@@ -87,7 +105,7 @@ const CategorySection = () => {
             >
               <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded-full bg-heartfelt-cream shadow-sm flex items-center justify-center mb-3 md:mb-4 group-hover:bg-heartfelt-burgundy transition-colors duration-300 shine-effect">
                 <div className="text-heartfelt-burgundy group-hover:text-white transition-colors duration-300">
-                  {iconMap[category.icon] || <Gift size={36} />}
+                  {iconMap[category.icon || ''] || <Gift size={36} />}
                 </div>
               </div>
               <h3 className="text-base md:text-xl font-serif font-medium mb-1 md:mb-2 group-hover:text-heartfelt-burgundy transition-colors text-center">

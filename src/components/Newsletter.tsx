@@ -1,7 +1,8 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Mail, CheckCircle, AlertCircle } from 'lucide-react';
+import { Mail, CheckCircle, Phone } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { cn } from '@/lib/utils';
 import { Link } from 'react-router-dom';
@@ -33,12 +34,20 @@ const Newsletter = ({ className, variant = 'default' }: NewsletterProps) => {
     setIsSubmitting(true);
     
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Store newsletter subscription in localStorage for now
+      const subscriptions = JSON.parse(localStorage.getItem('newsletter_subscriptions') || '[]');
+      subscriptions.push({
+        email: email,
+        subscribed_at: new Date().toISOString()
+      });
+      localStorage.setItem('newsletter_subscriptions', JSON.stringify(subscriptions));
+      
+      console.log('Newsletter subscription:', email);
       
       setIsSubscribed(true);
       toast({
         title: "Successfully subscribed!",
-        description: "Thank you for joining our newsletter.",
+        description: "Thank you for joining our newsletter. We'll keep you updated on new products and offers.",
         variant: "default",
       });
       setEmail('');
@@ -57,6 +66,10 @@ const Newsletter = ({ className, variant = 'default' }: NewsletterProps) => {
       setIsSubmitting(false);
     }
   };
+
+  const whatsappNumber = "7050682347";
+  const whatsappMessage = "Hi! I'm interested in your handcrafted products.";
+  const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(whatsappMessage)}`;
 
   if (variant === 'sidebar') {
     return (
@@ -96,6 +109,18 @@ const Newsletter = ({ className, variant = 'default' }: NewsletterProps) => {
             </Button>
           </div>
         </form>
+        
+        <div className="mt-4 pt-4 border-t">
+          <a 
+            href={whatsappUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center justify-center w-full bg-green-500 hover:bg-green-600 text-white rounded-md py-2 px-4 transition-colors"
+          >
+            <Phone className="mr-2 h-4 w-4" />
+            WhatsApp Us
+          </a>
+        </div>
       </div>
     );
   }
@@ -130,6 +155,18 @@ const Newsletter = ({ className, variant = 'default' }: NewsletterProps) => {
             )}
           </Button>
         </form>
+        
+        <div className="mt-3">
+          <a 
+            href={whatsappUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-white/80 hover:text-white text-sm flex items-center"
+          >
+            <Phone className="mr-2 h-3 w-3" />
+            WhatsApp: {whatsappNumber}
+          </a>
+        </div>
       </div>
     );
   }
@@ -147,7 +184,7 @@ const Newsletter = ({ className, variant = 'default' }: NewsletterProps) => {
           Subscribe to our newsletter and be the first to know about new products, special offers, and upcoming events.
         </p>
         
-        <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-2 max-w-md mx-auto">
+        <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-2 max-w-md mx-auto mb-6">
           <Input
             type="email"
             placeholder="Your email address"
@@ -177,9 +214,20 @@ const Newsletter = ({ className, variant = 'default' }: NewsletterProps) => {
           </Button>
         </form>
         
-        <p className="text-xs text-muted-foreground mt-4">
-          By subscribing, you agree to our <Link to="/privacy" className="underline">Privacy Policy</Link>. You can unsubscribe at any time.
-        </p>
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+          <p className="text-xs text-muted-foreground">
+            By subscribing, you agree to our <Link to="/privacy" className="underline">Privacy Policy</Link>. You can unsubscribe at any time.
+          </p>
+          <a 
+            href={whatsappUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center text-green-600 hover:text-green-700 font-medium"
+          >
+            <Phone className="mr-2 h-4 w-4" />
+            Chat on WhatsApp
+          </a>
+        </div>
       </div>
     </div>
   );

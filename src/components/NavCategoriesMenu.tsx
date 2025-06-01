@@ -10,9 +10,14 @@ import {
   NavigationMenuTrigger,
   navigationMenuTriggerStyle
 } from "@/components/ui/navigation-menu";
-import { Category as CategoryType } from '@/types';
 import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
+
+interface Category {
+  id: string;
+  name: string;
+  description?: string;
+}
 
 const CategoryItem = React.forwardRef<
   React.ElementRef<"a">,
@@ -46,7 +51,7 @@ interface NavCategoriesMenuProps {
 }
 
 const NavCategoriesMenu = ({ activePath }: NavCategoriesMenuProps) => {
-  const [categories, setCategories] = useState<CategoryType[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   
   const isActiveCategory = activePath?.startsWith('/categories') || activePath?.startsWith('/category');
@@ -59,8 +64,10 @@ const NavCategoriesMenu = ({ activePath }: NavCategoriesMenuProps) => {
           .from('categories')
           .select('*')
           .order('name')
-          .limit(8); // Increased limit slightly
+          .limit(8);
           
+        console.log('Navbar categories query result:', { data, error });
+        
         if (error) {
           console.error('Error fetching categories:', error);
           setCategories([]);
@@ -93,6 +100,18 @@ const NavCategoriesMenu = ({ activePath }: NavCategoriesMenuProps) => {
           </NavigationMenuTrigger>
           <NavigationMenuContent>
             <ul className="grid gap-3 p-6 md:w-[400px] lg:w-[500px] lg:grid-cols-2">
+              <CategoryItem
+                title="Best Sellers"
+                href="/best-sellers"
+              >
+                Our most popular handcrafted items loved by customers
+              </CategoryItem>
+              <CategoryItem
+                title="New Arrivals"
+                href="/new-arrivals"
+              >
+                Latest handcrafted creations just added to our collection
+              </CategoryItem>
               {isLoading ? (
                 <li className="col-span-2 flex items-center justify-center p-4">
                   <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-heartfelt-burgundy"></div>
@@ -124,7 +143,7 @@ const NavCategoriesMenu = ({ activePath }: NavCategoriesMenuProps) => {
                 </>
               ) : (
                 <li className="col-span-2 flex items-center justify-center p-4">
-                  <p className="text-sm text-muted-foreground">No categories found</p>
+                  <p className="text-sm text-muted-foreground">Loading categories...</p>
                 </li>
               )}
             </ul>

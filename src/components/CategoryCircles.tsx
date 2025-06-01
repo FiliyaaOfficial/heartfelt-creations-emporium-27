@@ -2,8 +2,15 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { Category } from '@/types';
 import { Flame, Sparkles } from 'lucide-react';
+
+interface Category {
+  id: string;
+  name: string;
+  description?: string;
+  image_url?: string;
+  icon?: string;
+}
 
 const CategoryCircles = () => {
   const [categories, setCategories] = useState<Category[]>([]);
@@ -12,15 +19,23 @@ const CategoryCircles = () => {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
+        console.log('Fetching categories...');
         const { data, error } = await supabase
           .from('categories')
-          .select()
+          .select('*')
           .order('name');
           
-        if (error) throw error;
-        setCategories(data as Category[]);
+        console.log('Categories query result:', { data, error });
+        
+        if (error) {
+          console.error('Error fetching categories:', error);
+          throw error;
+        }
+        
+        setCategories(data || []);
       } catch (error) {
         console.error('Error fetching categories:', error);
+        setCategories([]);
       } finally {
         setIsLoading(false);
       }
@@ -42,14 +57,26 @@ const CategoryCircles = () => {
       <div className="container mx-auto px-2 md:px-4">
         <div className="flex gap-4 md:gap-8 min-w-max py-2">
           <Link 
-            to="/shop?trending=true" 
+            to="/best-sellers" 
             className="flex flex-col items-center group"
           >
             <div className="w-16 h-16 md:w-20 md:h-20 rounded-full border-2 border-heartfelt-burgundy/20 overflow-hidden group-hover:border-heartfelt-burgundy transition-colors duration-300 flex items-center justify-center bg-heartfelt-cream/20">
               <Flame size={24} className="text-heartfelt-burgundy" />
             </div>
             <span className="text-xs md:text-sm mt-1 font-medium flex items-center">
-              Trending <Flame size={14} className="ml-1 text-orange-500" />
+              Best Sellers <Flame size={14} className="ml-1 text-orange-500" />
+            </span>
+          </Link>
+
+          <Link 
+            to="/new-arrivals" 
+            className="flex flex-col items-center group"
+          >
+            <div className="w-16 h-16 md:w-20 md:h-20 rounded-full border-2 border-heartfelt-burgundy/20 overflow-hidden group-hover:border-heartfelt-burgundy transition-colors duration-300 flex items-center justify-center bg-heartfelt-cream/20">
+              <Sparkles size={24} className="text-heartfelt-burgundy" />
+            </div>
+            <span className="text-xs md:text-sm mt-1 font-medium flex items-center">
+              New Arrivals <span className="text-xs font-semibold bg-heartfelt-cream px-2 py-1 rounded-full text-heartfelt-burgundy ml-1">NEW</span>
             </span>
           </Link>
           
