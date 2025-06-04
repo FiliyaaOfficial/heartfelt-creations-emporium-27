@@ -7,6 +7,8 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { CartProvider } from "@/contexts/CartContext";
 import { WishlistProvider } from "@/contexts/WishlistContext";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { useKeepAlive } from "@/hooks/useKeepAlive";
+import CheckoutProtection from "@/components/CheckoutProtection";
 import Layout from "@/components/Layout";
 import Index from "./pages/Index";
 import Shop from "./pages/Shop";
@@ -34,6 +36,48 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
+function AppContent() {
+  useKeepAlive();
+  
+  return (
+    <Layout>
+      <Routes>
+        <Route path="/" element={<Index />} />
+        <Route path="/shop" element={<Shop />} />
+        <Route path="/categories" element={<Categories />} />
+        <Route path="/category/:categoryName" element={<CategoryPage />} />
+        <Route path="/best-sellers" element={<BestSellers />} />
+        <Route path="/new-arrivals" element={<NewArrivals />} />
+        <Route path="/product/:id" element={<ProductDetail />} />
+        <Route path="/cart" element={<Cart />} />
+        <Route path="/wishlist" element={<Wishlist />} />
+        <Route path="/checkout" element={
+          <CheckoutProtection>
+            <Checkout />
+          </CheckoutProtection>
+        } />
+        <Route path="/order-confirmation" element={
+          <CheckoutProtection>
+            <OrderConfirmation />
+          </CheckoutProtection>
+        } />
+        <Route path="/custom" element={<Custom />} />
+        <Route path="/blog" element={<Blog />} />
+        <Route path="/blog/:slug" element={<BlogPost />} />
+        <Route path="/support" element={<Support />} />
+        <Route path="/account" element={<Account />} />
+        <Route path="/auth" element={<Auth />} />
+        <Route path="/auth/callback" element={<AuthCallback />} />
+        <Route path="/search" element={<Search />} />
+        <Route path="/privacy" element={<PrivacyPolicy />} />
+        <Route path="/terms" element={<TermsOfService />} />
+        <Route path="/shipping" element={<ShippingInfo />} />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </Layout>
+  );
+}
+
 function App() {
   return (
     <BrowserRouter>
@@ -44,33 +88,7 @@ function App() {
               <WishlistProvider>
                 <Toaster />
                 <Sonner />
-                <Layout>
-                  <Routes>
-                    <Route path="/" element={<Index />} />
-                    <Route path="/shop" element={<Shop />} />
-                    <Route path="/categories" element={<Categories />} />
-                    <Route path="/category/:categoryName" element={<CategoryPage />} />
-                    <Route path="/best-sellers" element={<BestSellers />} />
-                    <Route path="/new-arrivals" element={<NewArrivals />} />
-                    <Route path="/product/:id" element={<ProductDetail />} />
-                    <Route path="/cart" element={<Cart />} />
-                    <Route path="/wishlist" element={<Wishlist />} />
-                    <Route path="/checkout" element={<Checkout />} />
-                    <Route path="/order-confirmation" element={<OrderConfirmation />} />
-                    <Route path="/custom" element={<Custom />} />
-                    <Route path="/blog" element={<Blog />} />
-                    <Route path="/blog/:slug" element={<BlogPost />} />
-                    <Route path="/support" element={<Support />} />
-                    <Route path="/account" element={<Account />} />
-                    <Route path="/auth" element={<Auth />} />
-                    <Route path="/auth/callback" element={<AuthCallback />} />
-                    <Route path="/search" element={<Search />} />
-                    <Route path="/privacy" element={<PrivacyPolicy />} />
-                    <Route path="/terms" element={<TermsOfService />} />
-                    <Route path="/shipping" element={<ShippingInfo />} />
-                    <Route path="*" element={<NotFound />} />
-                  </Routes>
-                </Layout>
+                <AppContent />
               </WishlistProvider>
             </CartProvider>
           </AuthProvider>

@@ -122,30 +122,84 @@ export type Database = {
         }
         Relationships: []
       }
+      order_items: {
+        Row: {
+          created_at: string | null
+          id: string
+          order_id: string | null
+          price: number
+          product_id: string | null
+          quantity: number
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          order_id?: string | null
+          price: number
+          product_id?: string | null
+          quantity: number
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          order_id?: string | null
+          price?: number
+          product_id?: string | null
+          quantity?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_items_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       orders: {
         Row: {
           created_at: string
           customer_email: string
           customer_name: string
           id: string
+          payment_method: string | null
+          payment_status: string | null
+          shipping_address: Json | null
           status: string | null
           total_amount: number
+          user_id: string | null
         }
         Insert: {
           created_at?: string
           customer_email: string
           customer_name: string
           id?: string
+          payment_method?: string | null
+          payment_status?: string | null
+          shipping_address?: Json | null
           status?: string | null
           total_amount: number
+          user_id?: string | null
         }
         Update: {
           created_at?: string
           customer_email?: string
           customer_name?: string
           id?: string
+          payment_method?: string | null
+          payment_status?: string | null
+          shipping_address?: Json | null
           status?: string | null
           total_amount?: number
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -227,6 +281,36 @@ export type Database = {
         }
         Relationships: []
       }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string | null
+          first_name: string | null
+          id: string
+          last_name: string | null
+          phone: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string | null
+          first_name?: string | null
+          id: string
+          last_name?: string | null
+          phone?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string | null
+          first_name?: string | null
+          id?: string
+          last_name?: string | null
+          phone?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       support_messages: {
         Row: {
           created_at: string
@@ -291,7 +375,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      create_razorpay_order: {
+        Args: { amount_param: number; currency_param?: string }
+        Returns: Json
+      }
+      keep_alive: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
     }
     Enums: {
       [_ in never]: never
