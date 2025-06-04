@@ -1,4 +1,5 @@
 
+import React from 'react';
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -34,7 +35,14 @@ import BestSellers from "./pages/BestSellers";
 import NewArrivals from "./pages/NewArrivals";
 import NotFound from "./pages/NotFound";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 function AppContent() {
   useKeepAlive();
@@ -61,6 +69,11 @@ function AppContent() {
             <OrderConfirmation />
           </CheckoutProtection>
         } />
+        <Route path="/order-confirmation/:orderId" element={
+          <CheckoutProtection>
+            <OrderConfirmation />
+          </CheckoutProtection>
+        } />
         <Route path="/custom" element={<Custom />} />
         <Route path="/blog" element={<Blog />} />
         <Route path="/blog/:slug" element={<BlogPost />} />
@@ -80,8 +93,8 @@ function AppContent() {
 
 function App() {
   return (
-    <BrowserRouter>
-      <QueryClientProvider client={queryClient}>
+    <QueryClientProvider client={queryClient}>
+      <BrowserRouter>
         <TooltipProvider>
           <AuthProvider>
             <CartProvider>
@@ -93,8 +106,8 @@ function App() {
             </CartProvider>
           </AuthProvider>
         </TooltipProvider>
-      </QueryClientProvider>
-    </BrowserRouter>
+      </BrowserRouter>
+    </QueryClientProvider>
   );
 }
 
