@@ -33,31 +33,57 @@ interface UserProfile {
 const Account = () => {
   const { user, isAuthenticated, loading, signOut } = useAuth();
   const [profile, setProfile] = useState<UserProfile | null>(null);
-  const [profileLoading, setProfileLoading] = useState(true);
+  const [profileLoading, setProfileLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("profile");
   const navigate = useNavigate();
 
   useEffect(() => {
     if (isAuthenticated && user) {
       fetchProfile();
+    } else {
+      setProfileLoading(false);
     }
   }, [isAuthenticated, user]);
 
   const fetchProfile = async () => {
+    if (!user) return;
+    
+    setProfileLoading(true);
     try {
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
-        .eq('id', user?.id)
-        .single();
+        .eq('id', user.id)
+        .maybeSingle();
 
-      if (error && error.code !== 'PGRST116') {
+      if (error) {
         console.error('Error fetching profile:', error);
+        // Create a default profile if none exists
+        setProfile({
+          id: user.id,
+          first_name: '',
+          last_name: '',
+          phone: '',
+          avatar_url: ''
+        });
       } else {
-        setProfile(data);
+        setProfile(data || {
+          id: user.id,
+          first_name: '',
+          last_name: '',
+          phone: '',
+          avatar_url: ''
+        });
       }
     } catch (error) {
       console.error('Error fetching profile:', error);
+      setProfile({
+        id: user.id,
+        first_name: '',
+        last_name: '',
+        phone: '',
+        avatar_url: ''
+      });
     } finally {
       setProfileLoading(false);
     }

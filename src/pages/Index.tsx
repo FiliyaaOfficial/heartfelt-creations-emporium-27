@@ -18,14 +18,14 @@ import ProductPromoBanner from '@/components/ProductPromoBanner';
 const Index = () => {
   const [newArrivals, setNewArrivals] = useState<ProductType[]>([]);
   const [bestSellers, setBestSellers] = useState<ProductType[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     const fetchProducts = async () => {
       setIsLoading(true);
       try {
         // Fetch new arrivals
-        const { data: newArrivalsData } = await supabase
+        const { data: newArrivalsData, error: newArrivalsError } = await supabase
           .from('products')
           .select()
           .eq('is_new', true)
@@ -33,14 +33,23 @@ const Index = () => {
           .limit(4);
         
         // Fetch bestsellers
-        const { data: bestSellersData } = await supabase
+        const { data: bestSellersData, error: bestSellersError } = await supabase
           .from('products')
           .select()
           .eq('is_bestseller', true)
           .limit(4);
         
-        if (newArrivalsData) setNewArrivals(newArrivalsData as ProductType[]);
-        if (bestSellersData) setBestSellers(bestSellersData as ProductType[]);
+        if (newArrivalsError) {
+          console.error('Error fetching new arrivals:', newArrivalsError);
+        } else {
+          setNewArrivals(newArrivalsData as ProductType[] || []);
+        }
+
+        if (bestSellersError) {
+          console.error('Error fetching best sellers:', bestSellersError);
+        } else {
+          setBestSellers(bestSellersData as ProductType[] || []);
+        }
       } catch (error) {
         console.error('Error fetching products:', error);
         toast.error("Failed to load products", {
@@ -87,7 +96,12 @@ const Index = () => {
             ))
           ) : products.length === 0 ? (
             <div className="col-span-full text-center py-12 bg-heartfelt-cream/10 rounded-xl">
-              <p className="text-lg">No products found</p>
+              <p className="text-lg text-muted-foreground">No {title.toLowerCase()} available at the moment</p>
+              <Link to="/shop" className="inline-block mt-4">
+                <Button variant="outline" className="border-heartfelt-burgundy text-heartfelt-burgundy hover:bg-heartfelt-burgundy/5">
+                  Browse All Products
+                </Button>
+              </Link>
             </div>
           ) : (
             products.map((product) => (
