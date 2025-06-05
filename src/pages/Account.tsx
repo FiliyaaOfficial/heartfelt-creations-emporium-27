@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -40,8 +39,6 @@ const Account = () => {
   useEffect(() => {
     if (isAuthenticated && user) {
       fetchProfile();
-    } else {
-      setProfileLoading(false);
     }
   }, [isAuthenticated, user]);
 
@@ -118,7 +115,7 @@ const Account = () => {
     }
   };
 
-  if (loading || profileLoading) {
+  if (loading) {
     return (
       <div className="container mx-auto py-20 px-4">
         <div className="flex items-center justify-center">
@@ -261,68 +258,83 @@ const Account = () => {
                   </Button>
                 </div>
                 
-                <form className="space-y-6" onSubmit={(e) => {
-                  e.preventDefault();
-                  const formData = new FormData(e.currentTarget);
-                  updateProfile({
-                    first_name: formData.get('first_name') as string,
-                    last_name: formData.get('last_name') as string,
-                    phone: formData.get('phone') as string,
-                  });
-                }}>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                      <Label htmlFor="first_name">First Name</Label>
-                      <Input 
-                        id="first_name" 
-                        name="first_name"
-                        defaultValue={profile?.first_name || ''} 
-                        className="border-gray-200" 
-                      />
+                {profileLoading ? (
+                  <div className="space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="space-y-2">
+                        <div className="h-4 bg-gray-200 rounded animate-pulse"></div>
+                        <div className="h-10 bg-gray-200 rounded animate-pulse"></div>
+                      </div>
+                      <div className="space-y-2">
+                        <div className="h-4 bg-gray-200 rounded animate-pulse"></div>
+                        <div className="h-10 bg-gray-200 rounded animate-pulse"></div>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <form className="space-y-6" onSubmit={(e) => {
+                    e.preventDefault();
+                    const formData = new FormData(e.currentTarget);
+                    updateProfile({
+                      first_name: formData.get('first_name') as string,
+                      last_name: formData.get('last_name') as string,
+                      phone: formData.get('phone') as string,
+                    });
+                  }}>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="space-y-2">
+                        <Label htmlFor="first_name">First Name</Label>
+                        <Input 
+                          id="first_name" 
+                          name="first_name"
+                          defaultValue={profile?.first_name || ''} 
+                          className="border-gray-200" 
+                        />
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="last_name">Last Name</Label>
+                        <Input 
+                          id="last_name" 
+                          name="last_name"
+                          defaultValue={profile?.last_name || ''} 
+                          className="border-gray-200" 
+                        />
+                      </div>
                     </div>
                     
-                    <div className="space-y-2">
-                      <Label htmlFor="last_name">Last Name</Label>
-                      <Input 
-                        id="last_name" 
-                        name="last_name"
-                        defaultValue={profile?.last_name || ''} 
-                        className="border-gray-200" 
-                      />
-                    </div>
-                  </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                      <Label htmlFor="email">Email</Label>
-                      <Input 
-                        id="email" 
-                        type="email" 
-                        value={user?.email || ''} 
-                        className="border-gray-200 bg-gray-50" 
-                        disabled
-                      />
-                      <p className="text-xs text-muted-foreground">Email cannot be changed</p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="space-y-2">
+                        <Label htmlFor="email">Email</Label>
+                        <Input 
+                          id="email" 
+                          type="email" 
+                          value={user?.email || ''} 
+                          className="border-gray-200 bg-gray-50" 
+                          disabled
+                        />
+                        <p className="text-xs text-muted-foreground">Email cannot be changed</p>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="phone">Phone Number</Label>
+                        <Input 
+                          id="phone" 
+                          name="phone"
+                          defaultValue={profile?.phone || ''} 
+                          className="border-gray-200" 
+                          placeholder="+91 1234567890"
+                        />
+                      </div>
                     </div>
                     
-                    <div className="space-y-2">
-                      <Label htmlFor="phone">Phone Number</Label>
-                      <Input 
-                        id="phone" 
-                        name="phone"
-                        defaultValue={profile?.phone || ''} 
-                        className="border-gray-200" 
-                        placeholder="+91 1234567890"
-                      />
+                    <div className="pt-4">
+                      <Button type="submit" className="bg-heartfelt-burgundy hover:bg-heartfelt-dark">
+                        Save Changes
+                      </Button>
                     </div>
-                  </div>
-                  
-                  <div className="pt-4">
-                    <Button type="submit" className="bg-heartfelt-burgundy hover:bg-heartfelt-dark">
-                      Save Changes
-                    </Button>
-                  </div>
-                </form>
+                  </form>
+                )}
               </div>
             </TabsContent>
 

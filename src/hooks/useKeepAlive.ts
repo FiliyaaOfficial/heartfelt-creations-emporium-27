@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 
 export const useKeepAlive = () => {
   useEffect(() => {
-    // Call keep-alive function every 6 hours (21600000 ms)
+    // Call keep-alive function every 5 minutes (300000 ms) - more frequent to prevent timeout
     const keepAliveInterval = setInterval(async () => {
       try {
         const { data, error } = await supabase.functions.invoke('keep-alive');
@@ -15,9 +15,9 @@ export const useKeepAlive = () => {
       } catch (error) {
         console.error('Keep-alive function call failed:', error);
       }
-    }, 21600000); // 6 hours
+    }, 300000); // 5 minutes
 
-    // Initial call
+    // Initial call when app starts
     const initialKeepAlive = async () => {
       try {
         await supabase.functions.invoke('keep-alive');
@@ -27,8 +27,24 @@ export const useKeepAlive = () => {
       }
     };
 
+    // Call immediately when hook mounts
     initialKeepAlive();
 
-    return () => clearInterval(keepAliveInterval);
+    // Also call keep-alive on user interaction to keep session active
+    const handleUserActivity = () => {
+      initialKeepAlive();
+    };
+
+    // Listen for user activity
+    document.addEventListener('click', handleUserActivity, { passive: true });
+    document.addEventListener('keypress', handleUserActivity, { passive: true });
+    document.addEventListener('scroll', handleUserActivity, { passive: true });
+
+    return () => {
+      clearInterval(keepAliveInterval);
+      document.removeEventListener('click', handleUserActivity);
+      document.removeEventListener('keypress', handleUserActivity);
+      document.removeEventListener('scroll', handleUserActivity);
+    };
   }, []);
 };

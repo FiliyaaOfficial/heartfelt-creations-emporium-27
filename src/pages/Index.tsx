@@ -24,31 +24,31 @@ const Index = () => {
     const fetchProducts = async () => {
       setIsLoading(true);
       try {
-        // Fetch new arrivals
-        const { data: newArrivalsData, error: newArrivalsError } = await supabase
-          .from('products')
-          .select()
-          .eq('is_new', true)
-          .order('created_at', { ascending: false })
-          .limit(4);
+        // Use Promise.all for parallel requests to improve performance
+        const [newArrivalsResponse, bestSellersResponse] = await Promise.all([
+          supabase
+            .from('products')
+            .select('*')
+            .eq('is_new', true)
+            .order('created_at', { ascending: false })
+            .limit(4),
+          supabase
+            .from('products')
+            .select('*')
+            .eq('is_bestseller', true)
+            .limit(4)
+        ]);
         
-        // Fetch bestsellers
-        const { data: bestSellersData, error: bestSellersError } = await supabase
-          .from('products')
-          .select()
-          .eq('is_bestseller', true)
-          .limit(4);
-        
-        if (newArrivalsError) {
-          console.error('Error fetching new arrivals:', newArrivalsError);
+        if (newArrivalsResponse.error) {
+          console.error('Error fetching new arrivals:', newArrivalsResponse.error);
         } else {
-          setNewArrivals(newArrivalsData as ProductType[] || []);
+          setNewArrivals(newArrivalsResponse.data || []);
         }
 
-        if (bestSellersError) {
-          console.error('Error fetching best sellers:', bestSellersError);
+        if (bestSellersResponse.error) {
+          console.error('Error fetching best sellers:', bestSellersResponse.error);
         } else {
-          setBestSellers(bestSellersData as ProductType[] || []);
+          setBestSellers(bestSellersResponse.data || []);
         }
       } catch (error) {
         console.error('Error fetching products:', error);
