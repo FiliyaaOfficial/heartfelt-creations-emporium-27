@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -89,8 +88,10 @@ const Navbar = () => {
           <Link 
             to="/" 
             className={cn(
-              "text-sm lg:text-base text-gray-800 hover:text-heartfelt-burgundy transition-colors font-medium px-2 py-1",
-              isActivePath('/') ? "text-heartfelt-burgundy font-semibold" : ""
+              "text-sm lg:text-base font-medium px-3 py-2 rounded-lg transition-all duration-200",
+              isActivePath('/') 
+                ? "text-heartfelt-burgundy bg-heartfelt-cream/50 shadow-sm font-semibold" 
+                : "text-gray-800 hover:text-heartfelt-burgundy hover:bg-heartfelt-cream/30"
             )}
           >
             Home
@@ -98,18 +99,29 @@ const Navbar = () => {
           <Link 
             to="/shop" 
             className={cn(
-              "text-sm lg:text-base text-gray-800 hover:text-heartfelt-burgundy transition-colors font-medium px-2 py-1",
-              isActivePath('/shop') ? "text-heartfelt-burgundy font-semibold" : ""
+              "text-sm lg:text-base font-medium px-3 py-2 rounded-lg transition-all duration-200",
+              isActivePath('/shop') 
+                ? "text-heartfelt-burgundy bg-heartfelt-cream/50 shadow-sm font-semibold" 
+                : "text-gray-800 hover:text-heartfelt-burgundy hover:bg-heartfelt-cream/30"
             )}
           >
             Shop
           </Link>
-          <NavCategoriesMenu activePath={location.pathname} />
+          <div className={cn(
+            "rounded-lg transition-all duration-200",
+            (isActivePath('/categories') || isActivePath('/category')) 
+              ? "bg-heartfelt-cream/50 shadow-sm" 
+              : ""
+          )}>
+            <NavCategoriesMenu activePath={location.pathname} />
+          </div>
           <Link 
             to="/custom" 
             className={cn(
-              "text-sm lg:text-base text-gray-800 hover:text-heartfelt-burgundy transition-colors font-medium px-2 py-1",
-              isActivePath('/custom') ? "text-heartfelt-burgundy font-semibold" : ""
+              "text-sm lg:text-base font-medium px-3 py-2 rounded-lg transition-all duration-200",
+              isActivePath('/custom') 
+                ? "text-heartfelt-burgundy bg-heartfelt-cream/50 shadow-sm font-semibold" 
+                : "text-gray-800 hover:text-heartfelt-burgundy hover:bg-heartfelt-cream/30"
             )}
           >
             Custom Orders
@@ -117,8 +129,10 @@ const Navbar = () => {
           <Link 
             to="/blog" 
             className={cn(
-              "text-sm lg:text-base text-gray-800 hover:text-heartfelt-burgundy transition-colors font-medium px-2 py-1",
-              isActivePath('/blog') ? "text-heartfelt-burgundy font-semibold" : ""
+              "text-sm lg:text-base font-medium px-3 py-2 rounded-lg transition-all duration-200",
+              isActivePath('/blog') 
+                ? "text-heartfelt-burgundy bg-heartfelt-cream/50 shadow-sm font-semibold" 
+                : "text-gray-800 hover:text-heartfelt-burgundy hover:bg-heartfelt-cream/30"
             )}
           >
             Blog
@@ -126,8 +140,10 @@ const Navbar = () => {
           <Link 
             to="/support" 
             className={cn(
-              "text-sm lg:text-base text-gray-800 hover:text-heartfelt-burgundy transition-colors font-medium px-2 py-1",
-              isActivePath('/support') ? "text-heartfelt-burgundy font-semibold" : ""
+              "text-sm lg:text-base font-medium px-3 py-2 rounded-lg transition-all duration-200",
+              isActivePath('/support') 
+                ? "text-heartfelt-burgundy bg-heartfelt-cream/50 shadow-sm font-semibold" 
+                : "text-gray-800 hover:text-heartfelt-burgundy hover:bg-heartfelt-cream/30"
             )}
           >
             Support
@@ -230,12 +246,14 @@ const Navbar = () => {
               </div>
             </form>
             
-            <nav className="flex flex-col space-y-4">
+            <nav className="flex flex-col space-y-2">
               <Link 
                 to="/" 
                 className={cn(
-                  "text-base font-medium text-gray-800 hover:text-heartfelt-burgundy py-2 transition-colors border-b border-gray-100",
-                  isActivePath('/') ? "text-heartfelt-burgundy font-semibold" : ""
+                  "text-base font-medium py-3 px-4 rounded-lg transition-all duration-200 border-b border-gray-100",
+                  isActivePath('/') 
+                    ? "text-heartfelt-burgundy bg-heartfelt-cream/50 font-semibold" 
+                    : "text-gray-800 hover:text-heartfelt-burgundy hover:bg-heartfelt-cream/30"
                 )}
                 onClick={toggleMenu}
               >
@@ -244,8 +262,10 @@ const Navbar = () => {
               <Link 
                 to="/shop" 
                 className={cn(
-                  "text-base font-medium text-gray-800 hover:text-heartfelt-burgundy py-2 transition-colors border-b border-gray-100",
-                  isActivePath('/shop') ? "text-heartfelt-burgundy font-semibold" : ""
+                  "text-base font-medium py-3 px-4 rounded-lg transition-all duration-200 border-b border-gray-100",
+                  isActivePath('/shop') 
+                    ? "text-heartfelt-burgundy bg-heartfelt-cream/50 font-semibold" 
+                    : "text-gray-800 hover:text-heartfelt-burgundy hover:bg-heartfelt-cream/30"
                 )}
                 onClick={toggleMenu}
               >
@@ -254,8 +274,10 @@ const Navbar = () => {
               <Link 
                 to="/categories" 
                 className={cn(
-                  "text-base font-medium text-gray-800 hover:text-heartfelt-burgundy py-2 transition-colors border-b border-gray-100",
-                  isActivePath('/categories') || isActivePath('/category') ? "text-heartfelt-burgundy font-semibold" : ""
+                  "text-base font-medium py-3 px-4 rounded-lg transition-all duration-200 border-b border-gray-100",
+                  (isActivePath('/categories') || isActivePath('/category')) 
+                    ? "text-heartfelt-burgundy bg-heartfelt-cream/50 font-semibold" 
+                    : "text-gray-800 hover:text-heartfelt-burgundy hover:bg-heartfelt-cream/30"
                 )}
                 onClick={toggleMenu}
               >
@@ -264,8 +286,10 @@ const Navbar = () => {
               <Link 
                 to="/custom" 
                 className={cn(
-                  "text-base font-medium text-gray-800 hover:text-heartfelt-burgundy py-2 transition-colors border-b border-gray-100",
-                  isActivePath('/custom') ? "text-heartfelt-burgundy font-semibold" : ""
+                  "text-base font-medium py-3 px-4 rounded-lg transition-all duration-200 border-b border-gray-100",
+                  isActivePath('/custom') 
+                    ? "text-heartfelt-burgundy bg-heartfelt-cream/50 font-semibold" 
+                    : "text-gray-800 hover:text-heartfelt-burgundy hover:bg-heartfelt-cream/30"
                 )}
                 onClick={toggleMenu}
               >
@@ -274,8 +298,10 @@ const Navbar = () => {
               <Link 
                 to="/blog" 
                 className={cn(
-                  "text-base font-medium text-gray-800 hover:text-heartfelt-burgundy py-2 transition-colors border-b border-gray-100",
-                  isActivePath('/blog') ? "text-heartfelt-burgundy font-semibold" : ""
+                  "text-base font-medium py-3 px-4 rounded-lg transition-all duration-200 border-b border-gray-100",
+                  isActivePath('/blog') 
+                    ? "text-heartfelt-burgundy bg-heartfelt-cream/50 font-semibold" 
+                    : "text-gray-800 hover:text-heartfelt-burgundy hover:bg-heartfelt-cream/30"
                 )}
                 onClick={toggleMenu}
               >
@@ -284,8 +310,10 @@ const Navbar = () => {
               <Link 
                 to="/support" 
                 className={cn(
-                  "text-base font-medium text-gray-800 hover:text-heartfelt-burgundy py-2 transition-colors border-b border-gray-100",
-                  isActivePath('/support') ? "text-heartfelt-burgundy font-semibold" : ""
+                  "text-base font-medium py-3 px-4 rounded-lg transition-all duration-200 border-b border-gray-100",
+                  isActivePath('/support') 
+                    ? "text-heartfelt-burgundy bg-heartfelt-cream/50 font-semibold" 
+                    : "text-gray-800 hover:text-heartfelt-burgundy hover:bg-heartfelt-cream/30"
                 )}
                 onClick={toggleMenu}
               >

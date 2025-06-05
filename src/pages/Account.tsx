@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -17,7 +18,10 @@ import {
   Bell, 
   Shield, 
   Map,
-  Edit
+  Edit,
+  Calendar,
+  Mail,
+  Phone
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 
@@ -27,59 +31,95 @@ interface UserProfile {
   last_name?: string;
   phone?: string;
   avatar_url?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+interface UserMetadata {
+  email?: string;
+  email_verified?: boolean;
+  phone_verified?: boolean;
+  provider?: string;
+  providers?: string[];
+  last_sign_in_at?: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 const Account = () => {
   const { user, isAuthenticated, loading, signOut } = useAuth();
   const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [userMetadata, setUserMetadata] = useState<UserMetadata | null>(null);
   const [profileLoading, setProfileLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("profile");
   const navigate = useNavigate();
 
   useEffect(() => {
     if (isAuthenticated && user) {
-      fetchProfile();
+      fetchCompleteUserData();
     }
   }, [isAuthenticated, user]);
 
-  const fetchProfile = async () => {
+  const fetchCompleteUserData = async () => {
     if (!user) return;
     
     setProfileLoading(true);
     try {
-      const { data, error } = await supabase
+      console.log('Fetching complete user data for:', user.id);
+      
+      // Fetch user metadata from auth (frontend)
+      const userAuthData = {
+        email: user.email,
+        email_verified: user.email_confirmed_at ? true : false,
+        phone_verified: user.phone_confirmed_at ? true : false,
+        provider: user.app_metadata?.provider,
+        providers: user.app_metadata?.providers,
+        last_sign_in_at: user.last_sign_in_at,
+        created_at: user.created_at,
+        updated_at: user.updated_at,
+      };
+      setUserMetadata(userAuthData);
+      console.log('User auth metadata:', userAuthData);
+      
+      // Fetch profile data from backend
+      const { data: profileData, error } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', user.id)
         .maybeSingle();
 
-      if (error) {
+      console.log('Profile fetch result:', { profileData, error });
+
+      if (error && error.code !== 'PGRST116') { // PGRST116 is "not found" error
         console.error('Error fetching profile:', error);
-        // Create a default profile if none exists
-        setProfile({
-          id: user.id,
-          first_name: '',
-          last_name: '',
-          phone: '',
-          avatar_url: ''
-        });
-      } else {
-        setProfile(data || {
-          id: user.id,
-          first_name: '',
-          last_name: '',
-          phone: '',
-          avatar_url: ''
-        });
+        toast.error('Failed to load profile data');
       }
+
+      // Set profile data or create default if none exists
+      const finalProfile = profileData || {
+        id: user.id,
+        first_name: user.user_metadata?.first_name || '',
+        last_name: user.user_metadata?.last_name || '',
+        phone: user.phone || '',
+        avatar_url: user.user_metadata?.avatar_url || '',
+        created_at: user.created_at,
+        updated_at: user.updated_at
+      };
+
+      setProfile(finalProfile);
+      console.log('Final profile data:', finalProfile);
+
     } catch (error) {
-      console.error('Error fetching profile:', error);
+      console.error('Error fetching complete user data:', error);
+      toast.error('Failed to load user data');
+      
+      // Fallback to basic user data
       setProfile({
         id: user.id,
-        first_name: '',
-        last_name: '',
-        phone: '',
-        avatar_url: ''
+        first_name: user.user_metadata?.first_name || '',
+        last_name: user.user_metadata?.last_name || '',
+        phone: user.phone || '',
+        avatar_url: user.user_metadata?.avatar_url || ''
       });
     } finally {
       setProfileLoading(false);
@@ -90,15 +130,24 @@ const Account = () => {
     if (!user) return;
 
     try {
+      console.log('Updating profile with:', updates);
+      
       const { error } = await supabase
         .from('profiles')
-        .upsert({ id: user.id, ...updates })
+        .upsert({ 
+          id: user.id, 
+          ...updates,
+          updated_at: new Date().toISOString()
+        })
         .select();
 
       if (error) throw error;
 
       setProfile(prev => prev ? { ...prev, ...updates } : null);
       toast.success('Profile updated successfully');
+      
+      // Refetch to ensure we have the latest data
+      await fetchCompleteUserData();
     } catch (error) {
       console.error('Error updating profile:', error);
       toast.error('Failed to update profile');
@@ -113,6 +162,15 @@ const Account = () => {
     } catch (error) {
       toast.error('Error signing out');
     }
+  };
+
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return 'N/A';
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
   };
 
   if (loading) {
@@ -171,7 +229,7 @@ const Account = () => {
               <div className="flex items-center space-x-3">
                 <Avatar className="h-16 w-16">
                   <AvatarImage src={profile?.avatar_url} />
-                  <AvatarFallback className="bg-heartfelt-cream/50 text-heartfelt-burgundy">
+                  <AvatarFallback className="bg-heartfelt-cream/50 text-heartfelt-burgundy text-lg">
                     {profile?.first_name?.[0] || user?.email?.[0]?.toUpperCase() || 'U'}
                   </AvatarFallback>
                 </Avatar>
@@ -183,6 +241,11 @@ const Account = () => {
                     }
                   </p>
                   <p className="text-sm text-gray-500">{user?.email}</p>
+                  {userMetadata?.provider && (
+                    <p className="text-xs text-gray-400 capitalize">
+                      via {userMetadata.provider}
+                    </p>
+                  )}
                 </div>
               </div>
             </div>
@@ -272,68 +335,93 @@ const Account = () => {
                     </div>
                   </div>
                 ) : (
-                  <form className="space-y-6" onSubmit={(e) => {
-                    e.preventDefault();
-                    const formData = new FormData(e.currentTarget);
-                    updateProfile({
-                      first_name: formData.get('first_name') as string,
-                      last_name: formData.get('last_name') as string,
-                      phone: formData.get('phone') as string,
-                    });
-                  }}>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div className="space-y-2">
-                        <Label htmlFor="first_name">First Name</Label>
-                        <Input 
-                          id="first_name" 
-                          name="first_name"
-                          defaultValue={profile?.first_name || ''} 
-                          className="border-gray-200" 
-                        />
+                  <>
+                    {/* Account Information Cards */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                      <div className="p-4 bg-gray-50 rounded-lg">
+                        <div className="flex items-center mb-2">
+                          <Mail className="h-4 w-4 mr-2 text-heartfelt-burgundy" />
+                          <h3 className="font-medium">Email</h3>
+                        </div>
+                        <p className="text-sm text-gray-600">{user?.email}</p>
+                        <p className="text-xs text-gray-400 mt-1">
+                          {userMetadata?.email_verified ? '✓ Verified' : '⚠ Not verified'}
+                        </p>
                       </div>
                       
-                      <div className="space-y-2">
-                        <Label htmlFor="last_name">Last Name</Label>
-                        <Input 
-                          id="last_name" 
-                          name="last_name"
-                          defaultValue={profile?.last_name || ''} 
-                          className="border-gray-200" 
-                        />
+                      <div className="p-4 bg-gray-50 rounded-lg">
+                        <div className="flex items-center mb-2">
+                          <Calendar className="h-4 w-4 mr-2 text-heartfelt-burgundy" />
+                          <h3 className="font-medium">Member Since</h3>
+                        </div>
+                        <p className="text-sm text-gray-600">{formatDate(userMetadata?.created_at)}</p>
+                        <p className="text-xs text-gray-400 mt-1">Last login: {formatDate(userMetadata?.last_sign_in_at)}</p>
                       </div>
                     </div>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div className="space-y-2">
-                        <Label htmlFor="email">Email</Label>
-                        <Input 
-                          id="email" 
-                          type="email" 
-                          value={user?.email || ''} 
-                          className="border-gray-200 bg-gray-50" 
-                          disabled
-                        />
-                        <p className="text-xs text-muted-foreground">Email cannot be changed</p>
+
+                    <form className="space-y-6" onSubmit={(e) => {
+                      e.preventDefault();
+                      const formData = new FormData(e.currentTarget);
+                      updateProfile({
+                        first_name: formData.get('first_name') as string,
+                        last_name: formData.get('last_name') as string,
+                        phone: formData.get('phone') as string,
+                      });
+                    }}>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="space-y-2">
+                          <Label htmlFor="first_name">First Name</Label>
+                          <Input 
+                            id="first_name" 
+                            name="first_name"
+                            defaultValue={profile?.first_name || ''} 
+                            className="border-gray-200" 
+                          />
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <Label htmlFor="last_name">Last Name</Label>
+                          <Input 
+                            id="last_name" 
+                            name="last_name"
+                            defaultValue={profile?.last_name || ''} 
+                            className="border-gray-200" 
+                          />
+                        </div>
                       </div>
                       
-                      <div className="space-y-2">
-                        <Label htmlFor="phone">Phone Number</Label>
-                        <Input 
-                          id="phone" 
-                          name="phone"
-                          defaultValue={profile?.phone || ''} 
-                          className="border-gray-200" 
-                          placeholder="+91 1234567890"
-                        />
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="space-y-2">
+                          <Label htmlFor="email">Email</Label>
+                          <Input 
+                            id="email" 
+                            type="email" 
+                            value={user?.email || ''} 
+                            className="border-gray-200 bg-gray-50" 
+                            disabled
+                          />
+                          <p className="text-xs text-muted-foreground">Email cannot be changed</p>
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <Label htmlFor="phone">Phone Number</Label>
+                          <Input 
+                            id="phone" 
+                            name="phone"
+                            defaultValue={profile?.phone || ''} 
+                            className="border-gray-200" 
+                            placeholder="+91 1234567890"
+                          />
+                        </div>
                       </div>
-                    </div>
-                    
-                    <div className="pt-4">
-                      <Button type="submit" className="bg-heartfelt-burgundy hover:bg-heartfelt-dark">
-                        Save Changes
-                      </Button>
-                    </div>
-                  </form>
+                      
+                      <div className="pt-4">
+                        <Button type="submit" className="bg-heartfelt-burgundy hover:bg-heartfelt-dark">
+                          Save Changes
+                        </Button>
+                      </div>
+                    </form>
+                  </>
                 )}
               </div>
             </TabsContent>

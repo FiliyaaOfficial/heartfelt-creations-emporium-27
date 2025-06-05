@@ -9,7 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Palette, Heart, Clock, CheckCircle } from 'lucide-react';
+import { Palette, Heart, Clock, CheckCircle, Upload, Image, ArrowRight, MessageSquare, Sparkles } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
@@ -25,6 +25,7 @@ const formSchema = z.object({
 const Custom = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [inspirationImages, setInspirationImages] = useState<File[]>([]);
   
   const { register, handleSubmit, formState: { errors }, setValue, watch } = useForm({
     resolver: zodResolver(formSchema),
@@ -32,6 +33,19 @@ const Custom = () => {
 
   const selectedBudget = watch('budget');
   const selectedTimeline = watch('timeline');
+
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files || []);
+    if (files.length + inspirationImages.length > 3) {
+      toast.error('You can upload maximum 3 images');
+      return;
+    }
+    setInspirationImages(prev => [...prev, ...files]);
+  };
+
+  const removeImage = (index: number) => {
+    setInspirationImages(prev => prev.filter((_, i) => i !== index));
+  };
 
   const onSubmit = async (data: any) => {
     setIsSubmitting(true);
@@ -91,6 +105,40 @@ const Custom = () => {
             Have something special in mind? Let us create a unique, personalized piece just for you. 
             Our artisans love bringing your vision to life.
           </p>
+        </div>
+
+        {/* How It Works Section */}
+        <div className="mb-16">
+          <h2 className="text-3xl font-serif font-semibold text-center mb-8">How It Works</h2>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div className="text-center">
+              <div className="w-16 h-16 bg-heartfelt-burgundy rounded-full flex items-center justify-center mx-auto mb-4 text-white font-bold text-xl">
+                1
+              </div>
+              <h3 className="font-semibold mb-2">Share Your Vision</h3>
+              <p className="text-sm text-muted-foreground">Tell us about your idea, upload inspiration images, and share your requirements</p>
+            </div>
+            <div className="hidden md:flex items-center justify-center">
+              <ArrowRight className="text-heartfelt-burgundy" size={24} />
+            </div>
+            <div className="text-center">
+              <div className="w-16 h-16 bg-heartfelt-burgundy rounded-full flex items-center justify-center mx-auto mb-4 text-white font-bold text-xl">
+                2
+              </div>
+              <h3 className="font-semibold mb-2">We Design</h3>
+              <p className="text-sm text-muted-foreground">Our artisans create a detailed proposal with sketches and pricing within 24 hours</p>
+            </div>
+            <div className="hidden md:flex items-center justify-center">
+              <ArrowRight className="text-heartfelt-burgundy" size={24} />
+            </div>
+            <div className="text-center">
+              <div className="w-16 h-16 bg-heartfelt-burgundy rounded-full flex items-center justify-center mx-auto mb-4 text-white font-bold text-xl">
+                3
+              </div>
+              <h3 className="font-semibold mb-2">We Craft</h3>
+              <p className="text-sm text-muted-foreground">Once approved, we handcraft your unique piece with love and attention to detail</p>
+            </div>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
@@ -187,6 +235,55 @@ const Custom = () => {
                   {errors.description && <p className="text-sm text-red-500">{errors.description.message as string}</p>}
                 </div>
 
+                {/* Inspiration Images Upload */}
+                <div className="space-y-4">
+                  <Label>Inspiration Images (Optional)</Label>
+                  <div className="border-2 border-dashed border-heartfelt-cream rounded-lg p-6 text-center">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      onChange={handleImageUpload}
+                      className="hidden"
+                      id="image-upload"
+                    />
+                    <label htmlFor="image-upload" className="cursor-pointer">
+                      <div className="flex flex-col items-center">
+                        <Upload className="w-12 h-12 text-heartfelt-burgundy mb-4" />
+                        <p className="text-lg font-medium mb-2">Upload inspiration images</p>
+                        <p className="text-sm text-muted-foreground mb-4">
+                          Share photos of designs, colors, or styles you like (max 3 images)
+                        </p>
+                        <Button type="button" variant="outline" className="border-heartfelt-burgundy text-heartfelt-burgundy">
+                          <Image className="mr-2 h-4 w-4" />
+                          Choose Images
+                        </Button>
+                      </div>
+                    </label>
+                  </div>
+                  
+                  {inspirationImages.length > 0 && (
+                    <div className="grid grid-cols-3 gap-4">
+                      {inspirationImages.map((file, index) => (
+                        <div key={index} className="relative">
+                          <img
+                            src={URL.createObjectURL(file)}
+                            alt={`Inspiration ${index + 1}`}
+                            className="w-full h-24 object-cover rounded-lg"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => removeImage(index)}
+                            className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs"
+                          >
+                            ×
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <Label>Budget Range (Optional)</Label>
@@ -232,7 +329,10 @@ const Custom = () => {
                       Submitting...
                     </div>
                   ) : (
-                    'Submit Custom Order Request'
+                    <>
+                      <Sparkles className="mr-2 h-4 w-4" />
+                      Submit Custom Order Request
+                    </>
                   )}
                 </Button>
               </form>
