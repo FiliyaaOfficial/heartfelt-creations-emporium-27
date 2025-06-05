@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from "uuid";
 import { Product } from "@/types";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface WishlistItem {
   id: string;
@@ -35,34 +36,41 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [isLoading, setIsLoading] = useState(true);
   const [sessionId, setSessionId] = useState<string>("");
   const { toast } = useToast();
+  const { user, isAuthenticated } = useAuth();
 
   // Set up a session ID for anonymous users
   useEffect(() => {
-    const storedSessionId = localStorage.getItem("filiyaa_session_id");
-    if (storedSessionId) {
-      setSessionId(storedSessionId);
-    } else {
-      const newSessionId = uuidv4();
-      localStorage.setItem("filiyaa_session_id", newSessionId);
-      setSessionId(newSessionId);
+    if (!isAuthenticated) {
+      const storedSessionId = localStorage.getItem("filiyaa_session_id");
+      if (storedSessionId) {
+        setSessionId(storedSessionId);
+      } else {
+        const newSessionId = uuidv4();
+        localStorage.setItem("filiyaa_session_id", newSessionId);
+        setSessionId(newSessionId);
+      }
     }
-  }, []);
+  }, [isAuthenticated]);
 
-  // Fetch wishlist items when component mounts
+  // Fetch wishlist items when component mounts or user changes
   useEffect(() => {
-    if (sessionId) {
+    if (isAuthenticated || sessionId) {
       fetchWishlistItems();
     }
-  }, [sessionId]);
+  }, [isAuthenticated, user, sessionId]);
 
   const fetchWishlistItems = async () => {
     setIsLoading(true);
     try {
-      // Get wishlist items by session id
-      const { data: wishlistData, error: wishlistError } = await supabase
-        .from('wishlists')
-        .select('*')
-        .eq("session_id", sessionId);
+      let query = supabase.from('wishlists').select('*');
+      
+      if (isAuthenticated && user) {
+        query = query.eq("user_id", user.id);
+      } else {
+        query = query.eq("session_id", sessionId).is("user_id", null);
+      }
+
+      const { data: wishlistData, error: wishlistError } = await query;
 
       if (wishlistError) throw wishlistError;
 
@@ -117,13 +125,21 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         return Promise.resolve();
       }
 
-      // Add new wishlist item with explicit session_id
+      // Prepare insert data
+      const insertData: any = {
+        product_id: product.id,
+      };
+
+      if (isAuthenticated && user) {
+        insertData.user_id = user.id;
+      } else {
+        insertData.session_id = sessionId;
+      }
+
+      // Add new wishlist item
       const { data, error } = await supabase
         .from('wishlists')
-        .insert({
-          session_id: sessionId,
-          product_id: product.id,
-        })
+        .insert(insertData)
         .select()
         .single();
 
@@ -149,7 +165,6 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         description: `${product.name} has been added to your wishlist`,
       });
       
-      // Successfully added
       return Promise.resolve();
     } catch (error) {
       console.error("Error adding to wishlist:", error);

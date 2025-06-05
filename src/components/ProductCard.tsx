@@ -1,176 +1,220 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Product } from '@/types';
-import { Badge } from './ui/badge';
-import { Heart, ShoppingBag } from 'lucide-react';
-import { useWishlist } from '@/contexts/WishlistContext';
-import { toast } from 'sonner';
-import ProductCardOverlay from './ProductCardOverlay';
-import AddToCartButton from './AddToCartButton';
+
+import React, { useState } from "react";
+import { Link } from "react-router-dom";
+import { Heart, ShoppingBag, Star } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Product } from "@/types";
+import { useCart } from "@/contexts/CartContext";
+import { useWishlist } from "@/contexts/WishlistContext";
+import { toast } from "sonner";
 
 interface ProductCardProps {
   product: Product;
+  className?: string;
 }
 
-const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
-  const { addToWishlist, isInWishlist, removeFromWishlist } = useWishlist();
-  const [isHovered, setIsHovered] = useState(false);
-  const [isAddingToWishlist, setIsAddingToWishlist] = useState(false);
-  
-  const inWishlist = isInWishlist(product.id);
-  
-  const discountPercentage = product.compare_at_price && product.price ? 
-    Math.round((1 - (product.price / product.compare_at_price)) * 100) : 0;
-  
-  const handleWishlistToggle = async (e: React.MouseEvent) => {
+const ProductCard: React.FC<ProductCardProps> = ({ product, className = "" }) => {
+  const [isLoading, setIsLoading] = useState(false);
+  const { addToCart } = useCart();
+  const { addToWishlist, isInWishlist } = useWishlist();
+  const isInWishlistState = isInWishlist(product.id);
+
+  const handleAddToCart = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    
-    if (isAddingToWishlist) return;
-    
+    setIsLoading(true);
     try {
-      setIsAddingToWishlist(true);
-      
-      if (inWishlist) {
-        await removeFromWishlist(product.id);
-        toast.success(`Removed from wishlist`, {
-          description: `${product.name} has been removed from your wishlist`
-        });
-      } else {
-        await addToWishlist(product);
-        toast.success(`Added to wishlist`, {
-          description: `${product.name} has been added to your wishlist`,
-          action: {
-            label: "View Wishlist",
-            onClick: () => window.location.href = "/wishlist"
-          }
-        });
-      }
+      await addToCart(product, 1);
+      toast.success(`${product.name} added to cart`);
     } catch (error) {
-      console.error("Error updating wishlist:", error);
-      toast.error("Could not update wishlist", {
-        description: "There was a problem updating your wishlist"
-      });
+      toast.error("Failed to add to cart");
     } finally {
-      setTimeout(() => {
-        setIsAddingToWishlist(false);
-      }, 1000);
+      setIsLoading(false);
+    }
+  };
+
+  const handleAddToWishlist = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    try {
+      await addToWishlist(product);
+    } catch (error) {
+      // Error handling is done in the context
     }
   };
 
   const renderBadges = () => {
-    if (!product.badges || product.badges.length === 0) return null;
+    const badges = [];
     
-    return (
-      <div className="absolute top-2 left-2 z-10 flex flex-col gap-1">
-        {product.badges.map((badge, index) => {
-          let badgeClass = "bg-gray-500";
-          
-          if (badge.toLowerCase() === 'new') {
-            badgeClass = "bg-heartfelt-burgundy";
-          } else if (badge.toLowerCase() === 'sale') {
-            badgeClass = "bg-heartfelt-pink";
-          } else if (badge.toLowerCase() === 'bestseller') {
-            badgeClass = "bg-amber-500";
-          } else if (badge.toLowerCase() === 'customizable') {
-            badgeClass = "bg-indigo-500";
-          }
-          
-          return (
-            <Badge key={index} className={`${badgeClass} text-white capitalize`}>
-              {badge}
-            </Badge>
-          );
-        })}
-        
-        {product.is_new && !product.badges.includes('new') && (
-          <Badge className="bg-heartfelt-burgundy text-white">New</Badge>
-        )}
-        
-        {product.is_bestseller && !product.badges.includes('bestseller') && (
-          <Badge className="bg-amber-500 text-white">Bestseller</Badge>
-        )}
-        
-        {product.is_customizable && !product.badges.includes('customizable') && (
-          <Badge className="bg-indigo-500 text-white">Customizable</Badge>
-        )}
-      </div>
-    );
+    // Add custom badges from product.badges array
+    if (product.badges && product.badges.length > 0) {
+      product.badges.forEach((badge) => {
+        badges.push(
+          <Badge key={badge} variant="secondary" className="text-xs bg-heartfelt-burgundy/10 text-heartfelt-burgundy">
+            {badge}
+          </Badge>
+        );
+      });
+    }
+    
+    // Add status badges based on boolean flags (avoid duplicates)
+    const statusBadges = [];
+    if (product.is_new) statusBadges.push("New");
+    if (product.is_bestseller) statusBadges.push("Bestseller");
+    if (product.is_featured) statusBadges.push("Featured");
+    
+    // Only add customizable badge if it's not already in the badges array
+    if (product.is_customizable && !product.badges?.some(badge => badge.toLowerCase().includes('custom'))) {
+      statusBadges.push("Customizable");
+    }
+    
+    statusBadges.forEach((badge) => {
+      badges.push(
+        <Badge key={badge} variant="secondary" className="text-xs bg-heartfelt-burgundy/10 text-heartfelt-burgundy">
+          {badge}
+        </Badge>
+      );
+    });
+    
+    return badges;
+  };
+
+  const formatPrice = (price: number) => {
+    return new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(price);
   };
 
   return (
-    <div 
-      className="group relative rounded-xl overflow-hidden border border-heartfelt-cream/50 bg-white hover:shadow-md transition-all duration-300"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
+    <div className={`group relative bg-white rounded-xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100 hover:border-heartfelt-cream ${className}`}>
       <Link to={`/product/${product.id}`} className="block">
-        {/* Product Image */}
-        <div className="aspect-square relative overflow-hidden bg-gray-100">
-          <img 
-            src={product.image_url || '/placeholder.svg'} 
-            alt={product.name} 
-            className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
+        {/* Image Container */}
+        <div className="relative aspect-square overflow-hidden bg-gray-50">
+          <img
+            src={product.image_url || "/placeholder.svg"}
+            alt={product.name}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            onError={(e) => {
+              const target = e.target as HTMLImageElement;
+              target.src = "/placeholder.svg";
+            }}
           />
           
           {/* Badges */}
-          {renderBadges()}
-          
-          {/* Discount badge */}
-          {discountPercentage > 0 && (
-            <div className="absolute top-2 right-12 bg-heartfelt-pink text-white text-xs font-bold px-2 py-1 rounded-md">
-              {discountPercentage}% OFF
+          {renderBadges().length > 0 && (
+            <div className="absolute top-3 left-3 flex flex-wrap gap-1 max-w-[calc(100%-6rem)]">
+              {renderBadges()}
             </div>
           )}
           
-          {/* Wishlist button */}
-          <button 
-            onClick={handleWishlistToggle}
-            className={`absolute top-2 right-2 p-2 rounded-full 
-              ${inWishlist 
-                ? 'bg-heartfelt-pink text-white' 
-                : 'bg-white/80 backdrop-blur-sm text-gray-700 hover:text-heartfelt-burgundy'} 
-              shadow-sm z-10`}
-            aria-label={inWishlist ? "Remove from wishlist" : "Add to wishlist"}
+          {/* Wishlist Button */}
+          <button
+            onClick={handleAddToWishlist}
+            className="absolute top-3 right-3 p-2 bg-white/90 hover:bg-white rounded-full shadow-sm transition-all duration-200 group/heart"
+            aria-label="Add to wishlist"
           >
-            {isAddingToWishlist ? (
-              <span className="h-5 w-5 border-2 border-current border-t-transparent rounded-full animate-spin block"></span>
-            ) : (
-              <Heart size={20} className={inWishlist ? "fill-white" : ""} />
-            )}
+            <Heart 
+              size={18} 
+              className={`transition-colors duration-200 ${
+                isInWishlistState 
+                  ? "text-heartfelt-pink fill-heartfelt-pink" 
+                  : "text-gray-600 group-hover/heart:text-heartfelt-pink"
+              }`} 
+            />
           </button>
           
-          {/* Hover overlay with actions */}
-          {isHovered && <ProductCardOverlay product={product} />}
-        </div>
-
-        {/* Product details */}
-        <div className="p-3">
-          <h3 className="font-medium text-gray-800 mb-1 line-clamp-1">{product.name}</h3>
-          
-          <div className="flex justify-between items-center mb-2">
-            {product.compare_at_price && product.compare_at_price > product.price ? (
-              <div className="flex gap-2 items-center">
-                <span className="font-semibold text-heartfelt-burgundy">₹{product.price.toFixed(2)}</span>
-                <span className="text-gray-500 text-sm line-through">₹{product.compare_at_price.toFixed(2)}</span>
-              </div>
-            ) : (
-              <span className="font-semibold">₹{product.price.toFixed(2)}</span>
-            )}
+          {/* Quick Add to Cart - appears on hover */}
+          <div className="absolute bottom-3 left-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            <Button
+              onClick={handleAddToCart}
+              disabled={isLoading || product.stock_quantity === 0}
+              className="w-full bg-heartfelt-burgundy hover:bg-heartfelt-dark text-white py-2 text-sm font-medium"
+              size="sm"
+            >
+              {isLoading ? (
+                <div className="flex items-center space-x-2">
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  <span>Adding...</span>
+                </div>
+              ) : product.stock_quantity === 0 ? (
+                "Out of Stock"
+              ) : (
+                <>
+                  <ShoppingBag size={16} className="mr-2" />
+                  Add to Cart
+                </>
+              )}
+            </Button>
           </div>
         </div>
+        
+        {/* Product Info */}
+        <div className="p-4 space-y-3">
+          <div>
+            <h3 className="font-medium text-gray-900 line-clamp-2 group-hover:text-heartfelt-burgundy transition-colors duration-200">
+              {product.name}
+            </h3>
+            {product.description && (
+              <p className="text-sm text-gray-500 line-clamp-2 mt-1">
+                {product.description}
+              </p>
+            )}
+          </div>
+          
+          {/* Rating */}
+          {product.rating && (
+            <div className="flex items-center space-x-1">
+              <div className="flex items-center">
+                {[...Array(5)].map((_, i) => (
+                  <Star
+                    key={i}
+                    size={14}
+                    className={`${
+                      i < Math.floor(product.rating || 0)
+                        ? "text-yellow-400 fill-yellow-400"
+                        : "text-gray-300"
+                    }`}
+                  />
+                ))}
+              </div>
+              <span className="text-sm text-gray-600">
+                ({product.review_count || 0})
+              </span>
+            </div>
+          )}
+          
+          {/* Price */}
+          <div className="flex items-center space-x-2">
+            <span className="text-lg font-semibold text-heartfelt-burgundy">
+              {formatPrice(product.price)}
+            </span>
+            {product.compare_at_price && product.compare_at_price > product.price && (
+              <span className="text-sm text-gray-400 line-through">
+                {formatPrice(product.compare_at_price)}
+              </span>
+            )}
+          </div>
+          
+          {/* Stock Status */}
+          {product.stock_quantity !== undefined && (
+            <div className="text-xs">
+              {product.stock_quantity === 0 ? (
+                <span className="text-red-500 font-medium">Out of Stock</span>
+              ) : product.stock_quantity <= 5 ? (
+                <span className="text-orange-500 font-medium">
+                  Only {product.stock_quantity} left
+                </span>
+              ) : (
+                <span className="text-green-600 font-medium">In Stock</span>
+              )}
+            </div>
+          )}
+        </div>
       </Link>
-      
-      {/* Quick add button (shown on mobile, where hover doesn't work well) */}
-      <div className="p-3 pt-0 md:hidden">
-        <AddToCartButton 
-          product={product} 
-          quantity={1}
-          variant="outline"
-          size="sm"
-          className="w-full border-heartfelt-burgundy/50 text-heartfelt-burgundy hover:bg-heartfelt-burgundy/10"
-        />
-      </div>
     </div>
   );
 };
