@@ -160,7 +160,14 @@ const Account = () => {
       if (error) throw error;
       
       console.log('Orders data:', ordersData);
-      setOrders(ordersData || []);
+      
+      // Cast the data to match our Order interface
+      const typedOrders: Order[] = (ordersData || []).map(order => ({
+        ...order,
+        status: order.status as Order['status'] // Cast to the specific union type
+      }));
+      
+      setOrders(typedOrders);
     } catch (error) {
       console.error('Error fetching orders:', error);
       toast.error('Failed to load order history');
