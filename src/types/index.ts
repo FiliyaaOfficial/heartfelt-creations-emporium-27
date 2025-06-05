@@ -95,25 +95,29 @@ export interface ShippingAddress {
   phone?: string;
 }
 
+// Updated Order interface to match database schema
 export interface Order {
   id: string;
   user_id?: string;
-  items: CartItem[];
+  customer_name: string;
+  customer_email: string;
   status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
-  shipping_address: ShippingAddress;
-  billing_address: ShippingAddress;
-  payment_method: string;
-  subtotal: number;
-  shipping_cost: number;
-  tax: number;
-  total: number;
-  total_amount?: number;
-  placed_at: string;
-  created_at?: string;
-  updated_at?: string;
+  payment_method?: string;
   payment_status?: string;
-  contact_email?: string;
-  contact_phone?: string;
+  shipping_address?: any; // JSON field from database
+  total_amount: number;
+  created_at: string;
+  order_items?: OrderItem[]; // Relation to order items
+}
+
+export interface OrderItem {
+  id: string;
+  order_id: string;
+  product_id: string;
+  quantity: number;
+  price: number;
+  created_at?: string;
+  products?: Product; // Relation to product
 }
 
 export interface User {

@@ -32,14 +32,6 @@ import {
 import { Link, useNavigate } from "react-router-dom";
 import { Order } from "@/types";
 import ProductCard from "@/components/ProductCard";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 
 interface UserProfile {
   id: string;
@@ -553,10 +545,10 @@ const Account = () => {
                         {/* Order Items Preview */}
                         <div className="border-t pt-4">
                           <p className="text-sm text-gray-600 mb-2">
-                            Items: {(order as any).order_items?.length || 0}
+                            Items: {order.order_items?.length || 0}
                           </p>
                           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-                            {(order as any).order_items?.slice(0, 3).map((item: any) => (
+                            {order.order_items?.slice(0, 3).map((item) => (
                               <div key={item.id} className="flex items-center space-x-2 text-sm">
                                 <img 
                                   src={item.products?.image_url || "/placeholder.svg"} 
@@ -567,9 +559,9 @@ const Account = () => {
                                 <span className="text-gray-500">×{item.quantity}</span>
                               </div>
                             ))}
-                            {(order as any).order_items?.length > 3 && (
+                            {(order.order_items?.length || 0) > 3 && (
                               <span className="text-sm text-gray-500">
-                                +{(order as any).order_items.length - 3} more
+                                +{(order.order_items?.length || 0) - 3} more
                               </span>
                             )}
                           </div>
