@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { User, Session } from '@supabase/supabase-js';
@@ -61,7 +60,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
           // Handle successful sign in
           if (event === 'SIGNED_IN' && currentSession) {
-            toast.success('Successfully signed in with Google!');
+            if (currentSession.user?.app_metadata?.provider === 'google') {
+              toast.success('Successfully signed in with Google!');
+            } else {
+              toast.success('Successfully signed in!');
+            }
           }
         }
       }
@@ -77,14 +80,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const signUp = async (email: string, password: string, metadata?: { first_name?: string; last_name?: string }) => {
     try {
+      const redirectUrl = `${window.location.origin}/auth/callback`;
       const { error } = await supabase.auth.signUp({
         email,
         password,
         options: {
           data: metadata,
-          emailRedirectTo: `${window.location.origin}/auth/callback`
+          emailRedirectTo: redirectUrl
         }
       });
+      
+      if (!error) {
+        toast.success('Sign up successful! Please check your email to confirm your account.');
+      }
+      
       return { error };
     } catch (error) {
       return { error };
@@ -123,9 +132,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       if (error) {
         console.error("Google sign-in error:", error);
-        toast.error('Google sign in failed', { 
-          description: error.message 
-        });
+        if (error.message.includes('provider is not enabled')) {
+          toast.error('Google sign-in is not configured. Please contact support or use email/password login.');
+        } else {
+          toast.error('Google sign in failed', { 
+            description: error.message 
+          });
+        }
       } else {
         console.log('Google sign-in initiated successfully', data);
       }
