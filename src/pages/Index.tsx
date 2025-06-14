@@ -1,8 +1,8 @@
-
 import React, { useState, useEffect, lazy, Suspense } from 'react';
 import Hero from '@/components/Hero';
 import CategorySection from '@/components/CategorySection';
 import ProductPromoBanner from '@/components/ProductPromoBanner';
+import FeaturedProducts from '@/components/FeaturedProducts';
 import { supabase } from '@/integrations/supabase/client';
 import { Product as ProductType } from '@/types';
 import ProductCard from '@/components/ProductCard';
@@ -12,7 +12,6 @@ import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 
 // Lazy load heavy components
-const FeaturedProducts = lazy(() => import('@/components/FeaturedProducts'));
 const Testimonials = lazy(() => import('@/components/Testimonials'));
 const CustomOrderCta = lazy(() => import('@/components/CustomOrderCta'));
 const CategoryFeaturedSection = lazy(() => import('@/components/CategoryFeaturedSection'));
@@ -129,9 +128,7 @@ const Index = () => {
       <ProductPromoBanner />
       <CategorySection />
       
-      <Suspense fallback={<div className="h-64 flex items-center justify-center"><div className="animate-spin h-8 w-8 border-4 border-heartfelt-burgundy border-t-transparent rounded-full"></div></div>}>
-        <FeaturedProducts />
-      </Suspense>
+      <FeaturedProducts />
       
       {renderProductSection(
         "New Arrivals",
