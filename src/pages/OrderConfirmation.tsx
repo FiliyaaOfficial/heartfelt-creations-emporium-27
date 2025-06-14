@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ShippingAddress } from '@/types';
-import { formatCurrency } from '@/lib/utils';
+import { useCurrency } from '@/hooks/useCurrency';
 import { Button } from '@/components/ui/button';
 import { CheckCircle } from 'lucide-react';
 
@@ -19,6 +19,7 @@ const OrderConfirmation = () => {
   const [order, setOrder] = useState<OrderWithoutItems | null>(null);
   const [loading, setLoading] = useState(true);
   const { orderId } = useParams();
+  const { formatCurrency } = useCurrency();
 
   useEffect(() => {
     const fetchOrder = async () => {

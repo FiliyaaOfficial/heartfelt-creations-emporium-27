@@ -2,7 +2,8 @@
 import React from 'react';
 import { CartItem } from '@/types';
 import { Button } from '@/components/ui/button';
-import { IndianRupee, Truck, CreditCard, Shield, Loader2 } from 'lucide-react';
+import { Truck, CreditCard, Shield, Loader2 } from 'lucide-react';
+import { useCurrency } from '@/hooks/useCurrency';
 
 interface OrderSummaryProps {
   cartItems: CartItem[];
@@ -17,6 +18,7 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
   loading, 
   handleSubmit 
 }) => {
+  const { formatCurrency, currencyConfig } = useCurrency();
   const shippingCost = 0;
   const tax = subtotal * 0.18;
   const total = subtotal + shippingCost + tax;
@@ -34,6 +36,7 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
                   src={item.product.image_url} 
                   alt={item.product.name} 
                   className="h-full w-full object-cover"
+                  loading="lazy"
                 />
               </div>
               <div className="ml-3 flex-grow">
@@ -42,8 +45,7 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
               </div>
               <div className="font-medium text-right ml-2">
                 <div className="flex items-center">
-                  <IndianRupee size={12} />
-                  {(item.product.price * item.quantity).toFixed(2)}
+                  <span>{formatCurrency(item.product.price * item.quantity)}</span>
                 </div>
               </div>
             </div>
@@ -53,18 +55,12 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
         <div className="space-y-3 pt-2">
           <div className="flex justify-between">
             <span className="text-muted-foreground">Subtotal</span>
-            <div className="flex items-center">
-              <IndianRupee size={12} />
-              <span>{subtotal.toFixed(2)}</span>
-            </div>
+            <span>{formatCurrency(subtotal)}</span>
           </div>
           
           <div className="flex justify-between">
             <span className="text-muted-foreground">GST (18%)</span>
-            <div className="flex items-center">
-              <IndianRupee size={12} />
-              <span>{tax.toFixed(2)}</span>
-            </div>
+            <span>{formatCurrency(tax)}</span>
           </div>
           
           <div className="flex justify-between">
@@ -75,9 +71,8 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
           <div className="pt-3 border-t border-dashed">
             <div className="flex justify-between font-semibold">
               <span>Total</span>
-              <div className="flex items-center text-heartfelt-burgundy text-lg">
-                <IndianRupee size={14} />
-                <span>{total.toFixed(2)}</span>
+              <div className="text-heartfelt-burgundy text-lg">
+                {formatCurrency(total)}
               </div>
             </div>
           </div>

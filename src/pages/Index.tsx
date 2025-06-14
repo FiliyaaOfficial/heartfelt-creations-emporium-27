@@ -1,19 +1,21 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
 import Hero from '@/components/Hero';
 import CategorySection from '@/components/CategorySection';
-import FeaturedProducts from '@/components/FeaturedProducts';
-import Testimonials from '@/components/Testimonials';
-import CustomOrderCta from '@/components/CustomOrderCta';
-import CategoryFeaturedSection from '@/components/CategoryFeaturedSection';
+import ProductPromoBanner from '@/components/ProductPromoBanner';
 import { supabase } from '@/integrations/supabase/client';
 import { Product as ProductType } from '@/types';
 import ProductCard from '@/components/ProductCard';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Star, Sparkles, Clock, TrendingUp } from 'lucide-react';
+import { ArrowRight, Clock, TrendingUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
-import ProductPromoBanner from '@/components/ProductPromoBanner';
+
+// Lazy load heavy components
+const FeaturedProducts = lazy(() => import('@/components/FeaturedProducts'));
+const Testimonials = lazy(() => import('@/components/Testimonials'));
+const CustomOrderCta = lazy(() => import('@/components/CustomOrderCta'));
+const CategoryFeaturedSection = lazy(() => import('@/components/CategoryFeaturedSection'));
 
 const Index = () => {
   const [newArrivals, setNewArrivals] = useState<ProductType[]>([]);
@@ -70,13 +72,13 @@ const Index = () => {
     link: string,
     icon: React.ReactNode
   ) => (
-    <section className="py-16 bg-white relative overflow-hidden px-4">
+    <section className="py-12 bg-white relative overflow-hidden px-4">
       {/* Decorative elements */}
-      <div className="absolute top-40 left-0 w-64 h-64 rounded-full bg-heartfelt-cream/20 blur-3xl -z-10"></div>
-      <div className="absolute bottom-20 right-0 w-80 h-80 rounded-full bg-heartfelt-burgundy/5 blur-3xl -z-10"></div>
+      <div className="absolute top-20 left-0 w-32 h-32 rounded-full bg-heartfelt-cream/20 blur-2xl -z-10"></div>
+      <div className="absolute bottom-10 right-0 w-40 h-40 rounded-full bg-heartfelt-burgundy/5 blur-2xl -z-10"></div>
       
       <div className="container mx-auto">
-        <div className="flex justify-between items-center mb-10">
+        <div className="flex justify-between items-center mb-8">
           <div>
             <div className="flex items-center gap-2 mb-2">
               {icon}
@@ -110,7 +112,7 @@ const Index = () => {
           )}
         </div>
 
-        <div className="mt-10 text-center">
+        <div className="mt-8 text-center">
           <Link to={link}>
             <Button variant="outline" className="border-heartfelt-burgundy text-heartfelt-burgundy hover:bg-heartfelt-burgundy/5">
               View All {title} <ArrowRight size={16} className="ml-1" />
@@ -126,7 +128,10 @@ const Index = () => {
       <Hero />
       <ProductPromoBanner />
       <CategorySection />
-      <FeaturedProducts />
+      
+      <Suspense fallback={<div className="h-64 flex items-center justify-center"><div className="animate-spin h-8 w-8 border-4 border-heartfelt-burgundy border-t-transparent rounded-full"></div></div>}>
+        <FeaturedProducts />
+      </Suspense>
       
       {renderProductSection(
         "New Arrivals",
@@ -144,9 +149,17 @@ const Index = () => {
         <TrendingUp size={24} className="text-heartfelt-burgundy" />
       )}
       
-      <CategoryFeaturedSection />
-      <Testimonials />
-      <CustomOrderCta />
+      <Suspense fallback={<div className="h-32 flex items-center justify-center"><div className="animate-spin h-6 w-6 border-4 border-heartfelt-burgundy border-t-transparent rounded-full"></div></div>}>
+        <CategoryFeaturedSection />
+      </Suspense>
+      
+      <Suspense fallback={<div className="h-32 flex items-center justify-center"><div className="animate-spin h-6 w-6 border-4 border-heartfelt-burgundy border-t-transparent rounded-full"></div></div>}>
+        <Testimonials />
+      </Suspense>
+      
+      <Suspense fallback={<div className="h-32 flex items-center justify-center"><div className="animate-spin h-6 w-6 border-4 border-heartfelt-burgundy border-t-transparent rounded-full"></div></div>}>
+        <CustomOrderCta />
+      </Suspense>
     </div>
   );
 };

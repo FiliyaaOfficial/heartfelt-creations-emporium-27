@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, memo } from "react";
 import { Link } from "react-router-dom";
 import { Heart, ShoppingBag, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Product } from "@/types";
 import { useCart } from "@/contexts/CartContext";
 import { useWishlist } from "@/contexts/WishlistContext";
+import { useCurrency } from "@/hooks/useCurrency";
 import { toast } from "sonner";
 
 interface ProductCardProps {
@@ -14,10 +15,11 @@ interface ProductCardProps {
   className?: string;
 }
 
-const ProductCard: React.FC<ProductCardProps> = ({ product, className = "" }) => {
+const ProductCard: React.FC<ProductCardProps> = memo(({ product, className = "" }) => {
   const [isLoading, setIsLoading] = useState(false);
   const { addToCart } = useCart();
   const { addToWishlist, isInWishlist } = useWishlist();
+  const { formatCurrency } = useCurrency();
   const isInWishlistState = isInWishlist(product.id);
 
   const handleAddToCart = async (e: React.MouseEvent) => {
@@ -80,15 +82,6 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, className = "" }) =>
     return badges;
   };
 
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('en-IN', {
-      style: 'currency',
-      currency: 'INR',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(price);
-  };
-
   return (
     <div className={`group relative bg-white rounded-xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100 hover:border-heartfelt-cream ${className}`}>
       <Link to={`/product/${product.id}`} className="block">
@@ -98,6 +91,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, className = "" }) =>
             src={product.image_url || "/placeholder.svg"}
             alt={product.name}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            loading="lazy"
             onError={(e) => {
               const target = e.target as HTMLImageElement;
               target.src = "/placeholder.svg";
@@ -190,11 +184,11 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, className = "" }) =>
           {/* Price */}
           <div className="flex items-center space-x-2">
             <span className="text-lg font-semibold text-heartfelt-burgundy">
-              {formatPrice(product.price)}
+              {formatCurrency(product.price)}
             </span>
             {product.compare_at_price && product.compare_at_price > product.price && (
               <span className="text-sm text-gray-400 line-through">
-                {formatPrice(product.compare_at_price)}
+                {formatCurrency(product.compare_at_price)}
               </span>
             )}
           </div>
@@ -217,6 +211,8 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, className = "" }) =>
       </Link>
     </div>
   );
-};
+});
+
+ProductCard.displayName = 'ProductCard';
 
 export default ProductCard;

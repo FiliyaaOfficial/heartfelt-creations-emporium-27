@@ -4,10 +4,11 @@ import { useCart } from '@/contexts/CartContext';
 import { Button } from '@/components/ui/button';
 import { Minus, Plus, Trash2, ArrowRight, ShoppingBag } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { formatCurrency } from '@/lib/utils';
+import { useCurrency } from '@/hooks/useCurrency';
 
 const Cart = () => {
   const { cartItems, updateQuantity, removeFromCart, isLoading, subtotal } = useCart();
+  const { formatCurrency } = useCurrency();
 
   return (
     <div className="container mx-auto px-4 py-8 md:py-12">
@@ -53,6 +54,7 @@ const Cart = () => {
                               src={item.product.image_url} 
                               alt={item.product.name} 
                               className="h-16 w-16 object-cover rounded"
+                              loading="lazy"
                             />
                             <div>
                               <h3 className="font-medium">{item.product.name}</h3>
