@@ -10,6 +10,7 @@ import { WishlistProvider } from "@/contexts/WishlistContext";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { useKeepAlive } from "@/hooks/useKeepAlive";
 import CheckoutProtection from "@/components/CheckoutProtection";
+import AuthGuard from "@/components/AuthGuard";
 import Layout from "@/components/Layout";
 import Index from "./pages/Index";
 import Shop from "./pages/Shop";
@@ -60,25 +61,35 @@ function AppContent() {
         <Route path="/cart" element={<Cart />} />
         <Route path="/wishlist" element={<Wishlist />} />
         <Route path="/checkout" element={
-          <CheckoutProtection>
-            <Checkout />
-          </CheckoutProtection>
+          <AuthGuard>
+            <CheckoutProtection>
+              <Checkout />
+            </CheckoutProtection>
+          </AuthGuard>
         } />
         <Route path="/order-confirmation" element={
-          <CheckoutProtection>
-            <OrderConfirmation />
-          </CheckoutProtection>
+          <AuthGuard>
+            <CheckoutProtection>
+              <OrderConfirmation />
+            </CheckoutProtection>
+          </AuthGuard>
         } />
         <Route path="/order-confirmation/:orderId" element={
-          <CheckoutProtection>
-            <OrderConfirmation />
-          </CheckoutProtection>
+          <AuthGuard>
+            <CheckoutProtection>
+              <OrderConfirmation />
+            </CheckoutProtection>
+          </AuthGuard>
         } />
         <Route path="/custom" element={<Custom />} />
         <Route path="/blog" element={<Blog />} />
         <Route path="/blog/:slug" element={<BlogPost />} />
         <Route path="/support" element={<Support />} />
-        <Route path="/account" element={<Account />} />
+        <Route path="/account" element={
+          <AuthGuard>
+            <Account />
+          </AuthGuard>
+        } />
         <Route path="/auth" element={<Auth />} />
         <Route path="/auth/callback" element={<AuthCallback />} />
         <Route path="/search" element={<Search />} />

@@ -1,13 +1,23 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Search, ShoppingBag, Heart, Menu, X, User } from 'lucide-react';
+import { Search, ShoppingBag, Heart, Menu, X, User, LogOut } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
 import { Input } from '@/components/ui/input';
 import { useWishlist } from '@/contexts/WishlistContext';
 import { cn } from '@/lib/utils';
 import NavCategoriesMenu from './NavCategoriesMenu';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useAuth } from '@/contexts/AuthContext';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -15,6 +25,7 @@ const Navbar = () => {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const { totalItems } = useCart();
   const { totalItems: wishlistItems } = useWishlist();
+  const { user, isAuthenticated, signOut } = useAuth();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const location = useLocation();
@@ -43,6 +54,22 @@ const Navbar = () => {
       navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
       setIsSearchOpen(false);
     }
+  };
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/');
+  };
+
+  const getUserInitials = () => {
+    if (!user) return 'U';
+    const name = user.user_metadata?.full_name || user.email || '';
+    return name.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2);
+  };
+
+  const getUserDisplayName = () => {
+    if (!user) return 'User';
+    return user.user_metadata?.full_name || user.email || 'User';
   };
 
   useEffect(() => {
@@ -207,11 +234,52 @@ const Navbar = () => {
             )}
           </Link>
           
-          <Link to="/account">
-            <Button variant="ghost" size="icon" className="text-gray-700 hover:text-heartfelt-burgundy transition-colors">
-              <User size={isMobile ? 18 : 20} />
-            </Button>
-          </Link>
+          {isAuthenticated ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="text-gray-700 hover:text-heartfelt-burgundy transition-colors">
+                  <Avatar className="h-8 w-8">
+                    <AvatarImage src={user?.user_metadata?.avatar_url} />
+                    <AvatarFallback className="bg-heartfelt-burgundy text-white text-xs">
+                      {getUserInitials()}
+                    </AvatarFallback>
+                  </Avatar>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <div className="flex items-center justify-start gap-2 p-2">
+                  <Avatar className="h-8 w-8">
+                    <AvatarImage src={user?.user_metadata?.avatar_url} />
+                    <AvatarFallback className="bg-heartfelt-burgundy text-white text-xs">
+                      {getUserInitials()}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex flex-col space-y-1 leading-none">
+                    <p className="font-medium text-sm">{getUserDisplayName()}</p>
+                    <p className="text-xs text-muted-foreground">{user?.email}</p>
+                  </div>
+                </div>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <Link to="/account" className="cursor-pointer">
+                    <User className="mr-2 h-4 w-4" />
+                    <span>Account</span>
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer text-red-600">
+                  <LogOut className="mr-2 h-4 w-4" />
+                  <span>Sign out</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <Link to="/auth">
+              <Button variant="ghost" size="icon" className="text-gray-700 hover:text-heartfelt-burgundy transition-colors">
+                <User size={isMobile ? 18 : 20} />
+              </Button>
+            </Link>
+          )}
 
           <button
             className="md:hidden text-gray-700 hover:text-heartfelt-burgundy transition-colors p-1"
@@ -319,6 +387,16 @@ const Navbar = () => {
               >
                 Support
               </Link>
+              
+              {!isAuthenticated && (
+                <Link 
+                  to="/auth" 
+                  className="text-base font-medium py-3 px-4 rounded-lg transition-all duration-200 border-b border-gray-100 text-heartfelt-burgundy hover:bg-heartfelt-cream/30"
+                  onClick={toggleMenu}
+                >
+                  Sign in with Google
+                </Link>
+              )}
             </nav>
           </div>
         </div>

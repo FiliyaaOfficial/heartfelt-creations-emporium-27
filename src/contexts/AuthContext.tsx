@@ -58,6 +58,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           if (loading) {
             setLoading(false);
           }
+
+          // Handle successful sign in
+          if (event === 'SIGNED_IN' && currentSession) {
+            toast.success('Successfully signed in with Google!');
+          }
         }
       }
     );
@@ -181,6 +186,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const signOut = async () => {
     await supabase.auth.signOut();
+    toast.success('Signed out successfully');
   };
 
   const value = {
