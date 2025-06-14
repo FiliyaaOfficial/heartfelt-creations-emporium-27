@@ -23,31 +23,46 @@ const Blog = () => {
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [featuredPost, setFeaturedPost] = useState<BlogPost | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchPosts = async () => {
       setIsLoading(true);
+      setError(null);
+      
       try {
-        const { data: blogPosts, error } = await supabase
+        console.log('Fetching blog posts from Supabase...');
+        
+        const { data: blogPosts, error: fetchError } = await supabase
           .from('blog_posts')
           .select('*')
           .eq('is_published', true)
           .order('published_at', { ascending: false });
         
-        if (error) {
-          console.error('Error fetching blog posts:', error);
+        console.log('Supabase response:', { blogPosts, fetchError });
+        
+        if (fetchError) {
+          console.error('Error fetching blog posts:', fetchError);
+          setError(`Failed to fetch blog posts: ${fetchError.message}`);
           return;
         }
 
         if (blogPosts && blogPosts.length > 0) {
+          console.log(`Successfully fetched ${blogPosts.length} blog posts`);
+          
           // Set featured post to the first one
           setFeaturedPost(blogPosts[0]);
           
           // Set the rest as regular posts
           setPosts(blogPosts.slice(1));
+        } else {
+          console.log('No blog posts found');
+          setFeaturedPost(null);
+          setPosts([]);
         }
       } catch (error) {
         console.error('Error fetching blog posts:', error);
+        setError('An unexpected error occurred while fetching blog posts');
       } finally {
         setIsLoading(false);
       }
@@ -66,6 +81,21 @@ const Blog = () => {
       <div className="min-h-screen flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-heartfelt-burgundy mr-2" />
         <span className="text-lg">Loading blog posts...</span>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center flex-col">
+        <h2 className="text-2xl mb-4 text-red-600">Error Loading Blog Posts</h2>
+        <p className="text-gray-600 mb-4">{error}</p>
+        <Button 
+          onClick={() => window.location.reload()} 
+          className="bg-heartfelt-burgundy hover:bg-heartfelt-dark"
+        >
+          Try Again
+        </Button>
       </div>
     );
   }
@@ -135,9 +165,9 @@ const Blog = () => {
       {/* Recent Posts */}
       <div className="container mx-auto px-4 py-12">
         <h2 className="text-2xl font-serif font-medium mb-8">Recent Articles</h2>
-        {posts.length === 0 ? (
+        {posts.length === 0 && !featuredPost ? (
           <div className="text-center py-12">
-            <p className="text-lg text-muted-foreground">No recent articles available at the moment.</p>
+            <p className="text-lg text-muted-foreground">No blog posts available at the moment.</p>
           </div>
         ) : (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
