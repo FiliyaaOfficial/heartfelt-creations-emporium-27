@@ -179,53 +179,6 @@ export type Database = {
         }
         Relationships: []
       }
-      email_notifications: {
-        Row: {
-          content: string
-          created_at: string
-          email_type: string
-          error_message: string | null
-          id: string
-          order_id: string
-          recipient_email: string
-          sent_at: string | null
-          status: string
-          subject: string
-        }
-        Insert: {
-          content: string
-          created_at?: string
-          email_type: string
-          error_message?: string | null
-          id?: string
-          order_id: string
-          recipient_email: string
-          sent_at?: string | null
-          status?: string
-          subject: string
-        }
-        Update: {
-          content?: string
-          created_at?: string
-          email_type?: string
-          error_message?: string | null
-          id?: string
-          order_id?: string
-          recipient_email?: string
-          sent_at?: string | null
-          status?: string
-          subject?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "email_notifications_order_id_fkey"
-            columns: ["order_id"]
-            isOneToOne: false
-            referencedRelation: "orders"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       order_items: {
         Row: {
           created_at: string | null
@@ -414,50 +367,6 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
-      }
-      shipments: {
-        Row: {
-          actual_delivery_date: string | null
-          carrier: string
-          created_at: string
-          estimated_delivery_date: string | null
-          id: string
-          notes: string | null
-          order_id: string
-          tracking_number: string
-          updated_at: string
-        }
-        Insert: {
-          actual_delivery_date?: string | null
-          carrier: string
-          created_at?: string
-          estimated_delivery_date?: string | null
-          id?: string
-          notes?: string | null
-          order_id: string
-          tracking_number: string
-          updated_at?: string
-        }
-        Update: {
-          actual_delivery_date?: string | null
-          carrier?: string
-          created_at?: string
-          estimated_delivery_date?: string | null
-          id?: string
-          notes?: string | null
-          order_id?: string
-          tracking_number?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "shipments_order_id_fkey"
-            columns: ["order_id"]
-            isOneToOne: false
-            referencedRelation: "orders"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       support_messages: {
         Row: {
