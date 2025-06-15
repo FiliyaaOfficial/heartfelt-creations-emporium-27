@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -100,6 +99,13 @@ const Custom = () => {
     console.log('Form data being submitted:', data);
     
     try {
+      // Validate that occasion is selected
+      if (!data.occasion) {
+        toast.error('Please select an occasion');
+        setIsSubmitting(false);
+        return;
+      }
+
       // Upload images first
       let imageUrls: string[] = [];
       if (inspirationImages.length > 0) {
@@ -139,16 +145,27 @@ const Custom = () => {
       console.log('Supabase response:', { result, error });
 
       if (error) {
-        console.error('Supabase error:', error);
+        console.error('Supabase error details:', {
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code
+        });
         throw error;
       }
 
       console.log('Custom order inserted successfully:', result);
       setSubmitted(true);
       toast.success('Custom order request submitted successfully!');
-    } catch (error) {
-      console.error('Error submitting custom order:', error);
-      toast.error('Failed to submit request. Please try again.');
+    } catch (error: any) {
+      console.error('Error submitting custom order:', {
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+        code: error.code,
+        stack: error.stack
+      });
+      toast.error(`Failed to submit request: ${error.message || 'Please try again.'}`);
     } finally {
       setIsSubmitting(false);
     }
