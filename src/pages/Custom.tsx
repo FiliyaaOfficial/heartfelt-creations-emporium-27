@@ -30,6 +30,7 @@ const Custom = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [inspirationImages, setInspirationImages] = useState<File[]>([]);
+  const [uploadingImages, setUploadingImages] = useState(false);
   
   const { register, handleSubmit, formState: { errors }, setValue, watch } = useForm({
     resolver: zodResolver(formSchema),
@@ -52,11 +53,60 @@ const Custom = () => {
     setInspirationImages(prev => prev.filter((_, i) => i !== index));
   };
 
+  const uploadImages = async (): Promise<string[]> => {
+    if (inspirationImages.length === 0) return [];
+
+    setUploadingImages(true);
+    const uploadedUrls: string[] = [];
+
+    try {
+      for (const file of inspirationImages) {
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+        const filePath = `inspiration/${fileName}`;
+
+        console.log('Uploading file:', fileName);
+
+        const { data, error } = await supabase.storage
+          .from('custom-order-images')
+          .upload(filePath, file);
+
+        if (error) {
+          console.error('Error uploading file:', error);
+          throw error;
+        }
+
+        // Get public URL
+        const { data: publicUrlData } = supabase.storage
+          .from('custom-order-images')
+          .getPublicUrl(filePath);
+
+        uploadedUrls.push(publicUrlData.publicUrl);
+        console.log('File uploaded successfully:', publicUrlData.publicUrl);
+      }
+
+      return uploadedUrls;
+    } catch (error) {
+      console.error('Error uploading images:', error);
+      throw error;
+    } finally {
+      setUploadingImages(false);
+    }
+  };
+
   const onSubmit = async (data: any) => {
     setIsSubmitting(true);
     console.log('Form data being submitted:', data);
     
     try {
+      // Upload images first
+      let imageUrls: string[] = [];
+      if (inspirationImages.length > 0) {
+        console.log('Uploading images...');
+        imageUrls = await uploadImages();
+        console.log('Images uploaded:', imageUrls);
+      }
+
       const insertData = {
         name: data.name,
         email: data.email,
@@ -65,7 +115,8 @@ const Custom = () => {
         description: data.description,
         budget: data.budget ? parseFloat(data.budget.replace(/[^\d.]/g, '')) : null,
         timeline: data.timeline || null,
-        status: 'pending'
+        status: 'pending',
+        image_urls: imageUrls
       };
 
       console.log('Insert data:', insertData);
@@ -412,6 +463,7 @@ const Custom = () => {
                         onChange={handleImageUpload}
                         className="hidden"
                         id="image-upload"
+                        disabled={uploadingImages || isSubmitting}
                       />
                       <label htmlFor="image-upload" className="cursor-pointer">
                         <div className="flex flex-col items-center">
@@ -422,9 +474,14 @@ const Custom = () => {
                           <p className="text-sm text-gray-600 mb-4 max-w-md">
                             Upload photos of designs, colors, textures, or styles that inspire you. Help us understand your aesthetic preferences.
                           </p>
-                          <Button type="button" variant="outline" className="border-2 border-heartfelt-burgundy text-heartfelt-burgundy hover:bg-heartfelt-burgundy hover:text-white rounded-xl transition-all duration-300">
+                          <Button 
+                            type="button" 
+                            variant="outline" 
+                            className="border-2 border-heartfelt-burgundy text-heartfelt-burgundy hover:bg-heartfelt-burgundy hover:text-white rounded-xl transition-all duration-300"
+                            disabled={uploadingImages || isSubmitting}
+                          >
                             <Image className="mr-2 h-4 w-4" />
-                            Choose Images (Max 3)
+                            {uploadingImages ? 'Uploading...' : 'Choose Images (Max 3)'}
                           </Button>
                         </div>
                       </label>
@@ -443,6 +500,7 @@ const Custom = () => {
                               type="button"
                               onClick={() => removeImage(index)}
                               className="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs transition-all duration-300 shadow-lg opacity-0 group-hover:opacity-100"
+                              disabled={uploadingImages || isSubmitting}
                             >
                               ×
                             </button>
@@ -498,13 +556,13 @@ const Custom = () => {
                 <div className="pt-8">
                   <Button 
                     type="submit" 
-                    disabled={isSubmitting}
+                    disabled={isSubmitting || uploadingImages}
                     className="w-full h-16 bg-gradient-to-r from-heartfelt-burgundy to-heartfelt-pink hover:from-heartfelt-dark hover:to-heartfelt-burgundy text-white text-lg font-semibold rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-[1.02]"
                   >
                     {isSubmitting ? (
                       <div className="flex items-center">
                         <div className="animate-spin mr-3 h-6 w-6 border-3 border-white border-t-transparent rounded-full"></div>
-                        Crafting Your Request...
+                        {uploadingImages ? 'Uploading Images...' : 'Crafting Your Request...'}
                       </div>
                     ) : (
                       <div className="flex items-center">
