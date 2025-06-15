@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -204,9 +203,19 @@ const Support = () => {
 
         <div className="max-w-5xl mx-auto mb-16">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-2 mb-8">
-              <TabsTrigger value="contact">Contact Us</TabsTrigger>
-              <TabsTrigger value="orders">My Orders</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-2 mb-8 bg-gray-100 p-1 rounded-lg">
+              <TabsTrigger 
+                value="contact" 
+                className="data-[state=active]:bg-heartfelt-burgundy data-[state=active]:text-white data-[state=active]:shadow-sm font-medium transition-all duration-200 rounded-md"
+              >
+                Contact Us
+              </TabsTrigger>
+              <TabsTrigger 
+                value="orders" 
+                className="data-[state=active]:bg-heartfelt-burgundy data-[state=active]:text-white data-[state=active]:shadow-sm font-medium transition-all duration-200 rounded-md"
+              >
+                My Orders
+              </TabsTrigger>
             </TabsList>
             
             <TabsContent value="contact" className="mt-0">
