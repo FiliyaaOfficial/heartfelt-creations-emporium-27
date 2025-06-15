@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -326,53 +327,92 @@ const Support = () => {
                 {/* Contact Info & FAQs */}
                 <div className="space-y-8">
                   {/* Contact Info */}
-                  <div className="bg-white rounded-2xl shadow-sm p-8 border border-gray-100">
-                    <h2 className="text-2xl font-serif font-medium mb-6">Contact Information</h2>
+                  <div className="bg-gradient-to-br from-heartfelt-cream/10 to-heartfelt-pink/5 rounded-3xl shadow-lg p-8 border border-heartfelt-cream/50 backdrop-blur-sm">
+                    <div className="text-center mb-8">
+                      <h2 className="text-2xl font-serif font-medium text-heartfelt-burgundy mb-2">Get in Touch</h2>
+                      <p className="text-muted-foreground">We're here to help you every step of the way</p>
+                    </div>
+                    
                     <div className="space-y-6">
-                      <div className="flex items-start">
-                        <div className="bg-heartfelt-cream rounded-full p-3 mr-4">
-                          <Phone size={20} className="text-heartfelt-burgundy" />
-                        </div>
-                        <div>
-                          <h3 className="font-medium mb-1">Phone Support</h3>
-                          <p className="text-muted-foreground">+91 7050682347</p>
-                          <p className="text-sm text-muted-foreground mt-1">Monday to Saturday, 9am-6pm IST</p>
-                        </div>
-                      </div>
-                      
-                      <div className="flex items-start">
-                        <div className="bg-heartfelt-cream rounded-full p-3 mr-4">
-                          <Mail size={20} className="text-heartfelt-burgundy" />
-                        </div>
-                        <div>
-                          <h3 className="font-medium mb-1">Email Support</h3>
-                          <p className="text-muted-foreground">support@heartfelt.com</p>
-                          <p className="text-sm text-muted-foreground mt-1">We respond within 24 hours</p>
+                      <div className="group hover:bg-white/50 rounded-2xl p-4 transition-all duration-300 hover:shadow-md">
+                        <div className="flex items-start">
+                          <div className="bg-gradient-to-br from-heartfelt-burgundy to-heartfelt-pink rounded-full p-4 mr-5 group-hover:scale-110 transition-transform duration-300 shadow-lg">
+                            <Phone size={22} className="text-white" />
+                          </div>
+                          <div className="flex-1">
+                            <h3 className="font-semibold text-lg mb-2 text-heartfelt-burgundy">Phone Support</h3>
+                            <p className="text-xl font-medium text-gray-800 mb-1">+91 7050682347</p>
+                            <div className="flex items-center text-sm text-muted-foreground">
+                              <Clock size={14} className="mr-1" />
+                              Monday to Saturday, 9am-6pm IST
+                            </div>
+                          </div>
                         </div>
                       </div>
                       
-                      <div className="flex items-start">
-                        <div className="bg-heartfelt-cream rounded-full p-3 mr-4">
-                          <Clock size={20} className="text-heartfelt-burgundy" />
-                        </div>
-                        <div>
-                          <h3 className="font-medium mb-1">Business Hours</h3>
-                          <p className="text-muted-foreground">Monday to Friday: 9am - 6pm IST</p>
-                          <p className="text-muted-foreground">Saturday: 10am - 4pm IST</p>
-                          <p className="text-muted-foreground">Sunday: Closed</p>
+                      <div className="group hover:bg-white/50 rounded-2xl p-4 transition-all duration-300 hover:shadow-md">
+                        <div className="flex items-start">
+                          <div className="bg-gradient-to-br from-heartfelt-burgundy to-heartfelt-pink rounded-full p-4 mr-5 group-hover:scale-110 transition-transform duration-300 shadow-lg">
+                            <Mail size={22} className="text-white" />
+                          </div>
+                          <div className="flex-1">
+                            <h3 className="font-semibold text-lg mb-2 text-heartfelt-burgundy">Email Support</h3>
+                            <p className="text-xl font-medium text-gray-800 mb-1">support@heartfelt.com</p>
+                            <div className="flex items-center text-sm text-muted-foreground">
+                              <Clock size={14} className="mr-1" />
+                              We respond within 24 hours
+                            </div>
+                          </div>
                         </div>
                       </div>
                       
-                      <div className="flex items-start">
-                        <div className="bg-heartfelt-cream rounded-full p-3 mr-4">
-                          <MapPin size={20} className="text-heartfelt-burgundy" />
+                      <div className="group hover:bg-white/50 rounded-2xl p-4 transition-all duration-300 hover:shadow-md">
+                        <div className="flex items-start">
+                          <div className="bg-gradient-to-br from-heartfelt-burgundy to-heartfelt-pink rounded-full p-4 mr-5 group-hover:scale-110 transition-transform duration-300 shadow-lg">
+                            <Clock size={22} className="text-white" />
+                          </div>
+                          <div className="flex-1">
+                            <h3 className="font-semibold text-lg mb-2 text-heartfelt-burgundy">Business Hours</h3>
+                            <div className="space-y-1 text-gray-700">
+                              <p className="flex justify-between">
+                                <span>Monday - Friday</span>
+                                <span className="font-medium">9am - 6pm IST</span>
+                              </p>
+                              <p className="flex justify-between">
+                                <span>Saturday</span>
+                                <span className="font-medium">10am - 4pm IST</span>
+                              </p>
+                              <p className="flex justify-between">
+                                <span>Sunday</span>
+                                <span className="font-medium text-muted-foreground">Closed</span>
+                              </p>
+                            </div>
+                          </div>
                         </div>
-                        <div>
-                          <h3 className="font-medium mb-1">Office Address</h3>
-                          <p className="text-muted-foreground">123 Creative Lane,</p>
-                          <p className="text-muted-foreground">Craft District, Bangalore - 560001</p>
-                          <p className="text-muted-foreground">Karnataka, India</p>
+                      </div>
+                      
+                      <div className="group hover:bg-white/50 rounded-2xl p-4 transition-all duration-300 hover:shadow-md">
+                        <div className="flex items-start">
+                          <div className="bg-gradient-to-br from-heartfelt-burgundy to-heartfelt-pink rounded-full p-4 mr-5 group-hover:scale-110 transition-transform duration-300 shadow-lg">
+                            <MapPin size={22} className="text-white" />
+                          </div>
+                          <div className="flex-1">
+                            <h3 className="font-semibold text-lg mb-2 text-heartfelt-burgundy">Visit Our Studio</h3>
+                            <div className="text-gray-700 leading-relaxed">
+                              <p className="font-medium">123 Creative Lane</p>
+                              <p>Craft District, Bangalore - 560001</p>
+                              <p>Karnataka, India</p>
+                            </div>
+                          </div>
                         </div>
+                      </div>
+                    </div>
+                    
+                    {/* Response Time Badge */}
+                    <div className="mt-8 text-center">
+                      <div className="inline-flex items-center bg-green-50 text-green-700 px-4 py-2 rounded-full text-sm font-medium border border-green-200">
+                        <div className="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></div>
+                        Average response time: 2 hours
                       </div>
                     </div>
                   </div>
