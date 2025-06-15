@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -27,11 +26,14 @@ import {
   Clock,
   Truck,
   CheckCircle,
-  XCircle
+  XCircle,
+  Menu,
+  ChevronRight
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { Order } from "@/types";
 import ProductCard from "@/components/ProductCard";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface UserProfile {
   id: string;
@@ -63,7 +65,9 @@ const Account = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [ordersLoading, setOrdersLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("profile");
+  const [showMobileNav, setShowMobileNav] = useState(false);
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     if (isAuthenticated && user) {
@@ -248,6 +252,16 @@ const Account = () => {
     }
   };
 
+  const tabItems = [
+    { value: "profile", label: "Profile", icon: User, description: "Personal information" },
+    { value: "orders", label: "Orders", icon: Package, description: "Order history" },
+    { value: "wishlist", label: "Wishlist", icon: Heart, description: "Saved items" },
+    { value: "addresses", label: "Addresses", icon: Map, description: "Saved addresses" },
+    { value: "security", label: "Security", icon: Shield, description: "Account security" },
+  ];
+
+  const activeTabItem = tabItems.find(item => item.value === activeTab);
+
   if (loading) {
     return (
       <div className="container mx-auto py-20 px-4">
@@ -286,19 +300,89 @@ const Account = () => {
 
   return (
     <div className="container mx-auto px-4 py-6 md:py-12">
+      {/* Header */}
       <div className="relative mb-6 md:mb-10">
         <div className="absolute inset-0 bg-heartfelt-cream/30 rounded-2xl -z-10"></div>
         <div className="py-6 md:py-10 px-4 md:px-6">
-          <h1 className="text-2xl md:text-3xl lg:text-4xl font-serif font-semibold mb-2">My Account</h1>
-          <p className="text-muted-foreground max-w-2xl text-sm md:text-base">
-            Manage your personal information, orders, and preferences.
-          </p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl md:text-3xl lg:text-4xl font-serif font-semibold mb-2">My Account</h1>
+              <p className="text-muted-foreground max-w-2xl text-sm md:text-base">
+                Manage your personal information, orders, and preferences.
+              </p>
+            </div>
+            
+            {/* Mobile Menu Toggle */}
+            {isMobile && (
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => setShowMobileNav(!showMobileNav)}
+                className="lg:hidden"
+              >
+                <Menu className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
         </div>
       </div>
+
+      {/* Mobile Navigation Overlay */}
+      {isMobile && showMobileNav && (
+        <div className="fixed inset-0 bg-black/50 z-50 lg:hidden" onClick={() => setShowMobileNav(false)}>
+          <div className="bg-white w-80 h-full shadow-xl p-6" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-lg font-semibold">Account Menu</h2>
+              <Button variant="ghost" size="sm" onClick={() => setShowMobileNav(false)}>
+                ×
+              </Button>
+            </div>
+            
+            <div className="space-y-2">
+              {tabItems.map((item) => (
+                <button
+                  key={item.value}
+                  onClick={() => {
+                    setActiveTab(item.value);
+                    setShowMobileNav(false);
+                  }}
+                  className={`w-full flex items-center justify-between p-3 rounded-lg text-left transition-colors ${
+                    activeTab === item.value 
+                      ? 'bg-heartfelt-burgundy text-white' 
+                      : 'hover:bg-gray-100'
+                  }`}
+                >
+                  <div className="flex items-center space-x-3">
+                    <item.icon size={20} />
+                    <div>
+                      <div className="font-medium">{item.label}</div>
+                      <div className={`text-xs ${activeTab === item.value ? 'text-white/80' : 'text-gray-500'}`}>
+                        {item.description}
+                      </div>
+                    </div>
+                  </div>
+                  <ChevronRight size={16} />
+                </button>
+              ))}
+              
+              <div className="pt-4 border-t">
+                <Button 
+                  variant="ghost" 
+                  className="w-full justify-start text-red-500 hover:text-red-600 hover:bg-red-50"
+                  onClick={handleSignOut}
+                >
+                  <LogOut size={20} className="mr-3" />
+                  Logout
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
       
       <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
-        {/* Account Navigation */}
-        <aside className="w-full lg:w-64 shrink-0">
+        {/* Desktop Navigation */}
+        <aside className="hidden lg:block w-full lg:w-64 shrink-0">
           <nav className="bg-white shadow-sm rounded-xl overflow-hidden border border-gray-100">
             <div className="p-4 md:p-6 border-b border-gray-100">
               <div className="flex items-center space-x-3">
@@ -327,41 +411,16 @@ const Account = () => {
             
             <Tabs value={activeTab} onValueChange={setActiveTab} orientation="vertical" className="w-full">
               <TabsList className="flex-col h-auto bg-transparent p-2 space-y-1 w-full">
-                <TabsTrigger 
-                  value="profile" 
-                  className="w-full justify-start data-[state=active]:bg-heartfelt-burgundy data-[state=active]:text-white text-sm md:text-base"
-                >
-                  <User size={16} className="mr-3" />
-                  Profile
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="orders" 
-                  className="w-full justify-start data-[state=active]:bg-heartfelt-burgundy data-[state=active]:text-white text-sm md:text-base"
-                >
-                  <Package size={16} className="mr-3" />
-                  Orders
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="wishlist" 
-                  className="w-full justify-start data-[state=active]:bg-heartfelt-burgundy data-[state=active]:text-white text-sm md:text-base"
-                >
-                  <Heart size={16} className="mr-3" />
-                  Wishlist
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="addresses" 
-                  className="w-full justify-start data-[state=active]:bg-heartfelt-burgundy data-[state=active]:text-white text-sm md:text-base"
-                >
-                  <Map size={16} className="mr-3" />
-                  Addresses
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="security" 
-                  className="w-full justify-start data-[state=active]:bg-heartfelt-burgundy data-[state=active]:text-white text-sm md:text-base"
-                >
-                  <Shield size={16} className="mr-3" />
-                  Security
-                </TabsTrigger>
+                {tabItems.map((item) => (
+                  <TabsTrigger 
+                    key={item.value}
+                    value={item.value} 
+                    className="w-full justify-start data-[state=active]:bg-heartfelt-burgundy data-[state=active]:text-white text-sm md:text-base"
+                  >
+                    <item.icon size={16} className="mr-3" />
+                    {item.label}
+                  </TabsTrigger>
+                ))}
               </TabsList>
               
               <div className="px-2 pb-2">
@@ -377,6 +436,25 @@ const Account = () => {
             </Tabs>
           </nav>
         </aside>
+
+        {/* Mobile Current Tab Indicator */}
+        {isMobile && (
+          <div className="lg:hidden bg-white rounded-xl p-4 border border-gray-100 mb-4">
+            <div className="flex items-center space-x-3">
+              {activeTabItem && (
+                <>
+                  <div className="p-2 bg-heartfelt-burgundy/10 rounded-lg">
+                    <activeTabItem.icon className="h-5 w-5 text-heartfelt-burgundy" />
+                  </div>
+                  <div>
+                    <h2 className="font-semibold">{activeTabItem.label}</h2>
+                    <p className="text-sm text-gray-500">{activeTabItem.description}</p>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        )}
         
         {/* Main Content */}
         <div className="flex-1 min-w-0">
