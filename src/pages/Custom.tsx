@@ -54,22 +54,35 @@ const Custom = () => {
 
   const onSubmit = async (data: any) => {
     setIsSubmitting(true);
+    console.log('Form data being submitted:', data);
+    
     try {
-      // Use type assertion for the table that doesn't exist in types yet
-      const { error } = await (supabase as any)
+      const insertData = {
+        name: data.name,
+        email: data.email,
+        phone: data.phone || null,
+        occasion: data.occasion,
+        description: data.description,
+        budget: data.budget ? parseFloat(data.budget.replace(/[^\d.]/g, '')) : null,
+        timeline: data.timeline || null,
+        status: 'pending'
+      };
+
+      console.log('Insert data:', insertData);
+
+      const { data: result, error } = await supabase
         .from('custom_orders')
-        .insert({
-          name: data.name,
-          email: data.email,
-          phone: data.phone || null,
-          occasion: data.occasion,
-          description: data.description,
-          budget: data.budget ? parseFloat(data.budget) : null,
-          timeline: data.timeline || null,
-        });
+        .insert(insertData)
+        .select();
 
-      if (error) throw error;
+      console.log('Supabase response:', { result, error });
 
+      if (error) {
+        console.error('Supabase error:', error);
+        throw error;
+      }
+
+      console.log('Custom order inserted successfully:', result);
       setSubmitted(true);
       toast.success('Custom order request submitted successfully!');
     } catch (error) {
