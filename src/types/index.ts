@@ -1,4 +1,5 @@
 
+
 export interface Product {
   id: string;
   name: string;
@@ -95,13 +96,13 @@ export interface ShippingAddress {
   phone?: string;
 }
 
-// Updated Order interface to match database schema
+// Updated Order interface to match database schema - using string for status to match database
 export interface Order {
   id: string;
   user_id?: string;
   customer_name: string;
   customer_email: string;
-  status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
+  status: string; // Changed from union type to string to match database
   payment_method?: string;
   payment_status?: string;
   shipping_address?: any; // JSON field from database
@@ -143,6 +144,7 @@ export interface Review {
   photos?: string[];
 }
 
+// Updated BlogPost interface to include is_published
 export interface BlogPost {
   id: string;
   title: string;
@@ -154,6 +156,7 @@ export interface BlogPost {
   published_at: string;
   reading_time: number;
   tags?: string[];
+  is_published?: boolean; // Added missing property
 }
 
 export interface FilterState {
@@ -180,3 +183,4 @@ export interface AuthState {
   isAuthenticated: boolean;
   loading: boolean;
 }
+
