@@ -13,8 +13,10 @@ interface BlogPost {
   content: string;
   cover_image: string;
   author: string;
-  created_at: string;
+  published_at: string;
   slug: string;
+  reading_time: number;
+  tags: string[];
 }
 
 const BlogPost = () => {
@@ -28,95 +30,47 @@ const BlogPost = () => {
     const fetchPost = async () => {
       setIsLoading(true);
       try {
-        // For demo purposes, creating mock blog data
-        const mockPosts = [
-          {
-            id: '1',
-            title: 'Handcrafting with Love: The Art of Personalized Gifts',
-            excerpt: 'Discover the joy and meaning behind handcrafted personalized gifts and why they make the perfect present for your loved ones.',
-            content: `<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
-            <p>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
-            <h2>The Personal Touch Makes All the Difference</h2>
-            <p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.</p>
-            <p>Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem.</p>
-            <h2>Creating Lasting Memories</h2>
-            <p>Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur? Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur?</p>`,
-            cover_image: 'https://images.unsplash.com/photo-1528605248644-14dd04022da1?q=80&w=1200&auto=format&fit=crop',
-            author: 'Sarah Johnson',
-            created_at: '2025-03-15T10:30:00Z',
-            slug: 'handcrafting-with-love'
-          },
-          {
-            id: '2',
-            title: 'The Perfect Gift Guide for Every Occasion',
-            excerpt: "From birthdays to anniversaries, find the ideal handmade gift for any special moment in your loved ones' lives.",
-            content: `<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
-            <p>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
-            <h2>Birthdays: Celebrating Another Year</h2>
-            <p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.</p>
-            <p>Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt.</p>
-            <h2>Anniversaries: Honoring Your Journey Together</h2>
-            <p>Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur? Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur.</p>`,
-            cover_image: 'https://images.unsplash.com/photo-1513885535751-8b9238bd345a?q=80&w=1200&auto=format&fit=crop',
-            author: 'Michael Chen',
-            created_at: '2025-03-10T14:45:00Z',
-            slug: 'gift-guide-for-every-occasion'
-          },
-          {
-            id: '3',
-            title: 'The Sustainable Gift Revolution: Eco-Friendly Choices',
-            excerpt: 'How our handcrafted gifts are not only beautiful but also environmentally conscious and sustainable.',
-            content: `<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
-            <h2>Why Sustainability Matters in Gift-Giving</h2>
-            <p>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
-            <p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.</p>
-            <h2>Our Eco-Friendly Materials</h2>
-            <p>Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt.</p>`,
-            cover_image: 'https://images.unsplash.com/photo-1610114113404-0d9769eb5b82?q=80&w=1200&auto=format&fit=crop',
-            author: 'Emma Rodriguez',
-            created_at: '2025-03-05T09:15:00Z',
-            slug: 'sustainable-gift-revolution'
-          },
-          {
-            id: '4',
-            title: 'Behind the Scenes: Meet Our Artisan Craftspeople',
-            excerpt: 'Get to know the talented individuals who pour their heart and soul into creating our beautiful handcrafted items.',
-            content: `<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
-            <p>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
-            <h2>The Masters Behind Our Creations</h2>
-            <p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.</p>
-            <p>Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt.</p>`,
-            cover_image: 'https://images.unsplash.com/photo-1507236827745-1a76294d9ab2?q=80&w=1200&auto=format&fit=crop',
-            author: 'David Wilson',
-            created_at: '2025-02-28T16:20:00Z',
-            slug: 'meet-our-artisan-craftspeople'
-          },
-          {
-            id: '5',
-            title: 'Customer Stories: Memorable Gifts That Changed Lives',
-            excerpt: 'Heartwarming stories from our customers about how our personalized gifts created unforgettable moments.',
-            content: `<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
-            <h2>A Birthday Surprise That Brought Tears of Joy</h2>
-            <p>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
-            <p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.</p>
-            <h2>A Memorial Gift That Preserved Precious Memories</h2>
-            <p>Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt.</p>`,
-            cover_image: 'https://images.unsplash.com/photo-1559452214-f4901ae5a753?q=80&w=1200&auto=format&fit=crop',
-            author: 'Jessica Taylor',
-            created_at: '2025-02-20T11:10:00Z',
-            slug: 'customer-stories-memorable-gifts'
-          }
-        ];
+        console.log('Fetching blog post with slug:', slug);
         
-        // Find the post with matching slug
-        const foundPost = mockPosts.find(p => p.slug === slug);
+        // Fetch the specific blog post by slug
+        const { data: blogPost, error: fetchError } = await supabase
+          .from('blog_posts')
+          .select('*')
+          .eq('slug', slug)
+          .eq('is_published', true)
+          .maybeSingle();
         
-        if (foundPost) {
-          setPost(foundPost);
+        console.log('Supabase blog post response:', { blogPost, fetchError });
+        
+        if (fetchError) {
+          console.error('Error fetching blog post:', fetchError);
+          toast({
+            title: "Error loading blog post",
+            description: "Please try again later",
+            variant: "destructive",
+          });
+          return;
+        }
+
+        if (blogPost) {
+          setPost(blogPost);
           
-          // Set related posts (all posts except the current one)
-          setRelatedPosts(mockPosts.filter(p => p.id !== foundPost.id).slice(0, 3));
+          // Fetch related posts (other published posts, excluding current one)
+          const { data: relatedPostsData, error: relatedError } = await supabase
+            .from('blog_posts')
+            .select('*')
+            .eq('is_published', true)
+            .neq('id', blogPost.id)
+            .order('published_at', { ascending: false })
+            .limit(3);
+          
+          if (relatedError) {
+            console.error('Error fetching related posts:', relatedError);
+          } else {
+            setRelatedPosts(relatedPostsData || []);
+          }
         } else {
+          console.log('Blog post not found for slug:', slug);
           toast({
             title: "Blog post not found",
             description: "The blog post you're looking for doesn't exist or has been removed.",
@@ -135,7 +89,9 @@ const BlogPost = () => {
       }
     };
     
-    fetchPost();
+    if (slug) {
+      fetchPost();
+    }
   }, [slug, toast]);
 
   const formatDate = (dateString: string) => {
@@ -168,11 +124,13 @@ const BlogPost = () => {
       {/* Hero Section */}
       <div className="relative h-80 md:h-96 bg-gradient-to-br from-heartfelt-burgundy to-heartfelt-dark overflow-hidden">
         <div className="absolute inset-0">
-          <img 
-            src={post.cover_image} 
-            alt={post.title}
-            className="w-full h-full object-cover opacity-20"
-          />
+          {post.cover_image && (
+            <img 
+              src={post.cover_image} 
+              alt={post.title}
+              className="w-full h-full object-cover opacity-20"
+            />
+          )}
         </div>
         <div className="container mx-auto px-4 h-full flex flex-col justify-center relative z-10">
           <Button 
@@ -195,7 +153,7 @@ const BlogPost = () => {
             </div>
             <div className="flex items-center">
               <Calendar size={16} className="mr-2" />
-              <span>{formatDate(post.created_at)}</span>
+              <span>{formatDate(post.published_at)}</span>
             </div>
           </div>
         </div>
@@ -255,43 +213,51 @@ const BlogPost = () => {
             </div>
             
             {/* Related Posts */}
-            <div className="bg-white rounded-lg p-6 shadow-sm">
-              <h3 className="font-medium text-lg mb-4">Related Articles</h3>
-              <div className="space-y-4">
-                {relatedPosts.map((relatedPost) => (
-                  <Link 
-                    key={relatedPost.id} 
-                    to={`/blog/${relatedPost.slug}`}
-                    className="flex items-start group"
+            {relatedPosts.length > 0 && (
+              <div className="bg-white rounded-lg p-6 shadow-sm">
+                <h3 className="font-medium text-lg mb-4">Related Articles</h3>
+                <div className="space-y-4">
+                  {relatedPosts.map((relatedPost) => (
+                    <Link 
+                      key={relatedPost.id} 
+                      to={`/blog/${relatedPost.slug}`}
+                      className="flex items-start group"
+                    >
+                      <div className="w-16 h-16 bg-gray-200 rounded-md overflow-hidden flex-shrink-0">
+                        {relatedPost.cover_image ? (
+                          <img 
+                            src={relatedPost.cover_image} 
+                            alt={relatedPost.title}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          />
+                        ) : (
+                          <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                            <BookOpen size={16} className="text-gray-400" />
+                          </div>
+                        )}
+                      </div>
+                      <div className="ml-3">
+                        <h4 className="text-sm font-medium group-hover:text-heartfelt-burgundy transition-colors line-clamp-2">
+                          {relatedPost.title}
+                        </h4>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          {formatDate(relatedPost.published_at)}
+                        </p>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+                <div className="mt-6">
+                  <Button 
+                    variant="outline" 
+                    asChild 
+                    className="w-full justify-center hover:bg-heartfelt-burgundy hover:text-white"
                   >
-                    <div className="w-16 h-16 bg-gray-200 rounded-md overflow-hidden flex-shrink-0">
-                      <img 
-                        src={relatedPost.cover_image} 
-                        alt={relatedPost.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
-                    </div>
-                    <div className="ml-3">
-                      <h4 className="text-sm font-medium group-hover:text-heartfelt-burgundy transition-colors line-clamp-2">
-                        {relatedPost.title}
-                      </h4>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        {formatDate(relatedPost.created_at)}
-                      </p>
-                    </div>
-                  </Link>
-                ))}
+                    <Link to="/blog">View All Articles</Link>
+                  </Button>
+                </div>
               </div>
-              <div className="mt-6">
-                <Button 
-                  variant="outline" 
-                  asChild 
-                  className="w-full justify-center hover:bg-heartfelt-burgundy hover:text-white"
-                >
-                  <Link to="/blog">View All Articles</Link>
-                </Button>
-              </div>
-            </div>
+            )}
           </div>
         </div>
       </div>
