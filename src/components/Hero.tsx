@@ -16,7 +16,7 @@ const heroSlides = [
   {
     title: "Handcrafted Gifts for Every Occasion",
     subtitle: "Discover unique Indian artisan crafts that convey emotions words cannot express. Created with love, delivered across India.",
-    image: "https://images.unsplash.com/photo-1549465220-1a8b9238cd48?ixlib=rb-1.2.1&auto=format&fit=crop&w=1000&q=80",
+    image: "https://images.unsplash.com/photo-1520739945222-3a67d0f73a3a?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
     primaryLink: "/categories",
     primaryText: "Shop Now",
     secondaryLink: "/custom",
@@ -25,7 +25,7 @@ const heroSlides = [
   {
     title: "Personalized Gift Collections",
     subtitle: "Find the perfect gift that tells your unique story. Each piece selected with intention and meaning.",
-    image: "https://images.unsplash.com/photo-1607344645866-009c320c5ab8?ixlib=rb-1.2.1&auto=format&fit=crop&w=1000&q=80",
+    image: "https://images.unsplash.com/photo-1618762103559-9a2e6a6d3f2e?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
     primaryLink: "/categories/personalized",
     primaryText: "Browse Collection",
     secondaryLink: "/custom",
@@ -34,7 +34,7 @@ const heroSlides = [
   {
     title: "Special Occasions Made Memorable",
     subtitle: "Celebrate life's precious moments with gifts that leave lasting impressions.",
-    image: "https://images.unsplash.com/photo-1513885535751-8b9238bd345a?ixlib=rb-1.2.1&auto=format&fit=crop&w=1000&q=80",
+    image: "https://images.unsplash.com/photo-1576628994748-d343ab71c1f2?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
     primaryLink: "/categories/occasions",
     primaryText: "Explore Gifts",
     secondaryLink: "/categories",
