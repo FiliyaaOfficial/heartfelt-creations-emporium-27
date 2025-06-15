@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -6,6 +5,7 @@ import { Mail, CheckCircle, Phone } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { cn } from '@/lib/utils';
 import { Link } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
 
 interface NewsletterProps {
   className?: string;
@@ -34,27 +34,47 @@ const Newsletter = ({ className, variant = 'default' }: NewsletterProps) => {
     setIsSubmitting(true);
     
     try {
-      // Store newsletter subscription in localStorage for now
-      const subscriptions = JSON.parse(localStorage.getItem('newsletter_subscriptions') || '[]');
-      subscriptions.push({
-        email: email,
-        subscribed_at: new Date().toISOString()
-      });
-      localStorage.setItem('newsletter_subscriptions', JSON.stringify(subscriptions));
+      console.log('Subscribing email to newsletter:', email);
       
-      console.log('Newsletter subscription:', email);
-      
-      setIsSubscribed(true);
-      toast({
-        title: "Successfully subscribed!",
-        description: "Thank you for joining our newsletter. We'll keep you updated on new products and offers.",
-        variant: "default",
-      });
-      setEmail('');
-      
-      setTimeout(() => {
-        setIsSubscribed(false);
-      }, 5000);
+      const { data, error } = await supabase
+        .from('newsletter_subscriptions')
+        .insert([
+          {
+            email: email,
+            subscribed_at: new Date().toISOString(),
+            is_active: true
+          }
+        ])
+        .select();
+
+      if (error) {
+        console.error('Newsletter subscription error:', error);
+        
+        // Handle duplicate email error
+        if (error.code === '23505') {
+          toast({
+            title: "Already subscribed",
+            description: "This email is already subscribed to our newsletter.",
+            variant: "default",
+          });
+        } else {
+          throw error;
+        }
+      } else {
+        console.log('Newsletter subscription successful:', data);
+        
+        setIsSubscribed(true);
+        toast({
+          title: "Successfully subscribed!",
+          description: "Thank you for joining our newsletter. We'll keep you updated on new products and offers.",
+          variant: "default",
+        });
+        setEmail('');
+        
+        setTimeout(() => {
+          setIsSubscribed(false);
+        }, 5000);
+      }
     } catch (error) {
       console.error('Error subscribing to newsletter:', error);
       toast({

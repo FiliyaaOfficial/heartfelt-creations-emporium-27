@@ -179,52 +179,32 @@ export type Database = {
         }
         Relationships: []
       }
-      email_notifications: {
+      newsletter_subscriptions: {
         Row: {
-          content: string
           created_at: string
-          email_type: string
-          error_message: string | null
+          email: string
           id: string
-          order_id: string
-          recipient_email: string
-          sent_at: string | null
-          status: string
-          subject: string
+          is_active: boolean
+          subscribed_at: string
+          unsubscribe_token: string | null
         }
         Insert: {
-          content: string
           created_at?: string
-          email_type: string
-          error_message?: string | null
+          email: string
           id?: string
-          order_id: string
-          recipient_email: string
-          sent_at?: string | null
-          status?: string
-          subject: string
+          is_active?: boolean
+          subscribed_at?: string
+          unsubscribe_token?: string | null
         }
         Update: {
-          content?: string
           created_at?: string
-          email_type?: string
-          error_message?: string | null
+          email?: string
           id?: string
-          order_id?: string
-          recipient_email?: string
-          sent_at?: string | null
-          status?: string
-          subject?: string
+          is_active?: boolean
+          subscribed_at?: string
+          unsubscribe_token?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "email_notifications_order_id_fkey"
-            columns: ["order_id"]
-            isOneToOne: false
-            referencedRelation: "orders"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       order_items: {
         Row: {
