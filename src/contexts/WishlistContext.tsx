@@ -38,7 +38,6 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const { toast } = useToast();
   const { user, isAuthenticated } = useAuth();
 
-  // Set up a session ID for anonymous users
   useEffect(() => {
     if (!isAuthenticated) {
       const storedSessionId = localStorage.getItem("filiyaa_session_id");
@@ -52,9 +51,11 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
   }, [isAuthenticated]);
 
-  // Fetch wishlist items when component mounts or user changes
+  // Merge anonymous wishlist with user wishlist on login
   useEffect(() => {
-    if (isAuthenticated || sessionId) {
+    if (isAuthenticated && user) {
+      mergeLocalWishlistWithUser(user.id);
+    } else {
       fetchWishlistItems();
     }
   }, [isAuthenticated, user, sessionId]);
@@ -63,7 +64,7 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     setIsLoading(true);
     try {
       let query = supabase.from('wishlists').select('*');
-      
+
       if (isAuthenticated && user) {
         query = query.eq("user_id", user.id);
       } else {
@@ -108,6 +109,48 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
   };
 
+  // Merge local (anon) wishlist with user's wishlist
+  const mergeLocalWishlistWithUser = async (userId: string) => {
+    setIsLoading(true);
+    try {
+      // 1. Get anon wishlist items
+      const { data: anonItems, error: anonError } = await supabase
+        .from('wishlists')
+        .select('*')
+        .eq('session_id', sessionId)
+        .is('user_id', null);
+
+      if (anonError) throw anonError;
+
+      // 2. Get user wishlist items
+      const { data: userItems, error: userError } = await supabase
+        .from('wishlists')
+        .select('*')
+        .eq('user_id', userId);
+
+      if (userError) throw userError;
+
+      if (anonItems && anonItems.length > 0) {
+        for (const anonItem of anonItems) {
+          const match = userItems?.find((u) => u.product_id === anonItem.product_id);
+          if (match) {
+            // Duplicate item found in user wishlist, remove anon item
+            await supabase.from('wishlists').delete().eq('id', anonItem.id);
+          } else {
+            // Transfer the anonItem to user wishlist
+            await supabase.from('wishlists').update({ user_id: userId }).eq('id', anonItem.id);
+          }
+        }
+      }
+      // 3. Fetch updated wishlist for user
+      await fetchWishlistItems();
+    } catch (err) {
+      console.error("Error merging wishlist data:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const addToWishlist = async (product: Product) => {
     setIsLoading(true);
     try {
@@ -128,12 +171,11 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       // Prepare insert data
       const insertData: any = {
         product_id: product.id,
+        session_id: sessionId,
       };
 
       if (isAuthenticated && user) {
         insertData.user_id = user.id;
-      } else {
-        insertData.session_id = sessionId;
       }
 
       // Add new wishlist item
@@ -164,7 +206,7 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         title: "Added to wishlist",
         description: `${product.name} has been added to your wishlist`,
       });
-      
+
       return Promise.resolve();
     } catch (error) {
       console.error("Error adding to wishlist:", error);
@@ -183,12 +225,12 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     setIsLoading(true);
     try {
       const itemToRemove = wishlistItems.find(item => item.product_id === productId);
-      
+
       if (!itemToRemove) {
         setIsLoading(false);
         return;
       }
-      
+
       const { error } = await supabase
         .from('wishlists')
         .delete()
@@ -198,7 +240,7 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
       // Update local state
       setWishlistItems((prev) => prev.filter((item) => item.product_id !== productId));
-      
+
       toast({
         title: "Item removed",
         description: "The item has been removed from your wishlist",
@@ -234,3 +276,5 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     </WishlistContext.Provider>
   );
 };
+
+// ... End of file
