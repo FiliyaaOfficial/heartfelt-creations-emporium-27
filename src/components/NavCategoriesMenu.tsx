@@ -98,8 +98,8 @@ const NavCategoriesMenu = ({ activePath }: NavCategoriesMenuProps) => {
           >
             Categories
           </NavigationMenuTrigger>
-          <NavigationMenuContent>
-            <ul className="grid gap-3 p-6 md:w-[400px] lg:w-[500px] lg:grid-cols-2">
+          <NavigationMenuContent className="bg-white border border-gray-200 shadow-lg">
+            <ul className="grid gap-3 p-6 md:w-[400px] lg:w-[500px] lg:grid-cols-2 bg-white">
               <CategoryItem
                 title="Best Sellers"
                 href="/best-sellers"

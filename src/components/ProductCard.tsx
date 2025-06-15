@@ -1,7 +1,7 @@
 
 import React, { useState, memo } from "react";
 import { Link } from "react-router-dom";
-import { Heart, ShoppingBag, Star, Sparkles, TrendingUp, Gift } from "lucide-react";
+import { Heart, ShoppingBag, Star, Sparkles, TrendingUp, Gift, Crown, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Product } from "@/types";
@@ -47,78 +47,95 @@ const ProductCard: React.FC<ProductCardProps> = memo(({ product, className = "" 
   };
 
   const renderBadges = () => {
-    const allBadges = new Set<string>(); // Use Set to prevent duplicates
+    const allBadges = new Set<string>();
     const badgeElements = [];
     
-    // Add custom badges from product.badges array
-    if (product.badges && product.badges.length > 0) {
-      product.badges.forEach((badge) => {
-        const normalizedBadge = badge.toLowerCase();
-        if (!allBadges.has(normalizedBadge)) {
-          allBadges.add(normalizedBadge);
-          badgeElements.push({
-            text: badge,
-            variant: "custom" as const,
-            icon: <Gift size={12} />
-          });
-        }
-      });
-    }
-    
-    // Add status badges based on boolean flags (check for duplicates)
+    // Status badges with unique styling
     const statusBadges = [
-      { condition: product.is_new, text: "New", variant: "new" as const, icon: <Sparkles size={12} /> },
-      { condition: product.is_bestseller, text: "Bestseller", variant: "bestseller" as const, icon: <TrendingUp size={12} /> },
-      { condition: product.is_featured, text: "Featured", variant: "featured" as const, icon: <Star size={12} /> },
-      { condition: product.is_customizable, text: "Customizable", variant: "customizable" as const, icon: <Gift size={12} /> }
+      { 
+        condition: product.is_new, 
+        text: "New", 
+        variant: "new" as const, 
+        icon: <Sparkles size={12} />,
+        style: "bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-lg border-0 font-semibold tracking-wide"
+      },
+      { 
+        condition: product.is_bestseller, 
+        text: "Bestseller", 
+        variant: "bestseller" as const, 
+        icon: <Crown size={12} />,
+        style: "bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg border-0 font-semibold tracking-wide"
+      },
+      { 
+        condition: product.is_featured, 
+        text: "Featured", 
+        variant: "featured" as const, 
+        icon: <Star size={12} />,
+        style: "bg-gradient-to-r from-purple-500 to-indigo-500 text-white shadow-lg border-0 font-semibold tracking-wide"
+      },
+      { 
+        condition: product.is_customizable, 
+        text: "Customizable", 
+        variant: "customizable" as const, 
+        icon: <Zap size={12} />,
+        style: "bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-lg border-0 font-semibold tracking-wide"
+      }
     ];
     
-    statusBadges.forEach(({ condition, text, variant, icon }) => {
+    statusBadges.forEach(({ condition, text, variant, icon, style }) => {
       if (condition) {
         const normalizedText = text.toLowerCase();
-        // Check if this badge type already exists in custom badges
-        const isDuplicate = Array.from(allBadges).some(badge => 
-          badge.includes(normalizedText) || normalizedText.includes(badge)
-        );
-        
-        if (!isDuplicate && !allBadges.has(normalizedText)) {
+        if (!allBadges.has(normalizedText)) {
           allBadges.add(normalizedText);
           badgeElements.push({
             text,
             variant,
-            icon
+            icon,
+            style
           });
         }
       }
     });
     
-    // Render badges with improved styling
-    return badgeElements.slice(0, 3).map((badge, index) => {
-      const getBadgeStyles = (variant: string) => {
-        switch (variant) {
-          case "new":
-            return "bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-sm border-0";
-          case "bestseller":
-            return "bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-sm border-0";
-          case "featured":
-            return "bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-sm border-0";
-          case "customizable":
-            return "bg-gradient-to-r from-blue-500 to-indigo-500 text-white shadow-sm border-0";
-          default:
-            return "bg-gradient-to-r from-heartfelt-burgundy to-heartfelt-dark text-white shadow-sm border-0";
+    // Add custom badges from product.badges array with distinct styling
+    if (product.badges && product.badges.length > 0) {
+      product.badges.forEach((badge, index) => {
+        const normalizedBadge = badge.toLowerCase();
+        const isDuplicate = Array.from(allBadges).some(existingBadge => 
+          existingBadge.includes(normalizedBadge) || normalizedBadge.includes(existingBadge)
+        );
+        
+        if (!isDuplicate && !allBadges.has(normalizedBadge)) {
+          allBadges.add(normalizedBadge);
+          
+          // Cycle through different custom badge styles
+          const customStyles = [
+            "bg-gradient-to-r from-rose-500 to-pink-500 text-white shadow-lg border-0 font-semibold tracking-wide",
+            "bg-gradient-to-r from-violet-500 to-purple-500 text-white shadow-lg border-0 font-semibold tracking-wide",
+            "bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-lg border-0 font-semibold tracking-wide",
+            "bg-gradient-to-r from-red-500 to-orange-500 text-white shadow-lg border-0 font-semibold tracking-wide"
+          ];
+          
+          badgeElements.push({
+            text: badge,
+            variant: "custom" as const,
+            icon: <Gift size={12} />,
+            style: customStyles[index % customStyles.length]
+          });
         }
-      };
-
-      return (
-        <Badge 
-          key={`${badge.text}-${index}`} 
-          className={`text-xs font-medium px-2 py-1 flex items-center gap-1 ${getBadgeStyles(badge.variant)}`}
-        >
-          {badge.icon}
-          {badge.text}
-        </Badge>
-      );
-    });
+      });
+    }
+    
+    // Render badges with improved styling
+    return badgeElements.slice(0, 3).map((badge, index) => (
+      <Badge 
+        key={`${badge.text}-${index}`} 
+        className={`text-xs px-3 py-1.5 flex items-center gap-1.5 transition-all duration-200 hover:scale-105 ${badge.style}`}
+      >
+        {badge.icon}
+        {badge.text}
+      </Badge>
+    ));
   };
 
   return (
@@ -139,7 +156,7 @@ const ProductCard: React.FC<ProductCardProps> = memo(({ product, className = "" 
           
           {/* Badges */}
           {renderBadges().length > 0 && (
-            <div className="absolute top-3 left-3 flex flex-col gap-1 max-w-[calc(100%-6rem)] z-10">
+            <div className="absolute top-3 left-3 flex flex-col gap-2 max-w-[calc(100%-6rem)] z-10">
               {renderBadges()}
             </div>
           )}
