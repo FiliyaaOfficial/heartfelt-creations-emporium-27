@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -107,13 +108,22 @@ const Custom = () => {
         console.log('Images uploaded:', imageUrls);
       }
 
+      // Parse budget safely
+      let budgetValue = null;
+      if (data.budget) {
+        const budgetMatch = data.budget.match(/(\d+)/);
+        if (budgetMatch) {
+          budgetValue = parseInt(budgetMatch[1]);
+        }
+      }
+
       const insertData = {
         name: data.name,
         email: data.email,
         phone: data.phone || null,
         occasion: data.occasion,
         description: data.description,
-        budget: data.budget ? parseFloat(data.budget.replace(/[^\d.]/g, '')) : null,
+        budget: budgetValue,
         timeline: data.timeline || null,
         status: 'pending',
         image_urls: imageUrls
