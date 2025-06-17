@@ -2,32 +2,38 @@
 import React from 'react';
 import { CartItem } from '@/types';
 import { Button } from '@/components/ui/button';
-import { Truck, CreditCard, Shield, Loader2 } from 'lucide-react';
-import { useCurrency } from '@/hooks/useCurrency';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Truck, CreditCard, Shield, Loader2, Tag } from 'lucide-react';
 
 interface OrderSummaryProps {
   cartItems: CartItem[];
   subtotal: number;
+  discount: number;
   loading: boolean;
   handleSubmit: (e: React.FormEvent) => Promise<void>;
+  currencySymbol: string;
+  appliedCoupon: any;
 }
 
 const OrderSummary: React.FC<OrderSummaryProps> = ({ 
   cartItems, 
   subtotal, 
+  discount,
   loading, 
-  handleSubmit 
+  handleSubmit,
+  currencySymbol,
+  appliedCoupon
 }) => {
-  const { formatCurrency, currencyConfig } = useCurrency();
   const shippingCost = 0;
-  const tax = subtotal * 0.18;
-  const total = subtotal + shippingCost + tax;
+  const tax = (subtotal - discount) * 0.18;
+  const total = subtotal - discount + shippingCost + tax;
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow-sm border sticky top-24">
-      <h2 className="text-lg font-medium mb-4">Order Summary</h2>
-      
-      <div className="space-y-4">
+    <Card className="sticky top-24">
+      <CardHeader>
+        <CardTitle>Order Summary</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
         <div className="max-h-80 overflow-y-auto pr-2">
           {cartItems.map((item) => (
             <div key={item.id} className="flex items-center py-3 border-b">
@@ -44,9 +50,7 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
                 <div className="text-xs text-muted-foreground">Qty: {item.quantity}</div>
               </div>
               <div className="font-medium text-right ml-2">
-                <div className="flex items-center">
-                  <span>{formatCurrency(item.product.price * item.quantity)}</span>
-                </div>
+                {currencySymbol}{(item.product.price * item.quantity).toFixed(2)}
               </div>
             </div>
           ))}
@@ -55,12 +59,22 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
         <div className="space-y-3 pt-2">
           <div className="flex justify-between">
             <span className="text-muted-foreground">Subtotal</span>
-            <span>{formatCurrency(subtotal)}</span>
+            <span>{currencySymbol}{subtotal.toFixed(2)}</span>
           </div>
+          
+          {appliedCoupon && discount > 0 && (
+            <div className="flex justify-between text-green-600">
+              <span className="flex items-center gap-1">
+                <Tag size={14} />
+                Discount ({appliedCoupon.code})
+              </span>
+              <span>-{currencySymbol}{discount.toFixed(2)}</span>
+            </div>
+          )}
           
           <div className="flex justify-between">
             <span className="text-muted-foreground">GST (18%)</span>
-            <span>{formatCurrency(tax)}</span>
+            <span>{currencySymbol}{tax.toFixed(2)}</span>
           </div>
           
           <div className="flex justify-between">
@@ -72,7 +86,7 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
             <div className="flex justify-between font-semibold">
               <span>Total</span>
               <div className="text-heartfelt-burgundy text-lg">
-                {formatCurrency(total)}
+                {currencySymbol}{total.toFixed(2)}
               </div>
             </div>
           </div>
@@ -104,15 +118,15 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
         <div className="pt-3 border-t flex items-center justify-between text-xs text-muted-foreground">
           <div className="flex items-center">
             <Truck size={14} className="mr-1" />
-            <span>Free delivery across India</span>
+            <span>Free delivery</span>
           </div>
           <div className="flex items-center">
             <CreditCard size={14} className="mr-1" />
             <span>Secure payment</span>
           </div>
         </div>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 };
 
