@@ -1,3 +1,5 @@
+
+
 export interface Product {
   id: string;
   name: string;
@@ -182,34 +184,3 @@ export interface AuthState {
   loading: boolean;
 }
 
-// Add new interfaces for payment system
-export interface Coupon {
-  id: string;
-  code: string;
-  discount_type: 'percentage' | 'fixed';
-  discount_value: number;
-  min_order_amount: number;
-  max_uses: number;
-  used_count: number;
-  valid_from?: string;
-  valid_until?: string;
-  active: boolean;
-  created_at: string;
-}
-
-export interface CurrencyRate {
-  id: string;
-  currency_code: string;
-  rate_to_inr: number;
-  symbol: string;
-  updated_at: string;
-}
-
-export interface PaymentGateway {
-  id: string;
-  name: string;
-  supported_currencies: string[];
-  active: boolean;
-  config?: any;
-  created_at: string;
-}

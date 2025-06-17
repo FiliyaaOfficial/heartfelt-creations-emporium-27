@@ -1,76 +1,89 @@
 
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { CreditCard, Smartphone } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 interface PaymentMethodSelectorProps {
   loading: boolean;
-  selectedGateway: string;
-  currency: string;
 }
 
-const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({ 
-  loading, 
-  selectedGateway, 
-  currency 
-}) => {
-  const getGatewayInfo = () => {
-    if (selectedGateway === 'stripe') {
-      return {
-        name: 'Stripe',
-        icon: <CreditCard className="h-5 w-5" />,
-        description: 'International payments with credit/debit cards',
-        methods: ['Visa', 'Mastercard', 'American Express']
-      };
-    } else {
-      return {
-        name: 'Razorpay',
-        icon: <Smartphone className="h-5 w-5" />,
-        description: 'Multiple payment options for India',
-        methods: ['UPI', 'Cards', 'Net Banking', 'Wallets']
-      };
-    }
-  };
-
-  const gatewayInfo = getGatewayInfo();
-
+const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({ loading }) => {
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          {gatewayInfo.icon}
-          Payment Method
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          <div className="p-4 border rounded-lg bg-blue-50 border-blue-200">
-            <div className="flex items-center justify-between mb-2">
-              <h3 className="font-medium">{gatewayInfo.name}</h3>
-              <Badge variant="secondary">{currency}</Badge>
+    <div className="bg-white p-6 rounded-lg shadow-sm border">
+      <h2 className="text-lg font-medium mb-4">Payment Method</h2>
+      <Tabs defaultValue="card">
+        <TabsList className="grid grid-cols-3 mb-4">
+          <TabsTrigger value="card">Credit Card</TabsTrigger>
+          <TabsTrigger value="upi">UPI</TabsTrigger>
+          <TabsTrigger value="cod">Cash on Delivery</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="card" className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="card_number">Card Number</Label>
+              <Input 
+                id="card_number" 
+                placeholder="1234 5678 9012 3456"
+                disabled={loading}
+              />
             </div>
-            <p className="text-sm text-gray-600 mb-3">{gatewayInfo.description}</p>
-            <div className="flex flex-wrap gap-2">
-              {gatewayInfo.methods.map((method) => (
-                <Badge key={method} variant="outline" className="text-xs">
-                  {method}
-                </Badge>
-              ))}
+            <div>
+              <Label htmlFor="card_name">Name on Card</Label>
+              <Input 
+                id="card_name" 
+                placeholder="John Doe"
+                disabled={loading}
+              />
             </div>
           </div>
-          
-          <div className="text-xs text-gray-500 space-y-1">
-            <p>✓ Secure encrypted payments</p>
-            <p>✓ Multiple payment options</p>
-            <p>✓ Instant payment confirmation</p>
-            {selectedGateway === 'razorpay' && (
-              <p>✓ UPI, cards, wallets supported</p>
-            )}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="expiry">Expiry Date</Label>
+              <Input 
+                id="expiry" 
+                placeholder="MM/YY"
+                disabled={loading}
+              />
+            </div>
+            <div>
+              <Label htmlFor="cvv">CVV</Label>
+              <Input 
+                id="cvv" 
+                placeholder="123"
+                disabled={loading}
+              />
+            </div>
           </div>
-        </div>
-      </CardContent>
-    </Card>
+        </TabsContent>
+        
+        <TabsContent value="upi">
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="upi_id">UPI ID</Label>
+              <Input 
+                id="upi_id" 
+                placeholder="name@upi"
+                disabled={loading}
+              />
+            </div>
+            <p className="text-sm text-muted-foreground">
+              You'll receive a payment request on your UPI app when you place the order
+            </p>
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="cod">
+          <div className="p-4 bg-heartfelt-cream/20 rounded-md">
+            <p className="font-medium mb-2">Cash on Delivery</p>
+            <p className="text-sm text-muted-foreground">
+              Pay with cash when your order is delivered. Additional ₹40 fee applies.
+            </p>
+          </div>
+        </TabsContent>
+      </Tabs>
+    </div>
   );
 };
 
