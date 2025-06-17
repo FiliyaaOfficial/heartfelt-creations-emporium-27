@@ -60,7 +60,7 @@ const CouponInput: React.FC<CouponInputProps> = ({ orderAmount, onCouponApplied 
       ) : (
         <div className="flex gap-2">
           <Input
-            placeholder="Enter coupon code"
+            placeholder="Enter coupon code (try SAVE10 or FLAT50)"
             value={couponCode}
             onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
             onKeyPress={(e) => e.key === 'Enter' && handleApplyCoupon()}

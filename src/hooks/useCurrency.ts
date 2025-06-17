@@ -1,6 +1,5 @@
 
 import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
 
 interface CurrencyRate {
   currency_code: string;
@@ -15,16 +14,13 @@ interface CurrencyConfig {
   rate: number;
 }
 
-const CURRENCY_COUNTRY_MAP: Record<string, string> = {
-  US: 'USD',
-  GB: 'GBP',
-  DE: 'EUR',
-  FR: 'EUR',
-  IT: 'EUR',
-  ES: 'EUR',
-  IN: 'INR',
-  // Add more countries as needed
-};
+// Mock currency data until database is set up
+const MOCK_CURRENCIES: CurrencyRate[] = [
+  { currency_code: 'INR', rate_to_inr: 1.0, symbol: '₹' },
+  { currency_code: 'USD', rate_to_inr: 0.012, symbol: '$' },
+  { currency_code: 'EUR', rate_to_inr: 0.011, symbol: '€' },
+  { currency_code: 'GBP', rate_to_inr: 0.0095, symbol: '£' }
+];
 
 export const useCurrency = () => {
   const [currencyConfig, setCurrencyConfig] = useState<CurrencyConfig>({
@@ -39,21 +35,14 @@ export const useCurrency = () => {
   useEffect(() => {
     const detectUserLocationAndCurrency = async () => {
       try {
-        // Fetch available currencies from database
-        const { data: rates } = await supabase
-          .from('currency_rates')
-          .select('*');
+        // Set mock currencies
+        setAvailableCurrencies(MOCK_CURRENCIES);
 
-        if (rates) {
-          setAvailableCurrencies(rates);
-        }
-
-        // Try to get country from localStorage first
-        const cachedCountry = localStorage.getItem('userCountry');
+        // Try to get cached currency first
         const cachedCurrency = localStorage.getItem('userCurrency');
         
-        if (cachedCurrency && rates) {
-          const rate = rates.find(r => r.currency_code === cachedCurrency);
+        if (cachedCurrency) {
+          const rate = MOCK_CURRENCIES.find(r => r.currency_code === cachedCurrency);
           if (rate) {
             setCurrencyConfig({
               currency: rate.currency_code,
@@ -66,22 +55,20 @@ export const useCurrency = () => {
           }
         }
 
-        // Detect from browser locale or use geolocation
+        // Detect from browser locale
         let detectedCurrency = 'INR';
         const browserLocale = navigator.language || navigator.languages[0];
         
         if (browserLocale.includes('en-US')) {
           detectedCurrency = 'USD';
-          localStorage.setItem('userCountry', 'US');
         } else if (browserLocale.includes('en-GB')) {
           detectedCurrency = 'GBP';
-          localStorage.setItem('userCountry', 'GB');
         } else if (browserLocale.includes('de') || browserLocale.includes('fr') || browserLocale.includes('it')) {
           detectedCurrency = 'EUR';
         }
 
-        const selectedRate = rates?.find(r => r.currency_code === detectedCurrency) || 
-                           rates?.find(r => r.currency_code === 'INR');
+        const selectedRate = MOCK_CURRENCIES.find(r => r.currency_code === detectedCurrency) || 
+                           MOCK_CURRENCIES.find(r => r.currency_code === 'INR');
         
         if (selectedRate) {
           setCurrencyConfig({

@@ -1,6 +1,5 @@
 
 import { useState } from 'react';
-import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
 interface Coupon {
@@ -11,7 +10,33 @@ interface Coupon {
   min_order_amount: number;
   max_uses: number;
   used_count: number;
+  valid_until?: string;
+  active: boolean;
 }
+
+// Mock coupon data until database is set up
+const MOCK_COUPONS: Coupon[] = [
+  {
+    id: '1',
+    code: 'SAVE10',
+    discount_type: 'percentage',
+    discount_value: 10,
+    min_order_amount: 500,
+    max_uses: 100,
+    used_count: 0,
+    active: true
+  },
+  {
+    id: '2',
+    code: 'FLAT50',
+    discount_type: 'fixed',
+    discount_value: 50,
+    min_order_amount: 200,
+    max_uses: 50,
+    used_count: 0,
+    active: true
+  }
+];
 
 export const useCoupons = () => {
   const [appliedCoupon, setAppliedCoupon] = useState<Coupon | null>(null);
@@ -24,15 +49,17 @@ export const useCoupons = () => {
     }
 
     setIsValidating(true);
+    
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
     try {
-      const { data: coupon, error } = await supabase
-        .from('coupons')
-        .select('*')
-        .eq('code', code.toUpperCase())
-        .eq('active', true)
-        .single();
+      // Find coupon in mock data
+      const coupon = MOCK_COUPONS.find(c => 
+        c.code.toUpperCase() === code.toUpperCase() && c.active
+      );
 
-      if (error || !coupon) {
+      if (!coupon) {
         toast.error('Invalid coupon code');
         return null;
       }
