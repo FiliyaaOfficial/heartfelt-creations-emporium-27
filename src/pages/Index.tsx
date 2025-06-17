@@ -1,162 +1,129 @@
-import React, { useState, useEffect, lazy, Suspense } from 'react';
-import Hero from '@/components/Hero';
-import CategorySection from '@/components/CategorySection';
-import ProductPromoBanner from '@/components/ProductPromoBanner';
-import FeaturedProducts from '@/components/FeaturedProducts';
-import { supabase } from '@/integrations/supabase/client';
-import { Product as ProductType } from '@/types';
-import ProductCard from '@/components/ProductCard';
-import { Link } from 'react-router-dom';
-import { ArrowRight, Clock, TrendingUp } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { toast } from 'sonner';
 
-// Lazy load heavy components
-const Testimonials = lazy(() => import('@/components/Testimonials'));
-const CustomOrderCta = lazy(() => import('@/components/CustomOrderCta'));
-const CategoryFeaturedSection = lazy(() => import('@/components/CategoryFeaturedSection'));
+import React from "react";
+import { Link } from "react-router-dom";
+import { ArrowRight, Gift, Heart, Star, Users } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useAnalytics } from '@/hooks/useAnalytics';
+import Hero from "@/components/Hero";
+import CategorySection from "@/components/CategorySection";
+import FeaturedProducts from "@/components/FeaturedProducts";
+import CustomOrderCta from "@/components/CustomOrderCta";
+import Testimonials from "@/components/Testimonials";
+import Newsletter from "@/components/Newsletter";
+import SEOHead from "@/components/SEOHead";
+import CookieConsent from "@/components/CookieConsent";
 
 const Index = () => {
-  const [newArrivals, setNewArrivals] = useState<ProductType[]>([]);
-  const [bestSellers, setBestSellers] = useState<ProductType[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const { trackEvent } = useAnalytics();
 
-  useEffect(() => {
-    const fetchProducts = async () => {
-      setIsLoading(true);
-      try {
-        // Use Promise.all for parallel requests to improve performance
-        const [newArrivalsResponse, bestSellersResponse] = await Promise.all([
-          supabase
-            .from('products')
-            .select('*')
-            .eq('is_new', true)
-            .order('created_at', { ascending: false })
-            .limit(4),
-          supabase
-            .from('products')
-            .select('*')
-            .eq('is_bestseller', true)
-            .limit(4)
-        ]);
-        
-        if (newArrivalsResponse.error) {
-          console.error('Error fetching new arrivals:', newArrivalsResponse.error);
-        } else {
-          setNewArrivals(newArrivalsResponse.data || []);
-        }
-
-        if (bestSellersResponse.error) {
-          console.error('Error fetching best sellers:', bestSellersResponse.error);
-        } else {
-          setBestSellers(bestSellersResponse.data || []);
-        }
-      } catch (error) {
-        console.error('Error fetching products:', error);
-        toast.error("Failed to load products", {
-          description: "Please refresh the page to try again"
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    
-    fetchProducts();
-  }, []);
-
-  const renderProductSection = (
-    title: string,
-    subtitle: string,
-    products: ProductType[],
-    link: string,
-    icon: React.ReactNode
-  ) => (
-    <section className="py-12 bg-white relative overflow-hidden px-4">
-      {/* Decorative elements */}
-      <div className="absolute top-20 left-0 w-32 h-32 rounded-full bg-heartfelt-cream/20 blur-2xl -z-10"></div>
-      <div className="absolute bottom-10 right-0 w-40 h-40 rounded-full bg-heartfelt-burgundy/5 blur-2xl -z-10"></div>
-      
-      <div className="container mx-auto">
-        <div className="flex justify-between items-center mb-8">
-          <div>
-            <div className="flex items-center gap-2 mb-2">
-              {icon}
-              <h2 className="section-title m-0">{title}</h2>
-            </div>
-            <p className="text-muted-foreground">{subtitle}</p>
-          </div>
-          <Link to={link} className="flex items-center text-heartfelt-burgundy hover:text-heartfelt-dark transition-colors">
-            View all <ArrowRight size={16} className="ml-1 group-hover:translate-x-1 transition-transform" />
-          </Link>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {isLoading ? (
-            Array(4).fill(0).map((_, i) => (
-              <div key={i} className="h-[350px] bg-heartfelt-cream/20 animate-pulse rounded-xl"></div>
-            ))
-          ) : products.length === 0 ? (
-            <div className="col-span-full text-center py-12 bg-heartfelt-cream/10 rounded-xl">
-              <p className="text-lg text-muted-foreground">No {title.toLowerCase()} available at the moment</p>
-              <Link to="/shop" className="inline-block mt-4">
-                <Button variant="outline" className="border-heartfelt-burgundy text-heartfelt-burgundy hover:bg-heartfelt-burgundy/5">
-                  Browse All Products
-                </Button>
-              </Link>
-            </div>
-          ) : (
-            products.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))
-          )}
-        </div>
-
-        <div className="mt-8 text-center">
-          <Link to={link}>
-            <Button variant="outline" className="border-heartfelt-burgundy text-heartfelt-burgundy hover:bg-heartfelt-burgundy/5">
-              View All {title} <ArrowRight size={16} className="ml-1" />
-            </Button>
-          </Link>
-        </div>
-      </div>
-    </section>
-  );
+  const handleCTAClick = (action: string) => {
+    trackEvent(action, 'engagement', 'homepage_cta');
+  };
 
   return (
-    <div className="bg-white">
+    <div className="min-h-screen">
+      <SEOHead />
+      
+      {/* Hero Section */}
       <Hero />
-      <ProductPromoBanner />
+      
+      {/* Trust Indicators */}
+      <section className="py-12 bg-heartfelt-cream/30">
+        <div className="container mx-auto px-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+            <div className="flex flex-col items-center">
+              <Gift className="h-8 w-8 text-heartfelt-burgundy mb-2" />
+              <h3 className="font-semibold text-gray-900">1000+ Gifts</h3>
+              <p className="text-sm text-gray-600">Curated Collection</p>
+            </div>
+            <div className="flex flex-col items-center">
+              <Users className="h-8 w-8 text-heartfelt-burgundy mb-2" />
+              <h3 className="font-semibold text-gray-900">50k+ Customers</h3>
+              <p className="text-sm text-gray-600">Happy Families</p>
+            </div>
+            <div className="flex flex-col items-center">
+              <Star className="h-8 w-8 text-heartfelt-burgundy mb-2" />
+              <h3 className="font-semibold text-gray-900">4.8★ Rating</h3>
+              <p className="text-sm text-gray-600">Customer Reviews</p>
+            </div>
+            <div className="flex flex-col items-center">
+              <Heart className="h-8 w-8 text-heartfelt-burgundy mb-2" />
+              <h3 className="font-semibold text-gray-900">100% Love</h3>
+              <p className="text-sm text-gray-600">Guaranteed</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Category Section */}
       <CategorySection />
-      
+
+      {/* Featured Products */}
       <FeaturedProducts />
-      
-      {renderProductSection(
-        "New Arrivals",
-        "Our latest handcrafted creations",
-        newArrivals,
-        "/new-arrivals",
-        <Clock size={24} className="text-heartfelt-burgundy" />
-      )}
-      
-      {renderProductSection(
-        "Best Sellers",
-        "Our most loved products by customers",
-        bestSellers,
-        "/best-sellers",
-        <TrendingUp size={24} className="text-heartfelt-burgundy" />
-      )}
-      
-      <Suspense fallback={<div className="h-32 flex items-center justify-center"><div className="animate-spin h-6 w-6 border-4 border-heartfelt-burgundy border-t-transparent rounded-full"></div></div>}>
-        <CategoryFeaturedSection />
-      </Suspense>
-      
-      <Suspense fallback={<div className="h-32 flex items-center justify-center"><div className="animate-spin h-6 w-6 border-4 border-heartfelt-burgundy border-t-transparent rounded-full"></div></div>}>
-        <Testimonials />
-      </Suspense>
-      
-      <Suspense fallback={<div className="h-32 flex items-center justify-center"><div className="animate-spin h-6 w-6 border-4 border-heartfelt-burgundy border-t-transparent rounded-full"></div></div>}>
-        <CustomOrderCta />
-      </Suspense>
+
+      {/* Custom Order CTA */}
+      <CustomOrderCta />
+
+      {/* Why Choose Us */}
+      <section className="py-16 bg-white">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-serif font-bold text-heartfelt-burgundy mb-4">
+              Why Choose Filiyaa?
+            </h2>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              We're committed to helping you create meaningful connections through thoughtful gifts
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="text-center p-6">
+              <div className="w-16 h-16 bg-heartfelt-burgundy/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Gift className="h-8 w-8 text-heartfelt-burgundy" />
+              </div>
+              <h3 className="text-xl font-semibold mb-3">Personalized Touch</h3>
+              <p className="text-gray-600">Every gift can be customized to make it uniquely yours and perfectly suited for your loved ones.</p>
+            </div>
+            
+            <div className="text-center p-6">
+              <div className="w-16 h-16 bg-heartfelt-burgundy/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Heart className="h-8 w-8 text-heartfelt-burgundy" />
+              </div>
+              <h3 className="text-xl font-semibold mb-3">Made with Love</h3>
+              <p className="text-gray-600">Each product is carefully crafted by skilled artisans who put love and attention into every detail.</p>
+            </div>
+            
+            <div className="text-center p-6">
+              <div className="w-16 h-16 bg-heartfelt-burgundy/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Star className="h-8 w-8 text-heartfelt-burgundy" />
+              </div>
+              <h3 className="text-xl font-semibold mb-3">Premium Quality</h3>
+              <p className="text-gray-600">We use only the finest materials and maintain the highest standards in everything we create.</p>
+            </div>
+          </div>
+          
+          <div className="text-center mt-12">
+            <Button 
+              asChild 
+              className="bg-heartfelt-burgundy hover:bg-heartfelt-dark"
+              onClick={() => handleCTAClick('learn_more')}
+            >
+              <Link to="/shop">
+                Start Shopping <ArrowRight className="ml-2 h-4 w-4" />
+              </Link>
+            </Button>
+          </div>
+        </div>
+      </section>
+
+      {/* Testimonials */}
+      <Testimonials />
+
+      {/* Newsletter */}
+      <Newsletter />
+
+      {/* Cookie Consent */}
+      <CookieConsent />
     </div>
   );
 };
