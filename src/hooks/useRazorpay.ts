@@ -10,6 +10,8 @@ interface RazorpayOptions {
   description: string;
   onSuccess: (paymentId: string) => void;
   onError: (error: any) => void;
+  coupon_code?: string;
+  discount_amount?: number;
 }
 
 export const useRazorpay = () => {
