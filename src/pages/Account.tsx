@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -13,7 +12,7 @@ import { getUserProfile, updateUserProfile, type UserProfile } from '@/utils/pro
 import { User, Package, MessageCircle, LogOut, Edit } from 'lucide-react';
 
 const Account = () => {
-  const { user, logout } = useAuth();
+  const { user, signOut } = useAuth();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -107,7 +106,7 @@ const Account = () => {
 
   const handleLogout = async () => {
     try {
-      await logout();
+      await signOut();
       toast.success('Logged out successfully');
     } catch (error) {
       toast.error('Failed to logout');
