@@ -18,7 +18,7 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
   loading, 
   handleSubmit 
 }) => {
-  const { formatCurrency, currencyConfig } = useCurrency();
+  const { formatCurrency } = useCurrency();
   const shippingCost = 0;
   const tax = subtotal * 0.18;
   const total = subtotal + shippingCost + tax;

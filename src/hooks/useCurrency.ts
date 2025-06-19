@@ -28,10 +28,14 @@ export const useCurrency = () => {
     return Math.round(basePrice * rate * 100) / 100;
   };
 
+  // Add formatCurrency as an alias to formatPrice for backward compatibility
+  const formatCurrency = formatPrice;
+
   return {
     currency: currency.code,
     symbol: currency.symbol,
     formatPrice,
+    formatCurrency, // Add this for backward compatibility
     convertPrice,
     changeCurrency,
     isLoading,
