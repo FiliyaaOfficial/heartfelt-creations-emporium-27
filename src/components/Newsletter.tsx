@@ -22,7 +22,7 @@ const Newsletter: React.FC<NewsletterProps> = ({ variant = 'default', className 
     setIsLoading(true);
     try {
       const { error } = await supabase
-        .from('newsletter_subscribers')
+        .from('newsletter_subscriptions')
         .insert([{ email }]);
 
       if (error) {
