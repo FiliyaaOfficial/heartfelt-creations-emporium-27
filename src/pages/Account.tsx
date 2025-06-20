@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
-import { getUserProfile, updateUserProfile, type UserProfile } from '@/utils/profileUtils';
+import { getUserProfile, updateUserProfile, createUserProfile, type UserProfile } from '@/utils/profileUtils';
 import { User, Package, MessageCircle, LogOut, Edit } from 'lucide-react';
 
 const Account = () => {
@@ -31,7 +31,19 @@ const Account = () => {
 
       try {
         // Fetch user profile
-        const userProfile = await getUserProfile(user.id);
+        let userProfile = await getUserProfile(user.id);
+        if (!userProfile) {
+          // Create profile if it doesn't exist
+          const success = await createUserProfile(user.id, {
+            first_name: '',
+            last_name: '',
+            phone: '',
+          });
+          if (success) {
+            userProfile = await getUserProfile(user.id);
+          }
+        }
+        
         if (userProfile) {
           setProfile(userProfile);
           setFirstName(userProfile.first_name || '');
@@ -82,7 +94,7 @@ const Account = () => {
 
     setSaving(true);
     try {
-      const success = await updateUserProfile({
+      const success = await updateUserProfile(user.id, {
         first_name: firstName,
         last_name: lastName,
         phone: phone,
