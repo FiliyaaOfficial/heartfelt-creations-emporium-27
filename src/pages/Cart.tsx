@@ -2,7 +2,7 @@
 import React from 'react';
 import { useCart } from '@/contexts/CartContext';
 import { Button } from '@/components/ui/button';
-import { Minus, Plus, Trash2, ArrowRight, ShoppingBag } from 'lucide-react';
+import { Minus, Plus, Trash2, ArrowRight, ShoppingBag, Image } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useCurrency } from '@/hooks/useCurrency';
 
@@ -49,19 +49,47 @@ const Cart = () => {
                     {cartItems.map((item) => (
                       <tr key={item.id} className="py-4">
                         <td className="py-4">
-                          <div className="flex items-center space-x-3">
+                          <div className="flex items-start space-x-3">
                             <img 
                               src={item.product.image_url} 
                               alt={item.product.name} 
-                              className="h-16 w-16 object-cover rounded"
+                              className="h-16 w-16 object-cover rounded flex-shrink-0"
                               loading="lazy"
                             />
-                            <div>
+                            <div className="flex-grow">
                               <h3 className="font-medium">{item.product.name}</h3>
                               <p className="text-sm text-muted-foreground">{item.product.category}</p>
                               <p className="text-sm text-filiyaa-peach-600 font-medium sm:hidden">
                                 {formatCurrency(item.product.price)}
                               </p>
+                              
+                              {/* Show customization details */}
+                              {item.customization && (
+                                <div className="mt-2 p-2 bg-blue-50 rounded-md">
+                                  <p className="text-xs font-medium text-blue-800 mb-1">Customization:</p>
+                                  <p className="text-xs text-blue-700">{item.customization}</p>
+                                  
+                                  {/* Show customization images if available */}
+                                  {item.selected_options?.customizationImages && item.selected_options.customizationImages.length > 0 && (
+                                    <div className="mt-2 flex gap-1">
+                                      {item.selected_options.customizationImages.slice(0, 3).map((imageUrl: string, index: number) => (
+                                        <div key={index} className="relative">
+                                          <img 
+                                            src={imageUrl} 
+                                            alt={`Customization ${index + 1}`}
+                                            className="w-8 h-8 object-cover rounded border"
+                                          />
+                                          {index === 2 && item.selected_options!.customizationImages!.length > 3 && (
+                                            <div className="absolute inset-0 bg-black bg-opacity-50 rounded flex items-center justify-center">
+                                              <span className="text-white text-xs">+{item.selected_options!.customizationImages!.length - 3}</span>
+                                            </div>
+                                          )}
+                                        </div>
+                                      ))}
+                                    </div>
+                                  )}
+                                </div>
+                              )}
                             </div>
                           </div>
                         </td>

@@ -24,6 +24,7 @@ const ProductDetail = () => {
   const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
   const [customization, setCustomization] = useState('');
   const [customizationImages, setCustomizationImages] = useState<string[]>([]);
+  const [productImages, setProductImages] = useState<string[]>([]);
   const { addToCart } = useCart();
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
   const [inWishlist, setInWishlist] = useState(false);
@@ -49,7 +50,19 @@ const ProductDetail = () => {
         
         console.log('Product fetched successfully:', data);
         setProduct(data as Product);
-        setActiveImage(data.image_url || 'https://images.unsplash.com/photo-1546868871-7041f2a55e12');
+        
+        // Set up product images - use real images if available, otherwise fallback
+        const images = [
+          data.image_url,
+          // Add more image fields if they exist in your database
+        ].filter(Boolean);
+        
+        if (images.length === 0) {
+          images.push('https://images.unsplash.com/photo-1546868871-7041f2a55e12');
+        }
+        
+        setProductImages(images);
+        setActiveImage(images[0] || 'https://images.unsplash.com/photo-1546868871-7041f2a55e12');
         
         // After fetching product, get related products
         if (data.category) {
@@ -114,8 +127,13 @@ const ProductDetail = () => {
       };
       
       addToCart(productWithCustomization, quantity);
+      
+      // Show detailed toast with customization info
+      const customizationText = product.is_customizable && customization ? 
+        ` with customization: "${customization.substring(0, 50)}${customization.length > 50 ? '...' : ''}"` : '';
+      
       sonnerToast("Added to cart", {
-        description: `${quantity} × ${product.name} added to your cart`,
+        description: `${quantity} × ${product.name}${customizationText} added to your cart`,
         action: {
           label: "View Cart",
           onClick: () => window.location.href = "/cart"
@@ -151,19 +169,25 @@ const ProductDetail = () => {
     setCustomizationImages(images);
   };
 
-  // Simulated product images (in a real app, these would come from the database)
-  const productImages = [
-    product?.image_url || 'https://images.unsplash.com/photo-1546868871-7041f2a55e12',
-    'https://images.unsplash.com/photo-1567721913486-6585f069b332',
-    'https://images.unsplash.com/photo-1618160702438-9b02ab6515c9',
-  ].filter(Boolean);
+  // Product features - make dynamic based on product data
+  const getProductFeatures = () => {
+    const features = [
+      { icon: <Award className="text-heartfelt-burgundy" />, title: 'Premium Quality', description: 'Handcrafted with attention to detail' },
+      { icon: <ShieldCheck className="text-heartfelt-burgundy" />, title: '1 Year Warranty', description: 'We stand behind our products' },
+      { icon: <Truck className="text-heartfelt-burgundy" />, title: 'Free Shipping', description: 'On orders over ₹2000' },
+    ];
 
-  // Product features
-  const productFeatures = [
-    { icon: <Award className="text-heartfelt-burgundy" />, title: 'Premium Quality', description: 'Handcrafted with attention to detail' },
-    { icon: <ShieldCheck className="text-heartfelt-burgundy" />, title: '1 Year Warranty', description: 'We stand behind our products' },
-    { icon: <Truck className="text-heartfelt-burgundy" />, title: 'Free Shipping', description: 'On orders over ₹2000' },
-  ];
+    // Add customization feature if product is customizable
+    if (product?.is_customizable) {
+      features.unshift({
+        icon: <Package className="text-heartfelt-burgundy" />,
+        title: 'Customizable',
+        description: 'Personalize this product to your needs'
+      });
+    }
+
+    return features;
+  };
 
   if (isLoading) {
     return (
@@ -237,25 +261,27 @@ const ProductDetail = () => {
           </div>
           
           {/* Thumbnail Gallery */}
-          <div className="flex space-x-2 overflow-x-auto pb-2">
-            {productImages.map((img, idx) => (
-              <button 
-                key={idx}
-                className={`rounded-md overflow-hidden border-2 ${activeImage === img ? 'border-heartfelt-burgundy' : 'border-heartfelt-cream'} w-20 h-20 flex-shrink-0`}
-                onClick={() => setActiveImage(img || '')}
-              >
-                <img 
-                  src={img} 
-                  alt={`${product.name} thumbnail ${idx + 1}`} 
-                  className="w-full h-full object-cover"
-                  onError={(e) => {
-                    const target = e.target as HTMLImageElement;
-                    target.src = 'https://images.unsplash.com/photo-1546868871-7041f2a55e12';
-                  }}
-                />
-              </button>
-            ))}
-          </div>
+          {productImages.length > 1 && (
+            <div className="flex space-x-2 overflow-x-auto pb-2">
+              {productImages.map((img, idx) => (
+                <button 
+                  key={idx}
+                  className={`rounded-md overflow-hidden border-2 ${activeImage === img ? 'border-heartfelt-burgundy' : 'border-heartfelt-cream'} w-20 h-20 flex-shrink-0`}
+                  onClick={() => setActiveImage(img || '')}
+                >
+                  <img 
+                    src={img} 
+                    alt={`${product.name} thumbnail ${idx + 1}`} 
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.src = 'https://images.unsplash.com/photo-1546868871-7041f2a55e12';
+                    }}
+                  />
+                </button>
+              ))}
+            </div>
+          )}
         </div>
         
         {/* Product Details */}
@@ -268,11 +294,11 @@ const ProductDetail = () => {
                 <Star 
                   key={i} 
                   size={18} 
-                  className={i < 4 ? "fill-heartfelt-burgundy text-heartfelt-burgundy" : "text-gray-300"}
+                  className={i < Math.floor(product.rating || 0) ? "fill-heartfelt-burgundy text-heartfelt-burgundy" : "text-gray-300"}
                 />
               ))}
-              <span className="text-sm font-medium ml-2">4.0</span>
-              <span className="text-sm text-muted-foreground ml-1">(12 reviews)</span>
+              <span className="text-sm font-medium ml-2">{product.rating || 0}</span>
+              <span className="text-sm text-muted-foreground ml-1">({product.review_count || 0} reviews)</span>
             </div>
             
             <p className="text-2xl font-serif text-heartfelt-burgundy font-semibold mb-4">
@@ -296,12 +322,23 @@ const ProductDetail = () => {
             )}
           </div>
           
+          {/* Product Customization - Show for customizable products */}
+          {product.is_customizable && (
+            <div className="mb-8">
+              <ProductCustomization
+                onCustomizationChange={handleCustomizationChange}
+                initialCustomization={customization}
+                initialImages={customizationImages}
+              />
+            </div>
+          )}
+          
           {/* Quantity Selector */}
           <div className="mb-8">
             <p className="font-medium mb-3">Quantity</p>
             <div className="flex items-center">
               <button 
-                onClick={handleDecreaseQuantity}
+                onClick={() => setQuantity(Math.max(1, quantity - 1))}
                 disabled={quantity <= 1}
                 className="p-2 rounded-l border border-heartfelt-cream disabled:opacity-50"
                 aria-label="Decrease quantity"
@@ -312,7 +349,7 @@ const ProductDetail = () => {
                 {quantity}
               </div>
               <button 
-                onClick={handleIncreaseQuantity}
+                onClick={() => setQuantity(Math.min(product.stock_quantity, quantity + 1))}
                 disabled={product.stock_quantity <= quantity}
                 className="p-2 rounded-r border border-heartfelt-cream disabled:opacity-50"
                 aria-label="Increase quantity"
@@ -354,8 +391,8 @@ const ProductDetail = () => {
           </Button>
           
           {/* Product Features */}
-          <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
-            {productFeatures.map((feature, index) => (
+          <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-4">
+            {getProductFeatures().map((feature, index) => (
               <div key={index} className="flex items-start gap-3 p-3 rounded-lg border border-heartfelt-cream">
                 <div className="flex-shrink-0 mt-1">
                   {feature.icon}
@@ -384,15 +421,6 @@ const ProductDetail = () => {
         </div>
       </div>
       
-      {/* Product Customization - Only show for customizable products */}
-      {product.is_customizable && (
-        <ProductCustomization
-          onCustomizationChange={handleCustomizationChange}
-          initialCustomization={customization}
-          initialImages={customizationImages}
-        />
-      )}
-      
       {/* Product Details Tabs */}
       <div className="mt-16">
         <Tabs defaultValue="description" className="w-full">
@@ -403,66 +431,93 @@ const ProductDetail = () => {
           </TabsList>
           <TabsContent value="description" className="bg-white p-6 rounded-lg border border-heartfelt-cream">
             <h3 className="text-xl font-serif font-semibold mb-4">Product Description</h3>
-            <p className="text-gray-700 mb-4">
-              {product.description}
-            </p>
-            <p className="text-gray-700">
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed euismod, velit vel bibendum bibendum, 
-              risus nibh congue libero, ac congue urna velit vel nibh. Nulla facilisi. Sed auctor, nibh vel bibendum 
-              bibendum, risus nibh congue libero, ac congue urna velit vel nibh.
-            </p>
+            <div className="prose prose-gray max-w-none">
+              <p className="text-gray-700 mb-4 leading-relaxed">
+                {product.description}
+              </p>
+              {product.materials && product.materials.length > 0 && (
+                <div className="mt-6">
+                  <h4 className="font-medium mb-2">Materials Used:</h4>
+                  <ul className="list-disc list-inside text-gray-700">
+                    {product.materials.map((material, index) => (
+                      <li key={index}>{material}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {product.care_instructions && (
+                <div className="mt-6">
+                  <h4 className="font-medium mb-2">Care Instructions:</h4>
+                  <p className="text-gray-700">{product.care_instructions}</p>
+                </div>
+              )}
+            </div>
           </TabsContent>
           <TabsContent value="specifications" className="bg-white p-6 rounded-lg border border-heartfelt-cream">
             <h3 className="text-xl font-serif font-semibold mb-4">Product Specifications</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <h4 className="font-medium text-sm mb-2">Dimensions</h4>
-                <table className="w-full text-sm">
-                  <tbody>
-                    <tr className="border-b border-heartfelt-cream">
-                      <td className="py-2 text-muted-foreground">Height</td>
-                      <td className="py-2">10 inches</td>
-                    </tr>
-                    <tr className="border-b border-heartfelt-cream">
-                      <td className="py-2 text-muted-foreground">Width</td>
-                      <td className="py-2">8 inches</td>
-                    </tr>
-                    <tr>
-                      <td className="py-2 text-muted-foreground">Weight</td>
-                      <td className="py-2">1.2 kg</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-              <div>
-                <h4 className="font-medium text-sm mb-2">Materials</h4>
-                <table className="w-full text-sm">
-                  <tbody>
-                    <tr className="border-b border-heartfelt-cream">
-                      <td className="py-2 text-muted-foreground">Primary Material</td>
-                      <td className="py-2">Premium Quality Cotton</td>
-                    </tr>
-                    <tr className="border-b border-heartfelt-cream">
-                      <td className="py-2 text-muted-foreground">Secondary Material</td>
-                      <td className="py-2">Natural Dyes</td>
-                    </tr>
-                    <tr>
-                      <td className="py-2 text-muted-foreground">Finishing</td>
-                      <td className="py-2">Hand-finished</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {(product.dimensions || product.weight) && (
+                <div>
+                  <h4 className="font-medium text-sm mb-3">Physical Specifications</h4>
+                  <table className="w-full text-sm">
+                    <tbody>
+                      {product.dimensions && (
+                        <tr className="border-b border-heartfelt-cream">
+                          <td className="py-2 text-muted-foreground">Dimensions</td>
+                          <td className="py-2">{product.dimensions}</td>
+                        </tr>
+                      )}
+                      {product.weight && (
+                        <tr className="border-b border-heartfelt-cream">
+                          <td className="py-2 text-muted-foreground">Weight</td>
+                          <td className="py-2">{product.weight}</td>
+                        </tr>
+                      )}
+                      <tr>
+                        <td className="py-2 text-muted-foreground">Stock Quantity</td>
+                        <td className="py-2">{product.stock_quantity}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              )}
+              
+              {product.materials && product.materials.length > 0 && (
+                <div>
+                  <h4 className="font-medium text-sm mb-3">Materials & Composition</h4>
+                  <table className="w-full text-sm">
+                    <tbody>
+                      {product.materials.map((material, index) => (
+                        <tr key={index} className={index < product.materials!.length - 1 ? "border-b border-heartfelt-cream" : ""}>
+                          <td className="py-2 text-muted-foreground">Material {index + 1}</td>
+                          <td className="py-2">{material}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
-            <div className="mt-8">
-              <h4 className="font-medium text-sm mb-2">Care Instructions</h4>
-              <ul className="list-disc list-inside text-sm space-y-2 text-gray-700">
-                <li>Hand wash with cold water</li>
-                <li>Do not bleach</li>
-                <li>Hang dry in shade</li>
-                <li>Iron on low temperature if needed</li>
-              </ul>
-            </div>
+            
+            {product.care_instructions && (
+              <div className="mt-8">
+                <h4 className="font-medium text-sm mb-3">Care Instructions</h4>
+                <p className="text-sm text-gray-700 leading-relaxed">{product.care_instructions}</p>
+              </div>
+            )}
+            
+            {product.tags && product.tags.length > 0 && (
+              <div className="mt-8">
+                <h4 className="font-medium text-sm mb-3">Product Tags</h4>
+                <div className="flex flex-wrap gap-2">
+                  {product.tags.map((tag, index) => (
+                    <span key={index} className="px-3 py-1 bg-heartfelt-cream text-heartfelt-burgundy text-xs rounded-full">
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
           </TabsContent>
           <TabsContent value="reviews" className="bg-white p-6 rounded-lg border border-heartfelt-cream">
             <ProductReviews productId={product.id} />

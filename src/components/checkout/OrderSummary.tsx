@@ -30,7 +30,7 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
       <div className="space-y-4">
         <div className="max-h-80 overflow-y-auto pr-2">
           {cartItems.map((item) => (
-            <div key={item.id} className="flex items-center py-3 border-b">
+            <div key={item.id} className="flex items-start py-3 border-b">
               <div className="h-16 w-16 rounded overflow-hidden flex-shrink-0">
                 <img 
                   src={item.product.image_url} 
@@ -42,6 +42,31 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
               <div className="ml-3 flex-grow">
                 <h3 className="text-sm font-medium">{item.product.name}</h3>
                 <div className="text-xs text-muted-foreground">Qty: {item.quantity}</div>
+                
+                {/* Show customization details */}
+                {item.customization && (
+                  <div className="mt-1 p-2 bg-blue-50 rounded text-xs">
+                    <p className="font-medium text-blue-800 mb-1">Custom:</p>
+                    <p className="text-blue-700 line-clamp-2">{item.customization}</p>
+                    {item.selected_options?.customizationImages && item.selected_options.customizationImages.length > 0 && (
+                      <div className="mt-1 flex gap-1">
+                        {item.selected_options.customizationImages.slice(0, 2).map((imageUrl: string, index: number) => (
+                          <img 
+                            key={index}
+                            src={imageUrl} 
+                            alt={`Custom ${index + 1}`}
+                            className="w-6 h-6 object-cover rounded border"
+                          />
+                        ))}
+                        {item.selected_options.customizationImages.length > 2 && (
+                          <div className="w-6 h-6 bg-gray-200 rounded border flex items-center justify-center text-xs">
+                            +{item.selected_options.customizationImages.length - 2}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
               <div className="font-medium text-right ml-2">
                 <div className="flex items-center">

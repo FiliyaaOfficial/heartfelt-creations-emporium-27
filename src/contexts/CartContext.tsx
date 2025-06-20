@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { CartItem, Product } from "@/types";
@@ -8,7 +7,7 @@ import { useAuth } from "@/contexts/AuthContext";
 
 interface CartContextProps {
   cartItems: CartItem[];
-  addToCart: (product: Product, quantity: number) => Promise<void>;
+  addToCart: (product: Product & { customization?: string; customizationImages?: string[] }, quantity: number) => Promise<void>;
   updateQuantity: (itemId: string, quantity: number) => Promise<void>;
   removeFromCart: (itemId: string) => Promise<void>;
   clearCart: () => Promise<void>;
@@ -166,16 +165,17 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const addToCart = async (product: Product, quantity: number) => {
+  const addToCart = async (product: Product & { customization?: string; customizationImages?: string[] }, quantity: number) => {
     setIsLoading(true);
     try {
-      // Check if product already exists in cart
+      // For customizable products, check if there's an existing item with same customization
       const existingItem = cartItems.find(
-        (item) => item.product_id === product.id
+        (item) => item.product_id === product.id && 
+        (!product.is_customizable || item.customization === product.customization)
       );
 
-      if (existingItem) {
-        // Update existing cart item
+      if (existingItem && !product.is_customizable) {
+        // Update existing cart item (only for non-customizable products)
         const { error } = await supabase
           .from('cart_items')
           .update({
@@ -198,7 +198,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
           )
         );
       } else {
-        // Add new cart item with session_id and (if authenticated) user_id
+        // Add new cart item with customization data
         const insertData: any = {
           session_id: sessionId,
           product_id: product.id,
@@ -207,6 +207,16 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
         if (isAuthenticated && user) {
           insertData.user_id = user.id;
+        }
+
+        // Add customization data if product is customizable
+        if (product.is_customizable) {
+          insertData.customization = product.customization || '';
+          if (product.customizationImages && product.customizationImages.length > 0) {
+            insertData.selected_options = {
+              customizationImages: product.customizationImages
+            };
+          }
         }
 
         const { data, error } = await supabase
@@ -225,7 +235,18 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
             id: data.id,
             product_id: product.id,
             quantity,
-            product,
+            product: {
+              id: product.id,
+              name: product.name,
+              price: product.price,
+              image_url: product.image_url,
+              category: product.category,
+              stock_quantity: product.stock_quantity,
+              description: product.description,
+              is_customizable: product.is_customizable,
+              customization: data.customization,
+              selected_options: data.selected_options,
+            } as Product,
           };
           setCartItems((prev) => [...prev, newCartItem]);
         }
@@ -361,5 +382,3 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     </CartContext.Provider>
   );
 };
-
-// ... End of file
