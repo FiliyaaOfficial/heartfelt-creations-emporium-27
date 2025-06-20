@@ -48,7 +48,7 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
                   <div className="mt-1 p-2 bg-blue-50 rounded text-xs">
                     <p className="font-medium text-blue-800 mb-1">Custom:</p>
                     <p className="text-blue-700 line-clamp-2">{item.customization}</p>
-                    {item.selected_options?.customizationImages && item.selected_options.customizationImages.length > 0 && (
+                    {item.selected_options?.customizationImages && Array.isArray(item.selected_options.customizationImages) && item.selected_options.customizationImages.length > 0 && (
                       <div className="mt-1 flex gap-1">
                         {item.selected_options.customizationImages.slice(0, 2).map((imageUrl: string, index: number) => (
                           <img 

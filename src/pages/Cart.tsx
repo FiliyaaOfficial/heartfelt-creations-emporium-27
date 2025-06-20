@@ -70,7 +70,7 @@ const Cart = () => {
                                   <p className="text-xs text-blue-700">{item.customization}</p>
                                   
                                   {/* Show customization images if available */}
-                                  {item.selected_options?.customizationImages && item.selected_options.customizationImages.length > 0 && (
+                                  {item.selected_options?.customizationImages && Array.isArray(item.selected_options.customizationImages) && item.selected_options.customizationImages.length > 0 && (
                                     <div className="mt-2 flex gap-1">
                                       {item.selected_options.customizationImages.slice(0, 3).map((imageUrl: string, index: number) => (
                                         <div key={index} className="relative">
