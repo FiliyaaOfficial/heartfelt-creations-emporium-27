@@ -13,6 +13,7 @@ import { useToast } from '@/components/ui/use-toast';
 import { toast as sonnerToast } from "sonner";
 import ProductReviews from '@/components/ProductReviews';
 import RelatedProducts from '@/components/RelatedProducts';
+import ProductCustomization from '@/components/ProductCustomization';
 
 const ProductDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -21,6 +22,8 @@ const ProductDetail = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [activeImage, setActiveImage] = useState('');
   const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
+  const [customization, setCustomization] = useState('');
+  const [customizationImages, setCustomizationImages] = useState<string[]>([]);
   const { addToCart } = useCart();
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
   const [inWishlist, setInWishlist] = useState(false);
@@ -32,18 +35,26 @@ const ProductDetail = () => {
       
       setIsLoading(true);
       try {
+        console.log('Fetching product with ID:', id);
         const { data, error } = await supabase
           .from('products')
           .select()
           .eq('id', id)
           .single();
 
-        if (error) throw error;
+        if (error) {
+          console.error('Error fetching product:', error);
+          throw error;
+        }
+        
+        console.log('Product fetched successfully:', data);
         setProduct(data as Product);
-        setActiveImage(data.image_url);
+        setActiveImage(data.image_url || 'https://images.unsplash.com/photo-1546868871-7041f2a55e12');
         
         // After fetching product, get related products
-        fetchRelatedProducts(data.category);
+        if (data.category) {
+          fetchRelatedProducts(data.category);
+        }
       } catch (error) {
         console.error('Error fetching product:', error);
         toast({
@@ -95,7 +106,14 @@ const ProductDetail = () => {
 
   const handleAddToCart = () => {
     if (product) {
-      addToCart(product, quantity);
+      // For customizable products, include customization data
+      const productWithCustomization = {
+        ...product,
+        customization: product.is_customizable ? customization : undefined,
+        customizationImages: product.is_customizable ? customizationImages : undefined
+      };
+      
+      addToCart(productWithCustomization, quantity);
       sonnerToast("Added to cart", {
         description: `${quantity} × ${product.name} added to your cart`,
         action: {
@@ -128,11 +146,16 @@ const ProductDetail = () => {
     }
   };
 
+  const handleCustomizationChange = (newCustomization: string, images: string[]) => {
+    setCustomization(newCustomization);
+    setCustomizationImages(images);
+  };
+
   // Simulated product images (in a real app, these would come from the database)
   const productImages = [
-    product?.image_url,
-    'https://images.unsplash.com/photo-1546868871-7041f2a55e12',
+    product?.image_url || 'https://images.unsplash.com/photo-1546868871-7041f2a55e12',
     'https://images.unsplash.com/photo-1567721913486-6585f069b332',
+    'https://images.unsplash.com/photo-1618160702438-9b02ab6515c9',
   ].filter(Boolean);
 
   // Product features
@@ -189,12 +212,28 @@ const ProductDetail = () => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16">
         {/* Product Gallery */}
         <div className="space-y-4">
-          <div className="rounded-xl overflow-hidden bg-white shadow-sm border border-heartfelt-cream aspect-square">
+          <div className="rounded-xl overflow-hidden bg-white shadow-sm border border-heartfelt-cream aspect-square relative">
             <img 
               src={activeImage} 
               alt={product.name} 
               className="w-full h-full object-cover"
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                target.src = 'https://images.unsplash.com/photo-1546868871-7041f2a55e12';
+              }}
             />
+            
+            <div className="absolute top-4 left-4 flex flex-col gap-2">
+              {product.is_new && (
+                <span className="premium-badge bg-heartfelt-burgundy text-white">New Arrival</span>
+              )}
+              {product.is_bestseller && (
+                <span className="premium-badge bg-heartfelt-pink text-white">Bestseller</span>
+              )}
+              {product.is_customizable && (
+                <span className="premium-badge bg-blue-500 text-white">Customizable</span>
+              )}
+            </div>
           </div>
           
           {/* Thumbnail Gallery */}
@@ -209,18 +248,13 @@ const ProductDetail = () => {
                   src={img} 
                   alt={`${product.name} thumbnail ${idx + 1}`} 
                   className="w-full h-full object-cover"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.src = 'https://images.unsplash.com/photo-1546868871-7041f2a55e12';
+                  }}
                 />
               </button>
             ))}
-          </div>
-          
-          <div className="absolute top-4 left-4 flex flex-col gap-2">
-            {product.is_new && (
-              <span className="premium-badge bg-heartfelt-burgundy text-white">New Arrival</span>
-            )}
-            {product.is_bestseller && (
-              <span className="premium-badge bg-heartfelt-pink text-white">Bestseller</span>
-            )}
           </div>
         </div>
         
@@ -349,6 +383,15 @@ const ProductDetail = () => {
           </div>
         </div>
       </div>
+      
+      {/* Product Customization - Only show for customizable products */}
+      {product.is_customizable && (
+        <ProductCustomization
+          onCustomizationChange={handleCustomizationChange}
+          initialCustomization={customization}
+          initialImages={customizationImages}
+        />
+      )}
       
       {/* Product Details Tabs */}
       <div className="mt-16">
