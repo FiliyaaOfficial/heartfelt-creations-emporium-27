@@ -173,6 +173,21 @@ const Checkout = () => {
           ignoreDuplicates: false
         });
 
+      // Send order confirmation notifications
+      try {
+        await supabase.functions.invoke('send-order-confirmation', {
+          body: {
+            orderId: orderData.id,
+            customerEmail: user.email!,
+            customerName: shippingInfo.full_name,
+            customerPhone: shippingInfo.phone
+          }
+        });
+      } catch (notificationError) {
+        console.error('Error sending notifications:', notificationError);
+        // Don't fail the order if notification fails
+      }
+
       clearCart();
       navigate(`/order-confirmation/${orderData.id}`);
       
