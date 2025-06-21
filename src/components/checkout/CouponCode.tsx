@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,6 +11,14 @@ interface CouponCodeProps {
   onApplyCoupon: (discount: number, code: string) => void;
   appliedCoupon?: { code: string; discount: number };
   onRemoveCoupon: () => void;
+}
+
+interface CouponValidationResponse {
+  valid: boolean;
+  discount_amount?: number;
+  message?: string;
+  coupon_id?: string;
+  description?: string;
 }
 
 const CouponCode: React.FC<CouponCodeProps> = ({ 
@@ -38,12 +45,14 @@ const CouponCode: React.FC<CouponCodeProps> = ({
 
       if (error) throw error;
 
-      if (data.valid) {
-        onApplyCoupon(data.discount_amount, couponCode.trim().toUpperCase());
-        toast.success(`Coupon applied! You saved ₹${data.discount_amount}`);
+      const response = data as CouponValidationResponse;
+
+      if (response.valid) {
+        onApplyCoupon(response.discount_amount || 0, couponCode.trim().toUpperCase());
+        toast.success(`Coupon applied! You saved ₹${response.discount_amount}`);
         setCouponCode('');
       } else {
-        toast.error(data.message || 'Invalid coupon code');
+        toast.error(response.message || 'Invalid coupon code');
       }
     } catch (error) {
       console.error('Error applying coupon:', error);
