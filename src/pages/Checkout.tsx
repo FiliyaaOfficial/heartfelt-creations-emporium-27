@@ -45,11 +45,12 @@ const Checkout = () => {
     }
   }, [user]);
 
-  const handleCityStateChange = (city: string, state: string) => {
+  const handleCityStateChange = (city: string, state: string, postalCode: string) => {
     setShippingInfo(prev => ({
       ...prev,
       city,
-      state
+      state,
+      postal_code: postalCode
     }));
   };
 
@@ -84,6 +85,7 @@ const Checkout = () => {
   };
 
   const handleContinueToPayment = () => {
+    console.log('Shipping info before validation:', shippingInfo);
     if (validateShippingInfo()) {
       setCurrentStep(2);
     }
