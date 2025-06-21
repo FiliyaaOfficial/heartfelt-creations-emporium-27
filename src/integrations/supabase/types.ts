@@ -356,6 +356,7 @@ export type Database = {
           customer_email: string
           customer_name: string
           id: string
+          is_first_order: boolean | null
           payment_method: string | null
           payment_status: string | null
           razorpay_order_id: string | null
@@ -375,6 +376,7 @@ export type Database = {
           customer_email: string
           customer_name: string
           id?: string
+          is_first_order?: boolean | null
           payment_method?: string | null
           payment_status?: string | null
           razorpay_order_id?: string | null
@@ -394,6 +396,7 @@ export type Database = {
           customer_email?: string
           customer_name?: string
           id?: string
+          is_first_order?: boolean | null
           payment_method?: string | null
           payment_status?: string | null
           razorpay_order_id?: string | null
@@ -616,6 +619,36 @@ export type Database = {
         }
         Relationships: []
       }
+      user_purchase_history: {
+        Row: {
+          created_at: string
+          email: string
+          first_order_date: string
+          id: string
+          total_orders: number | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          first_order_date?: string
+          id?: string
+          total_orders?: number | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          first_order_date?: string
+          id?: string
+          total_orders?: number | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       wishlists: {
         Row: {
           created_at: string
@@ -653,8 +686,18 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      is_first_time_buyer: {
+        Args: { user_email: string }
+        Returns: boolean
+      }
       validate_coupon: {
-        Args: { coupon_code_input: string; order_amount: number }
+        Args:
+          | { coupon_code_input: string; order_amount: number }
+          | {
+              coupon_code_input: string
+              order_amount: number
+              user_email?: string
+            }
         Returns: Json
       }
     }

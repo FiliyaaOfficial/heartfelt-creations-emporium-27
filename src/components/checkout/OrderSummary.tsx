@@ -12,6 +12,7 @@ interface OrderSummaryProps {
   handleSubmit: (e: React.FormEvent) => Promise<void>;
   couponDiscount?: number;
   appliedCouponCode?: string;
+  showPlaceOrderButton?: boolean;
 }
 
 const OrderSummary: React.FC<OrderSummaryProps> = ({ 
@@ -20,7 +21,8 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
   loading, 
   handleSubmit,
   couponDiscount = 0,
-  appliedCouponCode
+  appliedCouponCode,
+  showPlaceOrderButton = true
 }) => {
   const { formatCurrency } = useCurrency();
   const shippingCost = 0;
@@ -116,28 +118,30 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
           </div>
         </div>
         
-        <div className="mt-6">
-          <Button 
-            type="submit" 
-            onClick={handleSubmit}
-            className="w-full bg-heartfelt-burgundy hover:bg-heartfelt-dark py-6 text-lg"
-            disabled={loading}
-          >
-            {loading ? (
-              <>
-                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                Processing...
-              </>
-            ) : (
-              <>Place Order</>
-            )}
-          </Button>
-          
-          <div className="flex items-center justify-center mt-4 text-xs text-muted-foreground gap-1">
-            <Shield size={14} />
-            <span>Secure checkout with 100% purchase protection</span>
+        {showPlaceOrderButton && (
+          <div className="mt-6">
+            <Button 
+              type="submit" 
+              onClick={handleSubmit}
+              className="w-full bg-heartfelt-burgundy hover:bg-heartfelt-dark py-6 text-lg"
+              disabled={loading}
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                  Processing...
+                </>
+              ) : (
+                <>Place Order</>
+              )}
+            </Button>
+            
+            <div className="flex items-center justify-center mt-4 text-xs text-muted-foreground gap-1">
+              <Shield size={14} />
+              <span>Secure checkout with 100% purchase protection</span>
+            </div>
           </div>
-        </div>
+        )}
         
         <div className="pt-3 border-t flex items-center justify-between text-xs text-muted-foreground">
           <div className="flex items-center">

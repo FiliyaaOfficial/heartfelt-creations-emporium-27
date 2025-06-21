@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -6,6 +5,7 @@ import { Label } from '@/components/ui/label';
 import { Tag, X } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface CouponCodeProps {
   subtotal: number;
@@ -30,6 +30,7 @@ const CouponCode: React.FC<CouponCodeProps> = ({
 }) => {
   const [couponCode, setCouponCode] = useState('');
   const [isApplying, setIsApplying] = useState(false);
+  const { user } = useAuth();
 
   const handleApplyCoupon = async () => {
     if (!couponCode.trim()) {
@@ -41,12 +42,12 @@ const CouponCode: React.FC<CouponCodeProps> = ({
     try {
       const { data, error } = await supabase.rpc('validate_coupon', {
         coupon_code_input: couponCode.trim().toUpperCase(),
-        order_amount: subtotal
+        order_amount: subtotal,
+        user_email: user?.email || null
       });
 
       if (error) throw error;
 
-      // Properly handle the JSON response from the RPC function
       const response = data as unknown as CouponValidationResponse;
 
       if (response && response.valid) {

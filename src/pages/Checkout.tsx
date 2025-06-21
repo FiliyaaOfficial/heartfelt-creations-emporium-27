@@ -7,6 +7,7 @@ import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { toast } from 'sonner';
 import { ShippingAddress } from '@/types';
 import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 import ShippingForm from '@/components/checkout/ShippingForm';
 import PaymentMethodSelector from '@/components/checkout/PaymentMethodSelector';
 import OrderSummary from '@/components/checkout/OrderSummary';
@@ -70,10 +71,13 @@ const Checkout = () => {
 
   const validateShippingInfo = () => {
     const requiredFields = ['full_name', 'street_address', 'city', 'state', 'postal_code', 'phone'];
-    const missingFields = requiredFields.filter(field => !shippingInfo[field as keyof ShippingAddress]);
+    const missingFields = requiredFields.filter(field => {
+      const value = shippingInfo[field as keyof ShippingAddress];
+      return !value || value.toString().trim() === '';
+    });
     
     if (missingFields.length) {
-      toast.error('Please fill in all required shipping information');
+      toast.error(`Please fill in all required shipping information: ${missingFields.join(', ')}`);
       return false;
     }
     return true;
@@ -85,47 +89,81 @@ const Checkout = () => {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!cartItems.length) {
-      toast.error('Your cart is empty');
-      return;
+  const createOrder = async () => {
+    if (!user || !cartItems.length) {
+      toast.error('Please login and add items to cart');
+      return null;
     }
 
     setLoading(true);
     try {
       const finalTotal = subtotal - (appliedCoupon?.discount || 0);
-      
-      console.log('Order would be created with:', {
-        shipping: shippingInfo,
-        items: cartItems,
-        subtotal: subtotal,
-        couponDiscount: appliedCoupon?.discount || 0,
-        couponCode: appliedCoupon?.code,
-        total: finalTotal
-      });
-      
-      const orderId = Date.now().toString();
-      const order = {
-        id: orderId,
-        shipping_address: shippingInfo,
-        items: cartItems,
-        subtotal: subtotal,
-        coupon_discount: appliedCoupon?.discount || 0,
-        coupon_code: appliedCoupon?.code || null,
-        total: finalTotal,
-        created_at: new Date().toISOString()
-      };
-      
-      localStorage.setItem(`order_${orderId}`, JSON.stringify(order));
-      
+      const tax = finalTotal * 0.18;
+      const totalAmount = finalTotal + tax;
+
+      // Create order in database
+      const { data: orderData, error: orderError } = await supabase
+        .from('orders')
+        .insert({
+          customer_name: shippingInfo.full_name,
+          customer_email: user.email!,
+          user_id: user.id,
+          total_amount: totalAmount,
+          shipping_address: shippingInfo,
+          coupon_code: appliedCoupon?.code || null,
+          coupon_discount: appliedCoupon?.discount || 0,
+          is_first_order: appliedCoupon?.code === 'FIRST50',
+          status: 'pending',
+          payment_status: 'pending'
+        })
+        .select()
+        .single();
+
+      if (orderError) throw orderError;
+
+      // Create order items
+      const orderItems = cartItems.map(item => ({
+        order_id: orderData.id,
+        product_id: item.product_id,
+        product_name: item.product.name,
+        quantity: item.quantity,
+        price: item.product.price
+      }));
+
+      const { error: itemsError } = await supabase
+        .from('order_items')
+        .insert(orderItems);
+
+      if (itemsError) throw itemsError;
+
+      // Update coupon usage count if coupon was applied
+      if (appliedCoupon) {
+        await supabase.rpc('increment_coupon_usage', {
+          coupon_code_input: appliedCoupon.code
+        });
+      }
+
+      // Track user purchase history
+      await supabase
+        .from('user_purchase_history')
+        .upsert({
+          user_id: user.id,
+          email: user.email!,
+          first_order_date: new Date().toISOString(),
+          total_orders: 1
+        }, {
+          onConflict: 'email',
+          ignoreDuplicates: false
+        });
+
       clearCart();
-      navigate(`/order-confirmation/${orderId}`);
+      navigate(`/order-confirmation/${orderData.id}`);
       
+      return orderData.id;
     } catch (error) {
       console.error('Error creating order:', error);
-      toast.error('Failed to place your order. Please try again.');
+      toast.error('Failed to create your order. Please try again.');
+      return null;
     } finally {
       setLoading(false);
     }
@@ -200,6 +238,16 @@ const Checkout = () => {
 
                 <div className="bg-white rounded-lg shadow-sm p-6">
                   <PaymentMethodSelector loading={loading} />
+                  
+                  <div className="mt-6">
+                    <Button 
+                      onClick={createOrder}
+                      className="w-full bg-heartfelt-burgundy hover:bg-heartfelt-dark py-6 text-lg"
+                      disabled={loading}
+                    >
+                      {loading ? 'Processing Order...' : 'Complete Order'}
+                    </Button>
+                  </div>
                 </div>
               </div>
             )}
@@ -210,9 +258,10 @@ const Checkout = () => {
               cartItems={cartItems} 
               subtotal={subtotal} 
               loading={loading} 
-              handleSubmit={handleSubmit}
+              handleSubmit={() => {}} // Remove direct submit functionality
               couponDiscount={appliedCoupon?.discount}
               appliedCouponCode={appliedCoupon?.code}
+              showPlaceOrderButton={false} // Add this prop to hide the button
             />
           </div>
         </div>
