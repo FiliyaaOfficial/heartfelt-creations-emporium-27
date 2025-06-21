@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useCart } from '@/contexts/CartContext';
 import { Button } from '@/components/ui/button';
@@ -49,11 +48,13 @@ const Cart = () => {
                     {cartItems.map((item) => {
                       // Safely handle customization images
                       const customizationImages = item.selected_options?.customizationImages;
-                      const imageArray = Array.isArray(customizationImages) 
-                        ? customizationImages 
-                        : typeof customizationImages === 'string' 
-                          ? [customizationImages] 
-                          : [];
+                      let imageArray: string[] = [];
+                      
+                      if (Array.isArray(customizationImages)) {
+                        imageArray = customizationImages;
+                      } else if (typeof customizationImages === 'string') {
+                        imageArray = [customizationImages];
+                      }
                       
                       return (
                         <tr key={item.id} className="py-4">

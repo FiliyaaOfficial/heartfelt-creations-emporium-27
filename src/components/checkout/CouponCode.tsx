@@ -45,14 +45,15 @@ const CouponCode: React.FC<CouponCodeProps> = ({
 
       if (error) throw error;
 
-      const response = data as CouponValidationResponse;
+      // Safely cast the response by first converting to unknown
+      const response = (data as unknown) as CouponValidationResponse;
 
-      if (response.valid) {
+      if (response && response.valid) {
         onApplyCoupon(response.discount_amount || 0, couponCode.trim().toUpperCase());
         toast.success(`Coupon applied! You saved ₹${response.discount_amount}`);
         setCouponCode('');
       } else {
-        toast.error(response.message || 'Invalid coupon code');
+        toast.error(response?.message || 'Invalid coupon code');
       }
     } catch (error) {
       console.error('Error applying coupon:', error);
