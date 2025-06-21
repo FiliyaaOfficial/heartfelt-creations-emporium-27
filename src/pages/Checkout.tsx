@@ -101,6 +101,17 @@ const Checkout = () => {
       const tax = finalTotal * 0.18;
       const totalAmount = finalTotal + tax;
 
+      // Convert ShippingAddress to Json format
+      const shippingAddressJson = {
+        full_name: shippingInfo.full_name,
+        street_address: shippingInfo.street_address,
+        city: shippingInfo.city,
+        state: shippingInfo.state,
+        postal_code: shippingInfo.postal_code,
+        country: shippingInfo.country,
+        phone: shippingInfo.phone
+      };
+
       // Create order in database
       const { data: orderData, error: orderError } = await supabase
         .from('orders')
@@ -109,7 +120,7 @@ const Checkout = () => {
           customer_email: user.email!,
           user_id: user.id,
           total_amount: totalAmount,
-          shipping_address: shippingInfo,
+          shipping_address: shippingAddressJson,
           coupon_code: appliedCoupon?.code || null,
           coupon_discount: appliedCoupon?.discount || 0,
           is_first_order: appliedCoupon?.code === 'FIRST50',
@@ -138,9 +149,13 @@ const Checkout = () => {
 
       // Update coupon usage count if coupon was applied
       if (appliedCoupon) {
-        await supabase.rpc('increment_coupon_usage', {
-          coupon_code_input: appliedCoupon.code
+        const { error: couponError } = await supabase.functions.invoke('increment-coupon-usage', {
+          body: { coupon_code: appliedCoupon.code }
         });
+        
+        if (couponError) {
+          console.error('Error updating coupon usage:', couponError);
+        }
       }
 
       // Track user purchase history
@@ -258,10 +273,10 @@ const Checkout = () => {
               cartItems={cartItems} 
               subtotal={subtotal} 
               loading={loading} 
-              handleSubmit={() => {}} // Remove direct submit functionality
+              handleSubmit={async () => {}} // Empty async function since we handle submission differently now
               couponDiscount={appliedCoupon?.discount}
               appliedCouponCode={appliedCoupon?.code}
-              showPlaceOrderButton={false} // Add this prop to hide the button
+              showPlaceOrderButton={false}
             />
           </div>
         </div>
