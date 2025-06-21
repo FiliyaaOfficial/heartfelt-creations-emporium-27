@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { Star, User, Thumbs Up } from 'lucide-react';
+import { Star, User, ThumbsUp } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 
@@ -149,7 +149,7 @@ const ReviewsList: React.FC<ReviewsListProps> = ({ productId, refreshTrigger }) 
               
               <div className="flex items-center text-sm text-muted-foreground">
                 <button className="flex items-center gap-1 hover:text-gray-700">
-                  <Thumbs Up size={14} />
+                  <ThumbsUp size={14} />
                   Helpful ({review.helpful_count})
                 </button>
               </div>
