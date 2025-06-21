@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useCart } from '@/contexts/CartContext';
 import { Button } from '@/components/ui/button';
@@ -82,7 +83,7 @@ const Cart = () => {
                                     {/* Show customization images if available */}
                                     {imageArray.length > 0 && (
                                       <div className="mt-2 flex gap-1">
-                                        {imageArray.slice(0, 3).map((imageUrl: string, index: number) => (
+                                        {imageArray.slice(0, 3).map((imageUrl, index) => (
                                           <div key={index} className="relative">
                                             <img 
                                               src={imageUrl} 

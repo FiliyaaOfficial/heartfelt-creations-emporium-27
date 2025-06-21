@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -45,8 +46,8 @@ const CouponCode: React.FC<CouponCodeProps> = ({
 
       if (error) throw error;
 
-      // Safely cast the response by first converting to unknown
-      const response = (data as unknown) as CouponValidationResponse;
+      // Properly handle the JSON response from the RPC function
+      const response = data as unknown as CouponValidationResponse;
 
       if (response && response.valid) {
         onApplyCoupon(response.discount_amount || 0, couponCode.trim().toUpperCase());
