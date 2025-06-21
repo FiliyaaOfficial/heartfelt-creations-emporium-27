@@ -2,7 +2,7 @@
 import React from 'react';
 import { useCart } from '@/contexts/CartContext';
 import { Button } from '@/components/ui/button';
-import { Minus, Plus, Trash2, ArrowRight, ShoppingBag, Image } from 'lucide-react';
+import { Minus, Plus, Trash2, ArrowRight, ShoppingBag } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useCurrency } from '@/hooks/useCurrency';
 
@@ -70,18 +70,20 @@ const Cart = () => {
                                   <p className="text-xs text-blue-700">{item.customization}</p>
                                   
                                   {/* Show customization images if available */}
-                                  {item.selected_options?.customizationImages && Array.isArray(item.selected_options.customizationImages) && item.selected_options.customizationImages.length > 0 && (
+                                  {item.selected_options?.customizationImages && 
+                                   Array.isArray(item.selected_options.customizationImages) && 
+                                   item.selected_options.customizationImages.length > 0 && (
                                     <div className="mt-2 flex gap-1">
-                                      {item.selected_options.customizationImages.slice(0, 3).map((imageUrl: string, index: number) => (
+                                      {(item.selected_options.customizationImages as string[]).slice(0, 3).map((imageUrl: string, index: number) => (
                                         <div key={index} className="relative">
                                           <img 
                                             src={imageUrl} 
                                             alt={`Customization ${index + 1}`}
                                             className="w-8 h-8 object-cover rounded border"
                                           />
-                                          {index === 2 && item.selected_options!.customizationImages!.length > 3 && (
+                                          {index === 2 && (item.selected_options!.customizationImages as string[]).length > 3 && (
                                             <div className="absolute inset-0 bg-black bg-opacity-50 rounded flex items-center justify-center">
-                                              <span className="text-white text-xs">+{item.selected_options!.customizationImages!.length - 3}</span>
+                                              <span className="text-white text-xs">+{(item.selected_options!.customizationImages as string[]).length - 3}</span>
                                             </div>
                                           )}
                                         </div>

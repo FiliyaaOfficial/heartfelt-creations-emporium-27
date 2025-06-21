@@ -9,6 +9,45 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      applied_coupons: {
+        Row: {
+          applied_at: string
+          coupon_id: string | null
+          discount_amount: number
+          id: string
+          order_id: string | null
+        }
+        Insert: {
+          applied_at?: string
+          coupon_id?: string | null
+          discount_amount: number
+          id?: string
+          order_id?: string | null
+        }
+        Update: {
+          applied_at?: string
+          coupon_id?: string | null
+          discount_amount?: number
+          id?: string
+          order_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "applied_coupons_coupon_id_fkey"
+            columns: ["coupon_id"]
+            isOneToOne: false
+            referencedRelation: "coupon_codes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "applied_coupons_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       blog_posts: {
         Row: {
           author: string
@@ -310,6 +349,8 @@ export type Database = {
       }
       orders: {
         Row: {
+          coupon_code: string | null
+          coupon_discount: number | null
           created_at: string
           currency: string | null
           customer_email: string
@@ -327,6 +368,8 @@ export type Database = {
           user_id: string | null
         }
         Insert: {
+          coupon_code?: string | null
+          coupon_discount?: number | null
           created_at?: string
           currency?: string | null
           customer_email: string
@@ -344,6 +387,8 @@ export type Database = {
           user_id?: string | null
         }
         Update: {
+          coupon_code?: string | null
+          coupon_discount?: number | null
           created_at?: string
           currency?: string | null
           customer_email?: string
@@ -361,6 +406,65 @@ export type Database = {
           user_id?: string | null
         }
         Relationships: []
+      }
+      product_reviews: {
+        Row: {
+          comment: string
+          created_at: string
+          helpful_count: number | null
+          id: string
+          is_approved: boolean | null
+          is_verified_purchase: boolean | null
+          product_id: string
+          rating: number
+          review_images: string[] | null
+          reviewer_email: string
+          reviewer_name: string
+          title: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          comment: string
+          created_at?: string
+          helpful_count?: number | null
+          id?: string
+          is_approved?: boolean | null
+          is_verified_purchase?: boolean | null
+          product_id: string
+          rating: number
+          review_images?: string[] | null
+          reviewer_email: string
+          reviewer_name: string
+          title?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          comment?: string
+          created_at?: string
+          helpful_count?: number | null
+          id?: string
+          is_approved?: boolean | null
+          is_verified_purchase?: boolean | null
+          product_id?: string
+          rating?: number
+          review_images?: string[] | null
+          reviewer_email?: string
+          reviewer_name?: string
+          title?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_reviews_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       products: {
         Row: {
@@ -549,7 +653,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      validate_coupon: {
+        Args: { coupon_code_input: string; order_amount: number }
+        Returns: Json
+      }
     }
     Enums: {
       [_ in never]: never

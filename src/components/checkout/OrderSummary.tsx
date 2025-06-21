@@ -10,18 +10,22 @@ interface OrderSummaryProps {
   subtotal: number;
   loading: boolean;
   handleSubmit: (e: React.FormEvent) => Promise<void>;
+  couponDiscount?: number;
+  appliedCouponCode?: string;
 }
 
 const OrderSummary: React.FC<OrderSummaryProps> = ({ 
   cartItems, 
   subtotal, 
   loading, 
-  handleSubmit 
+  handleSubmit,
+  couponDiscount = 0,
+  appliedCouponCode
 }) => {
   const { formatCurrency } = useCurrency();
   const shippingCost = 0;
-  const tax = subtotal * 0.18;
-  const total = subtotal + shippingCost + tax;
+  const tax = (subtotal - couponDiscount) * 0.18;
+  const total = subtotal + shippingCost + tax - couponDiscount;
 
   return (
     <div className="bg-white p-6 rounded-lg shadow-sm border sticky top-24">
@@ -48,9 +52,11 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
                   <div className="mt-1 p-2 bg-blue-50 rounded text-xs">
                     <p className="font-medium text-blue-800 mb-1">Custom:</p>
                     <p className="text-blue-700 line-clamp-2">{item.customization}</p>
-                    {item.selected_options?.customizationImages && Array.isArray(item.selected_options.customizationImages) && item.selected_options.customizationImages.length > 0 && (
+                    {item.selected_options?.customizationImages && 
+                     Array.isArray(item.selected_options.customizationImages) && 
+                     item.selected_options.customizationImages.length > 0 && (
                       <div className="mt-1 flex gap-1">
-                        {item.selected_options.customizationImages.slice(0, 2).map((imageUrl: string, index: number) => (
+                        {(item.selected_options.customizationImages as string[]).slice(0, 2).map((imageUrl: string, index: number) => (
                           <img 
                             key={index}
                             src={imageUrl} 
@@ -58,9 +64,9 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
                             className="w-6 h-6 object-cover rounded border"
                           />
                         ))}
-                        {item.selected_options.customizationImages.length > 2 && (
+                        {(item.selected_options.customizationImages as string[]).length > 2 && (
                           <div className="w-6 h-6 bg-gray-200 rounded border flex items-center justify-center text-xs">
-                            +{item.selected_options.customizationImages.length - 2}
+                            +{(item.selected_options.customizationImages as string[]).length - 2}
                           </div>
                         )}
                       </div>
@@ -82,6 +88,13 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
             <span className="text-muted-foreground">Subtotal</span>
             <span>{formatCurrency(subtotal)}</span>
           </div>
+
+          {couponDiscount > 0 && appliedCouponCode && (
+            <div className="flex justify-between text-green-600">
+              <span className="text-sm">Coupon ({appliedCouponCode})</span>
+              <span>-{formatCurrency(couponDiscount)}</span>
+            </div>
+          )}
           
           <div className="flex justify-between">
             <span className="text-muted-foreground">GST (18%)</span>
