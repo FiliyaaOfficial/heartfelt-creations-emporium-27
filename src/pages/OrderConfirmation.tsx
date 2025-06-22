@@ -59,8 +59,31 @@ const OrderConfirmation = () => {
         if (itemsError) throw itemsError;
 
         if (orderData) {
+          // Safely parse the shipping_address Json field
+          let shippingAddress: ShippingAddress;
+          try {
+            if (typeof orderData.shipping_address === 'string') {
+              shippingAddress = JSON.parse(orderData.shipping_address);
+            } else if (typeof orderData.shipping_address === 'object' && orderData.shipping_address !== null) {
+              shippingAddress = orderData.shipping_address as ShippingAddress;
+            } else {
+              throw new Error('Invalid shipping address format');
+            }
+          } catch (e) {
+            console.error('Error parsing shipping address:', e);
+            toast.error('Error loading shipping address');
+            return;
+          }
+
           setOrder({
-            ...orderData,
+            id: orderData.id,
+            created_at: orderData.created_at,
+            shipping_address: shippingAddress,
+            total_amount: orderData.total_amount,
+            status: orderData.status || 'pending',
+            payment_status: orderData.payment_status || 'pending',
+            coupon_code: orderData.coupon_code,
+            coupon_discount: orderData.coupon_discount,
             items: itemsData || []
           });
         }
