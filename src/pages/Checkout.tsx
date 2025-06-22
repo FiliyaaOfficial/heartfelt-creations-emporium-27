@@ -49,7 +49,11 @@ const Checkout = () => {
           full_name: `${firstName} ${lastName}`.trim() || user.email?.split('@')[0] || '',
           phone: profile?.phone || prev.phone,
           // Load saved shipping address if available
-          ...(profile?.shipping_address ? JSON.parse(profile.shipping_address as string) : {})
+          ...(profile?.shipping_address ? 
+            (typeof profile.shipping_address === 'string' ? 
+              JSON.parse(profile.shipping_address) : 
+              profile.shipping_address
+            ) : {})
         }));
       }
     };

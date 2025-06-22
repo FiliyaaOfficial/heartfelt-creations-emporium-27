@@ -7,6 +7,9 @@ export interface UserProfile {
   last_name?: string;
   phone?: string;
   avatar_url?: string;
+  shipping_address?: string | object;
+  phone_verified?: boolean;
+  email_verified?: boolean;
   created_at?: string;
   updated_at?: string;
 }
