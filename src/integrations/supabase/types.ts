@@ -278,6 +278,50 @@ export type Database = {
         }
         Relationships: []
       }
+      customer_testimonials: {
+        Row: {
+          created_at: string
+          customer_image: string | null
+          customer_name: string
+          id: string
+          is_featured: boolean | null
+          is_published: boolean | null
+          product_id: string | null
+          rating: number | null
+          testimonial_text: string
+        }
+        Insert: {
+          created_at?: string
+          customer_image?: string | null
+          customer_name: string
+          id?: string
+          is_featured?: boolean | null
+          is_published?: boolean | null
+          product_id?: string | null
+          rating?: number | null
+          testimonial_text: string
+        }
+        Update: {
+          created_at?: string
+          customer_image?: string | null
+          customer_name?: string
+          id?: string
+          is_featured?: boolean | null
+          is_published?: boolean | null
+          product_id?: string | null
+          rating?: number | null
+          testimonial_text?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_testimonials_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       newsletter_subscriptions: {
         Row: {
           created_at: string
@@ -347,6 +391,41 @@ export type Database = {
           },
         ]
       }
+      order_status_history: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          order_id: string
+          status: string
+          status_message: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          order_id: string
+          status: string
+          status_message?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          order_id?: string
+          status?: string
+          status_message?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_status_history_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       orders: {
         Row: {
           coupon_code: string | null
@@ -355,8 +434,10 @@ export type Database = {
           currency: string | null
           customer_email: string
           customer_name: string
+          estimated_delivery_date: string | null
           id: string
           is_first_order: boolean | null
+          order_notes: string | null
           payment_method: string | null
           payment_status: string | null
           razorpay_order_id: string | null
@@ -365,6 +446,7 @@ export type Database = {
           status: string | null
           stripe_session_id: string | null
           total_amount: number
+          tracking_number: string | null
           updated_at: string
           user_id: string | null
         }
@@ -375,8 +457,10 @@ export type Database = {
           currency?: string | null
           customer_email: string
           customer_name: string
+          estimated_delivery_date?: string | null
           id?: string
           is_first_order?: boolean | null
+          order_notes?: string | null
           payment_method?: string | null
           payment_status?: string | null
           razorpay_order_id?: string | null
@@ -385,6 +469,7 @@ export type Database = {
           status?: string | null
           stripe_session_id?: string | null
           total_amount: number
+          tracking_number?: string | null
           updated_at?: string
           user_id?: string | null
         }
@@ -395,8 +480,10 @@ export type Database = {
           currency?: string | null
           customer_email?: string
           customer_name?: string
+          estimated_delivery_date?: string | null
           id?: string
           is_first_order?: boolean | null
+          order_notes?: string | null
           payment_method?: string | null
           payment_status?: string | null
           razorpay_order_id?: string | null
@@ -405,6 +492,7 @@ export type Database = {
           status?: string | null
           stripe_session_id?: string | null
           total_amount?: number
+          tracking_number?: string | null
           updated_at?: string
           user_id?: string | null
         }
@@ -554,28 +642,37 @@ export type Database = {
         Row: {
           avatar_url: string | null
           created_at: string | null
+          email_verified: boolean | null
           first_name: string | null
           id: string
           last_name: string | null
           phone: string | null
+          phone_verified: boolean | null
+          shipping_address: Json | null
           updated_at: string | null
         }
         Insert: {
           avatar_url?: string | null
           created_at?: string | null
+          email_verified?: boolean | null
           first_name?: string | null
           id: string
           last_name?: string | null
           phone?: string | null
+          phone_verified?: boolean | null
+          shipping_address?: Json | null
           updated_at?: string | null
         }
         Update: {
           avatar_url?: string | null
           created_at?: string | null
+          email_verified?: boolean | null
           first_name?: string | null
           id?: string
           last_name?: string | null
           phone?: string | null
+          phone_verified?: boolean | null
+          shipping_address?: Json | null
           updated_at?: string | null
         }
         Relationships: []

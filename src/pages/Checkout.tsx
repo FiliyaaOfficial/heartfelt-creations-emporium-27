@@ -8,6 +8,7 @@ import { toast } from 'sonner';
 import { ShippingAddress } from '@/types';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
+import { getUserProfile } from '@/utils/profileUtils';
 import ShippingForm from '@/components/checkout/ShippingForm';
 import PaymentMethodSelector from '@/components/checkout/PaymentMethodSelector';
 import OrderSummary from '@/components/checkout/OrderSummary';
@@ -33,16 +34,27 @@ const Checkout = () => {
   });
 
   useEffect(() => {
-    if (user) {
-      const userMetadata = user.user_metadata || {};
-      const firstName = userMetadata.first_name || '';
-      const lastName = userMetadata.last_name || '';
-      
-      setShippingInfo(prev => ({
-        ...prev,
-        full_name: `${firstName} ${lastName}`.trim() || user.email?.split('@')[0] || ''
-      }));
-    }
+    const loadUserProfile = async () => {
+      if (user) {
+        // Load from user metadata first
+        const userMetadata = user.user_metadata || {};
+        const firstName = userMetadata.first_name || '';
+        const lastName = userMetadata.last_name || '';
+        
+        // Try to load saved profile data
+        const profile = await getUserProfile(user.id);
+        
+        setShippingInfo(prev => ({
+          ...prev,
+          full_name: `${firstName} ${lastName}`.trim() || user.email?.split('@')[0] || '',
+          phone: profile?.phone || prev.phone,
+          // Load saved shipping address if available
+          ...(profile?.shipping_address ? JSON.parse(profile.shipping_address as string) : {})
+        }));
+      }
+    };
+
+    loadUserProfile();
   }, [user]);
 
   const handleCityStateChange = (city: string, state: string, postalCode: string) => {
@@ -84,9 +96,23 @@ const Checkout = () => {
     return true;
   };
 
-  const handleContinueToPayment = () => {
+  const handleContinueToPayment = async () => {
     console.log('Shipping info before validation:', shippingInfo);
     if (validateShippingInfo()) {
+      // Save shipping info to user profile
+      if (user) {
+        try {
+          await supabase
+            .from('profiles')
+            .upsert({
+              id: user.id,
+              shipping_address: JSON.stringify(shippingInfo),
+              updated_at: new Date().toISOString()
+            });
+        } catch (error) {
+          console.error('Error saving shipping info:', error);
+        }
+      }
       setCurrentStep(2);
     }
   };
@@ -173,7 +199,27 @@ const Checkout = () => {
           ignoreDuplicates: false
         });
 
-      // Send order confirmation notifications
+      // Send order confirmation email
+      try {
+        await supabase.functions.invoke('send-order-confirmation-email', {
+          body: {
+            orderId: orderData.id,
+            customerEmail: user.email!,
+            customerName: shippingInfo.full_name,
+            orderTotal: totalAmount,
+            orderItems: orderItems.map(item => ({
+              name: item.product_name,
+              quantity: item.quantity,
+              price: item.price
+            }))
+          }
+        });
+      } catch (notificationError) {
+        console.error('Error sending confirmation email:', notificationError);
+        // Don't fail the order if email fails
+      }
+
+      // Send original notification as backup
       try {
         await supabase.functions.invoke('send-order-confirmation', {
           body: {
@@ -206,7 +252,7 @@ const Checkout = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white">
       <div className="container mx-auto px-4 py-8">
         <div className="flex items-center mb-8">
           <Button 
@@ -225,7 +271,7 @@ const Checkout = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="col-span-2">
             {currentStep === 1 && (
-              <div className="bg-white rounded-lg shadow-sm p-6">
+              <div className="bg-white rounded-lg shadow-sm p-6 border">
                 <h2 className="text-xl font-semibold mb-6">Shipping Information</h2>
                 <ShippingForm 
                   shippingInfo={shippingInfo} 
@@ -255,7 +301,7 @@ const Checkout = () => {
 
             {currentStep === 2 && (
               <div className="space-y-6">
-                <div className="bg-white rounded-lg shadow-sm p-6">
+                <div className="bg-white rounded-lg shadow-sm p-6 border">
                   <h2 className="text-xl font-semibold mb-4">Review Your Order</h2>
                   <div className="border rounded-lg p-4 bg-gray-50">
                     <h3 className="font-medium mb-2">Shipping Address</h3>
@@ -268,7 +314,7 @@ const Checkout = () => {
                   </div>
                 </div>
 
-                <div className="bg-white rounded-lg shadow-sm p-6">
+                <div className="bg-white rounded-lg shadow-sm p-6 border">
                   <PaymentMethodSelector loading={loading} />
                   
                   <div className="mt-6">
