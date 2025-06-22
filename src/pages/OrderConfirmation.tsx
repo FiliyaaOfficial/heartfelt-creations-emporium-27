@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ShippingAddress } from '@/types';
@@ -64,8 +63,9 @@ const OrderConfirmation = () => {
           try {
             if (typeof orderData.shipping_address === 'string') {
               shippingAddress = JSON.parse(orderData.shipping_address);
-            } else if (typeof orderData.shipping_address === 'object' && orderData.shipping_address !== null) {
-              shippingAddress = orderData.shipping_address as ShippingAddress;
+            } else if (typeof orderData.shipping_address === 'object' && orderData.shipping_address !== null && !Array.isArray(orderData.shipping_address)) {
+              // Convert through unknown first to satisfy TypeScript
+              shippingAddress = orderData.shipping_address as unknown as ShippingAddress;
             } else {
               throw new Error('Invalid shipping address format');
             }
