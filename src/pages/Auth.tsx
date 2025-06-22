@@ -34,6 +34,8 @@ interface FormData {
   lastName?: string;
 }
 
+type AuthMethod = 'email' | 'otp';
+
 const Auth = () => {
   const { isAuthenticated, signIn, signUp, signInWithGoogle } = useAuth();
   const navigate = useNavigate();
@@ -41,7 +43,7 @@ const Auth = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [authMethod, setAuthMethod] = useState<'email' | 'otp'>('email');
+  const [authMethod, setAuthMethod] = useState<AuthMethod>('email');
 
   const form = useForm<FormData>({
     defaultValues: {
