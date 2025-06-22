@@ -562,6 +562,7 @@ export type Database = {
           badges: string[] | null
           care_instructions: string | null
           category: string
+          cod_available: boolean | null
           compare_at_price: number | null
           created_at: string
           description: string | null
@@ -588,6 +589,7 @@ export type Database = {
           badges?: string[] | null
           care_instructions?: string | null
           category: string
+          cod_available?: boolean | null
           compare_at_price?: number | null
           created_at?: string
           description?: string | null
@@ -614,6 +616,7 @@ export type Database = {
           badges?: string[] | null
           care_instructions?: string | null
           category?: string
+          cod_available?: boolean | null
           compare_at_price?: number | null
           created_at?: string
           description?: string | null

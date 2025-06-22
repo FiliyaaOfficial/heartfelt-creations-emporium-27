@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '@/contexts/CartContext';
@@ -23,6 +22,7 @@ const Checkout = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [appliedCoupon, setAppliedCoupon] = useState<{ code: string; discount: number } | null>(null);
+  const [codAvailable, setCodAvailable] = useState(true);
   const [shippingInfo, setShippingInfo] = useState<ShippingAddress>({
     full_name: '',
     street_address: '',
@@ -32,6 +32,38 @@ const Checkout = () => {
     country: 'India',
     phone: '',
   });
+
+  // Check COD availability based on cart items
+  useEffect(() => {
+    const checkCodAvailability = async () => {
+      if (cartItems.length === 0) return;
+
+      try {
+        // Get product IDs from cart
+        const productIds = cartItems.map(item => item.product_id);
+        
+        // Check if all products support COD
+        const { data: products, error } = await supabase
+          .from('products')
+          .select('id, cod_available')
+          .in('id', productIds);
+
+        if (error) {
+          console.error('Error checking COD availability:', error);
+          return;
+        }
+
+        // COD is available only if ALL products in cart support it
+        const allSupportCod = products?.every(product => product.cod_available !== false) ?? true;
+        setCodAvailable(allSupportCod);
+      } catch (error) {
+        console.error('Error checking COD availability:', error);
+        setCodAvailable(true); // Default to available on error
+      }
+    };
+
+    checkCodAvailability();
+  }, [cartItems]);
 
   useEffect(() => {
     const loadUserProfile = async () => {
@@ -319,7 +351,10 @@ const Checkout = () => {
                 </div>
 
                 <div className="bg-white rounded-lg shadow-sm p-6 border">
-                  <PaymentMethodSelector loading={loading} />
+                  <PaymentMethodSelector 
+                    loading={loading} 
+                    codAvailable={codAvailable}
+                  />
                   
                   <div className="mt-6">
                     <Button 

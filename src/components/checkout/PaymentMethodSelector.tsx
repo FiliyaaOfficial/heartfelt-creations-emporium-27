@@ -16,7 +16,7 @@ const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
   onPaymentMethodChange,
   codAvailable = true 
 }) => {
-  const [selectedMethod, setSelectedMethod] = useState('cod');
+  const [selectedMethod, setSelectedMethod] = useState(codAvailable ? 'cod' : 'razorpay');
 
   const handleMethodChange = (value: string) => {
     setSelectedMethod(value);
@@ -59,7 +59,7 @@ const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
           <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
             <p className="text-sm text-yellow-800">
               <Banknote className="h-4 w-4 inline mr-1" />
-              Cash on Delivery is not available for this order
+              Cash on Delivery is not available for this order (some products don't support COD)
             </p>
           </div>
         )}
