@@ -1,3 +1,4 @@
+
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 
 const corsHeaders = {
@@ -18,7 +19,8 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({ 
         message: "Keep-alive successful", 
-        timestamp: new Date().toISOString() 
+        timestamp: new Date().toISOString(),
+        status: "ok"
       }),
       {
         headers: { 
@@ -29,11 +31,11 @@ serve(async (req) => {
       }
     );
   } catch (error) {
-    console.error("Keep alive error:", error);
     return new Response(
       JSON.stringify({ 
         error: "Keep alive failed", 
-        message: error.message 
+        message: error instanceof Error ? error.message : "Unknown error",
+        timestamp: new Date().toISOString()
       }),
       {
         headers: { 

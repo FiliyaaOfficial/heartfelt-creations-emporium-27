@@ -29,13 +29,12 @@ export const handleSecureSignOut = async () => {
     try {
       await supabase.auth.signOut({ scope: 'global' });
     } catch (err) {
-      console.warn('Global sign out failed, continuing with cleanup:', err);
+      // Silent error handling for production
     }
     
     // Force page reload for clean state
     window.location.href = '/auth';
   } catch (error) {
-    console.error('Error during sign out:', error);
     // Force reload even if there's an error
     window.location.href = '/auth';
   }
