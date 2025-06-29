@@ -3,17 +3,12 @@ import { supabase } from '@/integrations/supabase/client';
 
 export const useKeepAlive = () => {
   useEffect(() => {
-    // Call keep-alive function every 5 minutes (300000 ms) - more frequent to prevent timeout
+    // Call keep-alive function every 5 minutes (300000 ms)
     const keepAliveInterval = setInterval(async () => {
       try {
-        const { data, error } = await supabase.functions.invoke('keep-alive');
-        if (error) {
-          console.error('Keep-alive error:', error);
-        } else {
-          console.log('Keep-alive successful:', data);
-        }
+        await supabase.functions.invoke('keep-alive');
       } catch (error) {
-        console.error('Keep-alive function call failed:', error);
+        // Silent error handling for production
       }
     }, 300000); // 5 minutes
 
@@ -21,9 +16,8 @@ export const useKeepAlive = () => {
     const initialKeepAlive = async () => {
       try {
         await supabase.functions.invoke('keep-alive');
-        console.log('Initial keep-alive call successful');
       } catch (error) {
-        console.error('Initial keep-alive failed:', error);
+        // Silent error handling for production
       }
     };
 
