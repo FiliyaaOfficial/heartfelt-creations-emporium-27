@@ -98,7 +98,7 @@ const Auth = () => {
     } catch (error) {
       toast.error('An unexpected error occurred');
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
