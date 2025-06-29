@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -11,7 +12,6 @@ import { useKeepAlive } from "@/hooks/useKeepAlive";
 import CheckoutProtection from "@/components/CheckoutProtection";
 import AuthGuard from "@/components/AuthGuard";
 import Layout from "@/components/Layout";
-import ErrorBoundary from "@/components/ErrorBoundary";
 import Index from "./pages/Index";
 import Shop from "./pages/Shop";
 import Categories from "./pages/Categories";
@@ -35,7 +35,6 @@ import ShippingInfo from "./pages/ShippingInfo";
 import BestSellers from "./pages/BestSellers";
 import NewArrivals from "./pages/NewArrivals";
 import NotFound from "./pages/NotFound";
-import ThankYou from "./pages/ThankYou";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -97,7 +96,6 @@ function AppContent() {
         <Route path="/privacy" element={<PrivacyPolicy />} />
         <Route path="/terms" element={<TermsOfService />} />
         <Route path="/shipping" element={<ShippingInfo />} />
-        <Route path="/thank-you" element={<ThankYou />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </Layout>
@@ -106,23 +104,21 @@ function AppContent() {
 
 function App() {
   return (
-    <ErrorBoundary>
-      <QueryClientProvider client={queryClient}>
-        <BrowserRouter>
-          <TooltipProvider>
-            <AuthProvider>
-              <CartProvider>
-                <WishlistProvider>
-                  <Toaster />
-                  <Sonner />
-                  <AppContent />
-                </WishlistProvider>
-              </CartProvider>
-            </AuthProvider>
-          </TooltipProvider>
-        </BrowserRouter>
-      </QueryClientProvider>
-    </ErrorBoundary>
+    <QueryClientProvider client={queryClient}>
+      <BrowserRouter>
+        <TooltipProvider>
+          <AuthProvider>
+            <CartProvider>
+              <WishlistProvider>
+                <Toaster />
+                <Sonner />
+                <AppContent />
+              </WishlistProvider>
+            </CartProvider>
+          </AuthProvider>
+        </TooltipProvider>
+      </BrowserRouter>
+    </QueryClientProvider>
   );
 }
 

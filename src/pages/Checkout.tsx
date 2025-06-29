@@ -23,7 +23,6 @@ const Checkout = () => {
   const [loading, setLoading] = useState(false);
   const [appliedCoupon, setAppliedCoupon] = useState<{ code: string; discount: number } | null>(null);
   const [codAvailable, setCodAvailable] = useState(true);
-  const [paymentMethod, setPaymentMethod] = useState(codAvailable ? 'cod' : 'razorpay');
   const [shippingInfo, setShippingInfo] = useState<ShippingAddress>({
     full_name: '',
     street_address: '',
@@ -34,181 +33,12 @@ const Checkout = () => {
     phone: '',
   });
 
-  const createOrder = async () => {
-    if (!user || !cartItems.length) {
-      console.error('Order creation failed: No user or empty cart', { user: !!user, cartItemsLength: cartItems.length });
-      toast.error('Please login and add items to cart');
-      return null;
-    }
-
-    console.log('Starting order creation process...');
-    console.log('User:', user.id, user.email);
-    console.log('Cart items:', cartItems.length);
-    console.log('Payment method:', paymentMethod);
-    console.log('Shipping info:', shippingInfo);
-    
-    setLoading(true);
-    
-    try {
-      const finalTotal = subtotal - (appliedCoupon?.discount || 0);
-      const tax = finalTotal * 0.18;
-      const totalAmount = finalTotal + tax;
-
-      console.log('Order totals calculated:', { subtotal, finalTotal, tax, totalAmount });
-
-      // Validate required fields
-      if (!shippingInfo.full_name || !shippingInfo.street_address || !shippingInfo.city || !shippingInfo.state || !shippingInfo.postal_code || !shippingInfo.phone) {
-        console.error('Missing shipping information:', shippingInfo);
-        toast.error('Missing shipping information. Please fill in all required fields.');
-        return null;
-      }
-
-      // Convert ShippingAddress to Json format
-      const shippingAddressJson = {
-        full_name: shippingInfo.full_name,
-        street_address: shippingInfo.street_address,
-        city: shippingInfo.city,
-        state: shippingInfo.state,
-        postal_code: shippingInfo.postal_code,
-        country: shippingInfo.country,
-        phone: shippingInfo.phone
-      };
-
-      console.log('Creating order with shipping address:', shippingAddressJson);
-
-      // Create order in database
-      const orderData = {
-        customer_name: shippingInfo.full_name,
-        customer_email: user.email!,
-        user_id: user.id,
-        total_amount: totalAmount,
-        shipping_address: shippingAddressJson,
-        coupon_code: appliedCoupon?.code || null,
-        coupon_discount: appliedCoupon?.discount || 0,
-        is_first_order: appliedCoupon?.code === 'FIRST50',
-        status: 'pending',
-        payment_status: 'pending',
-        payment_method: paymentMethod
-      };
-
-      console.log('Inserting order data:', orderData);
-
-      const { data: createdOrder, error: orderError } = await supabase
-        .from('orders')
-        .insert(orderData)
-        .select()
-        .single();
-
-      if (orderError) {
-        console.error('Supabase order creation error:', orderError);
-        console.error('Error details:', {
-          code: orderError.code,
-          message: orderError.message,
-          details: orderError.details,
-          hint: orderError.hint
-        });
-        throw new Error(`Order creation failed: ${orderError.message}`);
-      }
-
-      if (!createdOrder) {
-        console.error('No order data returned from Supabase');
-        throw new Error('Order creation failed: No data returned');
-      }
-
-      console.log('Order created successfully:', createdOrder);
-
-      // Create order items
-      const orderItems = cartItems.map(item => ({
-        order_id: createdOrder.id,
-        product_id: item.product_id,
-        product_name: item.product.name,
-        quantity: item.quantity,
-        price: item.product.price
-      }));
-
-      console.log('Creating order items:', orderItems);
-
-      const { error: itemsError } = await supabase
-        .from('order_items')
-        .insert(orderItems);
-
-      if (itemsError) {
-        console.error('Order items creation error:', itemsError);
-        throw new Error(`Order items creation failed: ${itemsError.message}`);
-      }
-
-      console.log('Order items created successfully');
-
-      // Update coupon usage count if coupon was applied (simplified version without edge function)
-      if (appliedCoupon) {
-        console.log('Updating coupon usage for:', appliedCoupon.code);
-        try {
-          const { error: couponError } = await supabase
-            .from('coupon_codes')
-            .update({ 
-              used_count: supabase.raw('used_count + 1')
-            })
-            .eq('code', appliedCoupon.code);
-          
-          if (couponError) {
-            console.error('Error updating coupon usage:', couponError);
-          }
-        } catch (couponErr) {
-          console.error('Failed to update coupon usage:', couponErr);
-          // Don't fail the order if coupon update fails
-        }
-      }
-
-      // Track user purchase history (simplified version)
-      console.log('Updating user purchase history');
-      try {
-        await supabase
-          .from('user_purchase_history')
-          .upsert({
-            user_id: user.id,
-            email: user.email!,
-            first_order_date: new Date().toISOString(),
-            total_orders: 1
-          }, {
-            onConflict: 'email',
-            ignoreDuplicates: false
-          });
-      } catch (historyErr) {
-        console.error('Failed to update purchase history:', historyErr);
-        // Don't fail the order if history update fails
-      }
-
-      console.log('Order process completed successfully, clearing cart');
-      clearCart();
-      
-      toast.success('Order placed successfully!');
-      navigate(`/order-confirmation/${createdOrder.id}`);
-      
-      return createdOrder.id;
-    } catch (error) {
-      console.error('Order creation failed with error:', error);
-      
-      let errorMessage = 'Failed to create your order. Please try again.';
-      
-      if (error instanceof Error) {
-        errorMessage = error.message;
-        console.error('Error stack:', error.stack);
-      }
-      
-      toast.error(errorMessage);
-      return null;
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  // Check COD availability based on cart items
   useEffect(() => {
     const checkCodAvailability = async () => {
       if (cartItems.length === 0) return;
 
       try {
-        console.log('Checking COD availability for cart items:', cartItems);
-        
         // Get product IDs from cart
         const productIds = cartItems.map(item => item.product_id);
         
@@ -223,18 +53,12 @@ const Checkout = () => {
           return;
         }
 
-        console.log('Products COD availability:', products);
-
         // COD is available only if ALL products in cart support it
         const allSupportCod = products?.every(product => product.cod_available !== false) ?? true;
-        console.log('COD available for all products:', allSupportCod);
-        
         setCodAvailable(allSupportCod);
-        setPaymentMethod(allSupportCod ? 'cod' : 'razorpay');
       } catch (error) {
         console.error('Error checking COD availability:', error);
         setCodAvailable(true); // Default to available on error
-        setPaymentMethod('cod');
       }
     };
 
@@ -244,8 +68,6 @@ const Checkout = () => {
   useEffect(() => {
     const loadUserProfile = async () => {
       if (user) {
-        console.log('Loading user profile for:', user.email);
-        
         // Load from user metadata first
         const userMetadata = user.user_metadata || {};
         const firstName = userMetadata.first_name || '';
@@ -253,7 +75,6 @@ const Checkout = () => {
         
         // Try to load saved profile data
         const profile = await getUserProfile(user.id);
-        console.log('User profile loaded:', profile);
         
         setShippingInfo(prev => ({
           ...prev,
@@ -297,11 +118,6 @@ const Checkout = () => {
     setAppliedCoupon(null);
   };
 
-  const handlePaymentMethodChange = (method: string) => {
-    console.log('Payment method changed to:', method);
-    setPaymentMethod(method);
-  };
-
   const validateShippingInfo = () => {
     const requiredFields = ['full_name', 'street_address', 'city', 'state', 'postal_code', 'phone'];
     const missingFields = requiredFields.filter(field => {
@@ -322,7 +138,6 @@ const Checkout = () => {
       // Save shipping info to user profile
       if (user) {
         try {
-          console.log('Saving shipping info to profile');
           await supabase
             .from('profiles')
             .upsert({
@@ -330,12 +145,141 @@ const Checkout = () => {
               shipping_address: JSON.stringify(shippingInfo),
               updated_at: new Date().toISOString()
             });
-          console.log('Shipping info saved successfully');
         } catch (error) {
           console.error('Error saving shipping info:', error);
         }
       }
       setCurrentStep(2);
+    }
+  };
+
+  const createOrder = async () => {
+    if (!user || !cartItems.length) {
+      toast.error('Please login and add items to cart');
+      return null;
+    }
+
+    setLoading(true);
+    try {
+      const finalTotal = subtotal - (appliedCoupon?.discount || 0);
+      const tax = finalTotal * 0.18;
+      const totalAmount = finalTotal + tax;
+
+      // Convert ShippingAddress to Json format
+      const shippingAddressJson = {
+        full_name: shippingInfo.full_name,
+        street_address: shippingInfo.street_address,
+        city: shippingInfo.city,
+        state: shippingInfo.state,
+        postal_code: shippingInfo.postal_code,
+        country: shippingInfo.country,
+        phone: shippingInfo.phone
+      };
+
+      // Create order in database
+      const { data: orderData, error: orderError } = await supabase
+        .from('orders')
+        .insert({
+          customer_name: shippingInfo.full_name,
+          customer_email: user.email!,
+          user_id: user.id,
+          total_amount: totalAmount,
+          shipping_address: shippingAddressJson,
+          coupon_code: appliedCoupon?.code || null,
+          coupon_discount: appliedCoupon?.discount || 0,
+          is_first_order: appliedCoupon?.code === 'FIRST50',
+          status: 'pending',
+          payment_status: 'pending'
+        })
+        .select()
+        .single();
+
+      if (orderError) throw orderError;
+
+      // Create order items
+      const orderItems = cartItems.map(item => ({
+        order_id: orderData.id,
+        product_id: item.product_id,
+        product_name: item.product.name,
+        quantity: item.quantity,
+        price: item.product.price
+      }));
+
+      const { error: itemsError } = await supabase
+        .from('order_items')
+        .insert(orderItems);
+
+      if (itemsError) throw itemsError;
+
+      // Update coupon usage count if coupon was applied
+      if (appliedCoupon) {
+        const { error: couponError } = await supabase.functions.invoke('increment-coupon-usage', {
+          body: { coupon_code: appliedCoupon.code }
+        });
+        
+        if (couponError) {
+          console.error('Error updating coupon usage:', couponError);
+        }
+      }
+
+      // Track user purchase history
+      await supabase
+        .from('user_purchase_history')
+        .upsert({
+          user_id: user.id,
+          email: user.email!,
+          first_order_date: new Date().toISOString(),
+          total_orders: 1
+        }, {
+          onConflict: 'email',
+          ignoreDuplicates: false
+        });
+
+      // Send order confirmation email
+      try {
+        await supabase.functions.invoke('send-order-confirmation-email', {
+          body: {
+            orderId: orderData.id,
+            customerEmail: user.email!,
+            customerName: shippingInfo.full_name,
+            orderTotal: totalAmount,
+            orderItems: orderItems.map(item => ({
+              name: item.product_name,
+              quantity: item.quantity,
+              price: item.price
+            }))
+          }
+        });
+      } catch (notificationError) {
+        console.error('Error sending confirmation email:', notificationError);
+        // Don't fail the order if email fails
+      }
+
+      // Send original notification as backup
+      try {
+        await supabase.functions.invoke('send-order-confirmation', {
+          body: {
+            orderId: orderData.id,
+            customerEmail: user.email!,
+            customerName: shippingInfo.full_name,
+            customerPhone: shippingInfo.phone
+          }
+        });
+      } catch (notificationError) {
+        console.error('Error sending notifications:', notificationError);
+        // Don't fail the order if notification fails
+      }
+
+      clearCart();
+      navigate(`/order-confirmation/${orderData.id}`);
+      
+      return orderData.id;
+    } catch (error) {
+      console.error('Error creating order:', error);
+      toast.error('Failed to create your order. Please try again.');
+      return null;
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -410,7 +354,6 @@ const Checkout = () => {
                   <PaymentMethodSelector 
                     loading={loading} 
                     codAvailable={codAvailable}
-                    onPaymentMethodChange={handlePaymentMethodChange}
                   />
                   
                   <div className="mt-6">
