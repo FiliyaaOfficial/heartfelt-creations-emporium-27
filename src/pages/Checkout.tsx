@@ -139,13 +139,16 @@ const Checkout = () => {
 
       console.log('Order items created successfully');
 
-      // Update coupon usage count if coupon was applied
+      // Update coupon usage count if coupon was applied (simplified version without edge function)
       if (appliedCoupon) {
         console.log('Updating coupon usage for:', appliedCoupon.code);
         try {
-          const { error: couponError } = await supabase.functions.invoke('increment-coupon-usage', {
-            body: { coupon_code: appliedCoupon.code }
-          });
+          const { error: couponError } = await supabase
+            .from('coupon_codes')
+            .update({ 
+              used_count: supabase.raw('used_count + 1')
+            })
+            .eq('code', appliedCoupon.code);
           
           if (couponError) {
             console.error('Error updating coupon usage:', couponError);
@@ -156,7 +159,7 @@ const Checkout = () => {
         }
       }
 
-      // Track user purchase history
+      // Track user purchase history (simplified version)
       console.log('Updating user purchase history');
       try {
         await supabase
@@ -173,41 +176,6 @@ const Checkout = () => {
       } catch (historyErr) {
         console.error('Failed to update purchase history:', historyErr);
         // Don't fail the order if history update fails
-      }
-
-      // Send order confirmation emails
-      try {
-        console.log('Sending order confirmation emails');
-        
-        // Send detailed confirmation email
-        await supabase.functions.invoke('send-order-confirmation-email', {
-          body: {
-            orderId: createdOrder.id,
-            customerEmail: user.email!,
-            customerName: shippingInfo.full_name,
-            orderTotal: totalAmount,
-            orderItems: orderItems.map(item => ({
-              name: item.product_name,
-              quantity: item.quantity,
-              price: item.price
-            }))
-          }
-        });
-
-        // Send backup notification
-        await supabase.functions.invoke('send-order-confirmation', {
-          body: {
-            orderId: createdOrder.id,
-            customerEmail: user.email!,
-            customerName: shippingInfo.full_name,
-            customerPhone: shippingInfo.phone
-          }
-        });
-        
-        console.log('Order confirmation emails sent successfully');
-      } catch (notificationError) {
-        console.error('Error sending confirmation emails:', notificationError);
-        // Don't fail the order if email fails
       }
 
       console.log('Order process completed successfully, clearing cart');

@@ -1,337 +1,343 @@
 
-import React, { useState } from 'react';
-import { useNavigate, Navigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form';
-import { useAuth } from '@/contexts/AuthContext';
-import { Gift, Eye, EyeOff, Phone, Mail } from 'lucide-react';
-import GoogleIcon from '@/components/icons/GoogleIcon';
-import OTPLogin from '@/components/auth/OTPLogin';
-import { useForm } from 'react-hook-form';
+import { Separator } from '@/components/ui/separator';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { GoogleIcon } from '@/components/icons/GoogleIcon';
+import { OTPLogin } from '@/components/auth/OTPLogin';
 import { toast } from 'sonner';
-
-interface FormData {
-  email: string;
-  password: string;
-  confirmPassword?: string;
-  firstName?: string;
-  lastName?: string;
-}
-
-type AuthMethod = 'email' | 'otp';
+import { ArrowLeft, Mail, Phone, Eye, EyeOff } from 'lucide-react';
 
 const Auth = () => {
-  const { isAuthenticated, signIn, signUp, signInWithGoogle } = useAuth();
   const navigate = useNavigate();
-  const [isSignUp, setIsSignUp] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [searchParams] = useSearchParams();
+  const { signIn, signUp, signInWithGoogle, user, loading } = useAuth();
+  
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [phone, setPhone] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [authMethod, setAuthMethod] = useState<AuthMethod>('email');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [activeTab, setActiveTab] = useState('signin');
+  const [authMethod, setAuthMethod] = useState<'email' | 'otp'>('email');
 
-  const form = useForm<FormData>({
-    defaultValues: {
-      email: '',
-      password: '',
-      confirmPassword: '',
-      firstName: '',
-      lastName: '',
-    },
-  });
+  const redirectTo = searchParams.get('redirect') || '/';
+
+  useEffect(() => {
+    if (user && !loading) {
+      navigate(redirectTo);
+    }
+  }, [user, loading, navigate, redirectTo]);
+
+  const handleEmailSignIn = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email || !password) {
+      setError('Please fill in all fields');
+      return;
+    }
+
+    setIsLoading(true);
+    setError('');
+
+    try {
+      await signIn(email, password);
+      toast.success('Welcome back!');
+    } catch (error: any) {
+      console.error('Sign in error:', error);
+      setError(error.message || 'Failed to sign in');
+      toast.error(error.message || 'Failed to sign in');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleEmailSignUp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email || !password || !firstName) {
+      setError('Please fill in all required fields');
+      return;
+    }
+
+    if (password.length < 6) {
+      setError('Password must be at least 6 characters long');
+      return;
+    }
+
+    setIsLoading(true);
+    setError('');
+
+    try {
+      await signUp(email, password, {
+        first_name: firstName,
+        last_name: lastName,
+        phone: phone
+      });
+      toast.success('Account created successfully! Please check your email to verify your account.');
+    } catch (error: any) {
+      console.error('Sign up error:', error);
+      setError(error.message || 'Failed to create account');
+      toast.error(error.message || 'Failed to create account');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleGoogleSignIn = async () => {
-    try {
-      setIsLoading(true);
-      await signInWithGoogle();
-    } catch (error) {
-      // Error handling without console logging
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const onSubmit = async (data: FormData) => {
     setIsLoading(true);
-    
+    setError('');
+
     try {
-      if (isSignUp) {
-        if (data.password !== data.confirmPassword) {
-          toast.error('Passwords do not match');
-          return;
-        }
-        
-        const { error } = await signUp(data.email, data.password, {
-          first_name: data.firstName,
-          last_name: data.lastName,
-        });
-        
-        if (error) {
-          toast.error('Sign up failed', {
-            description: error.message
-          });
-        }
-      } else {
-        const { error } = await signIn(data.email, data.password);
-        
-        if (error) {
-          toast.error('Sign in failed', {
-            description: error.message
-          });
-        }
-      }
-    } catch (error) {
-      toast.error('An unexpected error occurred');
+      await signInWithGoogle();
+      toast.success('Welcome!');
+    } catch (error: any) {
+      console.error('Google sign in error:', error);
+      setError(error.message || 'Failed to sign in with Google');
+      toast.error(error.message || 'Failed to sign in with Google');
     } finally {
       setIsLoading(false);
     }
   };
 
-  if (isAuthenticated) {
-    return <Navigate to="/" />;
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-heartfelt-burgundy"></div>
+      </div>
+    );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-heartfelt-burgundy/5 to-pink-50 py-12 px-4">
-      <div className="container mx-auto max-w-md">
-        <div className="mb-8 text-center">
-          <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-heartfelt-burgundy mb-4">
-            <Gift size={32} className="text-white" />
-          </div>
-          <h1 className="text-3xl font-serif font-bold text-heartfelt-burgundy mb-2">Welcome to Filiyaa</h1>
-          <p className="text-gray-600">
-            {isSignUp ? 'Create an account to start shopping' : 'Sign in to continue shopping for heartfelt gifts'}
-          </p>
+    <div className="min-h-screen bg-gradient-to-br from-heartfelt-cream/20 via-white to-heartfelt-burgundy/5 flex items-center justify-center px-4 py-8">
+      <div className="w-full max-w-md">
+        <div className="mb-6">
+          <Button 
+            onClick={() => navigate(-1)} 
+            variant="ghost" 
+            size="sm" 
+            className="mb-4"
+          >
+            <ArrowLeft size={16} className="mr-2" /> Back
+          </Button>
         </div>
 
-        <Card className="shadow-xl border-0">
+        <Card className="shadow-2xl border-0 bg-white/90 backdrop-blur-sm">
           <CardHeader className="text-center pb-4">
-            <CardTitle className="text-xl">{isSignUp ? 'Create Account' : 'Sign In'}</CardTitle>
-            <CardDescription>
-              {isSignUp 
-                ? 'Please fill in your details to create an account'
-                : 'Choose your preferred sign-in method'
-              }
+            <CardTitle className="text-2xl font-bold text-heartfelt-dark">
+              Welcome to Heartfelt Gifts
+            </CardTitle>
+            <CardDescription className="text-gray-600">
+              Sign in to your account or create a new one
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
+          
+          <CardContent className="space-y-6">
+            {error && (
+              <Alert className="border-red-200 bg-red-50">
+                <AlertDescription className="text-red-800">
+                  {error}
+                </AlertDescription>
+              </Alert>
+            )}
+
+            <div className="flex justify-center space-x-2 mb-6">
+              <Button
+                variant={authMethod === 'email' ? 'default' : 'outline'}
+                onClick={() => setAuthMethod('email')}
+                className="flex-1"
+                disabled={isLoading}
+              >
+                <Mail size={16} className="mr-2" />
+                Email
+              </Button>
+              <Button
+                variant={authMethod === 'otp' ? 'default' : 'outline'}
+                onClick={() => setAuthMethod('otp')}
+                className="flex-1"
+                disabled={isLoading}
+              >
+                <Phone size={16} className="mr-2" />
+                OTP
+              </Button>
+            </div>
+
             {authMethod === 'otp' ? (
-              <OTPLogin onBack={() => setAuthMethod('email')} />
+              <OTPLogin />
             ) : (
-              <>
-                {/* Auth Method Selection */}
-                {!isSignUp && (
-                  <div className="grid grid-cols-2 gap-2 mb-4">
-                    <Button
-                      type="button"
-                      variant={authMethod === 'email' ? 'default' : 'outline'}
-                      onClick={() => setAuthMethod('email')}
-                      className="flex items-center justify-center"
-                    >
-                      <Mail className="w-4 h-4 mr-2" />
-                      Email
-                    </Button>
-                    <Button
-                      type="button"
-                      variant={authMethod === 'otp' ? 'default' : 'outline'}
-                      onClick={() => setAuthMethod('otp')}
-                      className="flex items-center justify-center"
-                    >
-                      <Phone className="w-4 h-4 mr-2" />
-                      OTP
-                    </Button>
-                  </div>
-                )}
-
-                {/* Google Sign In Button */}
-                <Button 
-                  onClick={handleGoogleSignIn}
-                  disabled={isLoading}
-                  className="w-full bg-white hover:bg-gray-50 text-gray-800 border border-gray-300 py-6 text-lg shadow-sm"
-                  size="lg"
-                >
-                  <GoogleIcon />
-                  <span className="ml-3">Continue with Google</span>
-                </Button>
+              <Tabs value={activeTab} onValueChange={setActiveTab}>
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="signin">Sign In</TabsTrigger>
+                  <TabsTrigger value="signup">Sign Up</TabsTrigger>
+                </TabsList>
                 
-                <div className="relative">
-                  <div className="absolute inset-0 flex items-center">
-                    <span className="w-full border-t" />
-                  </div>
-                  <div className="relative flex justify-center text-xs uppercase">
-                    <span className="bg-background px-2 text-muted-foreground">Or continue with email</span>
-                  </div>
-                </div>
-
-                {/* Email/Password Form */}
-                <Form {...form}>
-                  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                    {isSignUp && (
-                      <div className="grid grid-cols-2 gap-4">
-                        <FormField
-                          control={form.control}
-                          name="firstName"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>First Name</FormLabel>
-                              <FormControl>
-                                <Input placeholder="John" {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        <FormField
-                          control={form.control}
-                          name="lastName"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Last Name</FormLabel>
-                              <FormControl>
-                                <Input placeholder="Doe" {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </div>
-                    )}
-
-                    <FormField
-                      control={form.control}
-                      name="email"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Email</FormLabel>
-                          <FormControl>
-                            <Input 
-                              type="email" 
-                              placeholder="john@example.com" 
-                              required
-                              {...field} 
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="password"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Password</FormLabel>
-                          <FormControl>
-                            <div className="relative">
-                              <Input 
-                                type={showPassword ? "text" : "password"}
-                                placeholder="••••••••"
-                                required
-                                {...field} 
-                              />
-                              <Button
-                                type="button"
-                                variant="ghost"
-                                size="sm"
-                                className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                                onClick={() => setShowPassword(!showPassword)}
-                              >
-                                {showPassword ? (
-                                  <EyeOff className="h-4 w-4" />
-                                ) : (
-                                  <Eye className="h-4 w-4" />
-                                )}
-                              </Button>
-                            </div>
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    {isSignUp && (
-                      <FormField
-                        control={form.control}
-                        name="confirmPassword"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Confirm Password</FormLabel>
-                            <FormControl>
-                              <div className="relative">
-                                <Input 
-                                  type={showConfirmPassword ? "text" : "password"}
-                                  placeholder="••••••••"
-                                  required
-                                  {...field} 
-                                />
-                                <Button
-                                  type="button"
-                                  variant="ghost"
-                                  size="sm"
-                                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                                >
-                                  {showConfirmPassword ? (
-                                    <EyeOff className="h-4 w-4" />
-                                  ) : (
-                                    <Eye className="h-4 w-4" />
-                                  )}
-                                </Button>
-                              </div>
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
+                <TabsContent value="signin" className="space-y-4">
+                  <form onSubmit={handleEmailSignIn} className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="signin-email">Email</Label>
+                      <Input
+                        id="signin-email"
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        placeholder="Enter your email"
+                        required
+                        disabled={isLoading}
                       />
-                    )}
-
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="signin-password">Password</Label>
+                      <div className="relative">
+                        <Input
+                          id="signin-password"
+                          type={showPassword ? 'text' : 'password'}
+                          value={password}
+                          onChange={(e) => setPassword(e.target.value)}
+                          placeholder="Enter your password"
+                          required
+                          disabled={isLoading}
+                        />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                          onClick={() => setShowPassword(!showPassword)}
+                          disabled={isLoading}
+                        >
+                          {showPassword ? (
+                            <EyeOff className="h-4 w-4" />
+                          ) : (
+                            <Eye className="h-4 w-4" />
+                          )}
+                        </Button>
+                      </div>
+                    </div>
                     <Button 
                       type="submit" 
-                      className="w-full bg-heartfelt-burgundy hover:bg-heartfelt-dark py-6 text-lg"
+                      className="w-full bg-heartfelt-burgundy hover:bg-heartfelt-dark"
                       disabled={isLoading}
                     >
-                      {isLoading ? 'Please wait...' : (isSignUp ? 'Create Account' : 'Sign In')}
+                      {isLoading ? 'Signing In...' : 'Sign In'}
                     </Button>
                   </form>
-                </Form>
-
-                <div className="text-center">
-                  <Button
-                    variant="ghost"
-                    onClick={() => {
-                      setIsSignUp(!isSignUp);
-                      setAuthMethod('email');
-                    }}
-                    className="text-sm text-heartfelt-burgundy hover:text-heartfelt-dark"
-                  >
-                    {isSignUp 
-                      ? 'Already have an account? Sign in' 
-                      : "Don't have an account? Sign up"
-                    }
-                  </Button>
-                </div>
-              </>
+                </TabsContent>
+                
+                <TabsContent value="signup" className="space-y-4">
+                  <form onSubmit={handleEmailSignUp} className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="first-name">First Name *</Label>
+                        <Input
+                          id="first-name"
+                          type="text"
+                          value={firstName}
+                          onChange={(e) => setFirstName(e.target.value)}
+                          placeholder="First name"
+                          required
+                          disabled={isLoading}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="last-name">Last Name</Label>
+                        <Input
+                          id="last-name"
+                          type="text"
+                          value={lastName}
+                          onChange={(e) => setLastName(e.target.value)}
+                          placeholder="Last name"
+                          disabled={isLoading}
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="signup-email">Email *</Label>
+                      <Input
+                        id="signup-email"
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        placeholder="Enter your email"
+                        required
+                        disabled={isLoading}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="phone">Phone</Label>
+                      <Input
+                        id="phone"
+                        type="tel"
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
+                        placeholder="Enter your phone number"
+                        disabled={isLoading}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="signup-password">Password *</Label>
+                      <div className="relative">
+                        <Input
+                          id="signup-password"
+                          type={showPassword ? 'text' : 'password'}
+                          value={password}
+                          onChange={(e) => setPassword(e.target.value)}
+                          placeholder="Create a password (min. 6 characters)"
+                          required
+                          disabled={isLoading}
+                        />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                          onClick={() => setShowPassword(!showPassword)}
+                          disabled={isLoading}
+                        >
+                          {showPassword ? (
+                            <EyeOff className="h-4 w-4" />
+                          ) : (
+                            <Eye className="h-4 w-4" />
+                          )}
+                        </Button>
+                      </div>
+                    </div>
+                    <Button 
+                      type="submit" 
+                      className="w-full bg-heartfelt-burgundy hover:bg-heartfelt-dark"
+                      disabled={isLoading}
+                    >
+                      {isLoading ? 'Creating Account...' : 'Create Account'}
+                    </Button>
+                  </form>
+                </TabsContent>
+              </Tabs>
             )}
-            
-            <div className="mt-6 text-center text-sm text-gray-500">
-              <p>By signing in, you agree to our Terms of Service and Privacy Policy</p>
+
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <Separator />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-white px-2 text-gray-500">Or continue with</span>
+              </div>
             </div>
+
+            <Button
+              onClick={handleGoogleSignIn}
+              variant="outline"
+              className="w-full"
+              disabled={isLoading}
+            >
+              <GoogleIcon className="mr-2 h-4 w-4" />
+              {isLoading ? 'Signing In...' : 'Continue with Google'}
+            </Button>
           </CardContent>
         </Card>
       </div>
