@@ -12,7 +12,6 @@ import { useKeepAlive } from "@/hooks/useKeepAlive";
 import CheckoutProtection from "@/components/CheckoutProtection";
 import AuthGuard from "@/components/AuthGuard";
 import Layout from "@/components/Layout";
-import ErrorBoundary from "@/components/ErrorBoundary";
 import Index from "./pages/Index";
 import Shop from "./pages/Shop";
 import Categories from "./pages/Categories";
@@ -105,23 +104,21 @@ function AppContent() {
 
 function App() {
   return (
-    <ErrorBoundary>
-      <QueryClientProvider client={queryClient}>
-        <BrowserRouter>
-          <TooltipProvider>
-            <AuthProvider>
-              <CartProvider>
-                <WishlistProvider>
-                  <Toaster />
-                  <Sonner />
-                  <AppContent />
-                </WishlistProvider>
-              </CartProvider>
-            </AuthProvider>
-          </TooltipProvider>
-        </BrowserRouter>
-      </QueryClientProvider>
-    </ErrorBoundary>
+    <QueryClientProvider client={queryClient}>
+      <BrowserRouter>
+        <TooltipProvider>
+          <AuthProvider>
+            <CartProvider>
+              <WishlistProvider>
+                <Toaster />
+                <Sonner />
+                <AppContent />
+              </WishlistProvider>
+            </CartProvider>
+          </AuthProvider>
+        </TooltipProvider>
+      </BrowserRouter>
+    </QueryClientProvider>
   );
 }
 

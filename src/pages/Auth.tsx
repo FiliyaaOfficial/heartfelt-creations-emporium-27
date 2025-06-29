@@ -60,7 +60,7 @@ const Auth = () => {
       setIsLoading(true);
       await signInWithGoogle();
     } catch (error) {
-      // Error handling without console logging
+      console.error('Google sign in failed:', error);
     } finally {
       setIsLoading(false);
     }
