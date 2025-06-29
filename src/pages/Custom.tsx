@@ -1,5 +1,5 @@
-
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -18,6 +18,7 @@ import { CalendarIcon, Upload, X, Palette, Sparkles } from 'lucide-react';
 
 const Custom = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -134,20 +135,10 @@ const Custom = () => {
         return;
       }
 
-      toast.success('Your custom order request has been submitted successfully! We will contact you soon.');
+      toast.success('Your custom order request has been submitted successfully!');
       
-      // Reset form
-      setFormData({
-        name: '',
-        email: '',
-        phone: '',
-        occasion: '',
-        description: '',
-        budget: '',
-        additionalInfo: ''
-      });
-      setUploadedImages([]);
-      setDate(new Date());
+      // Redirect to thank you page
+      navigate('/thank-you?form=custom');
       
     } catch (error) {
       console.error('Unexpected error:', error);

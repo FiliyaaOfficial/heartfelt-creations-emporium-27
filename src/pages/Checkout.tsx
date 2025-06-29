@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '@/contexts/CartContext';
@@ -35,7 +34,206 @@ const Checkout = () => {
     phone: '',
   });
 
-  // Check COD availability based on cart items
+  const createOrder = async () => {
+    if (!user || !cartItems.length) {
+      console.error('Order creation failed: No user or empty cart', { user: !!user, cartItemsLength: cartItems.length });
+      toast.error('Please login and add items to cart');
+      return null;
+    }
+
+    console.log('Starting order creation process...');
+    console.log('User:', user.id, user.email);
+    console.log('Cart items:', cartItems.length);
+    console.log('Payment method:', paymentMethod);
+    console.log('Shipping info:', shippingInfo);
+    
+    setLoading(true);
+    
+    try {
+      const finalTotal = subtotal - (appliedCoupon?.discount || 0);
+      const tax = finalTotal * 0.18;
+      const totalAmount = finalTotal + tax;
+
+      console.log('Order totals calculated:', { subtotal, finalTotal, tax, totalAmount });
+
+      // Validate required fields
+      if (!shippingInfo.full_name || !shippingInfo.street_address || !shippingInfo.city || !shippingInfo.state || !shippingInfo.postal_code || !shippingInfo.phone) {
+        console.error('Missing shipping information:', shippingInfo);
+        toast.error('Missing shipping information. Please fill in all required fields.');
+        return null;
+      }
+
+      // Convert ShippingAddress to Json format
+      const shippingAddressJson = {
+        full_name: shippingInfo.full_name,
+        street_address: shippingInfo.street_address,
+        city: shippingInfo.city,
+        state: shippingInfo.state,
+        postal_code: shippingInfo.postal_code,
+        country: shippingInfo.country,
+        phone: shippingInfo.phone
+      };
+
+      console.log('Creating order with shipping address:', shippingAddressJson);
+
+      // Create order in database
+      const orderData = {
+        customer_name: shippingInfo.full_name,
+        customer_email: user.email!,
+        user_id: user.id,
+        total_amount: totalAmount,
+        shipping_address: shippingAddressJson,
+        coupon_code: appliedCoupon?.code || null,
+        coupon_discount: appliedCoupon?.discount || 0,
+        is_first_order: appliedCoupon?.code === 'FIRST50',
+        status: 'pending',
+        payment_status: 'pending',
+        payment_method: paymentMethod
+      };
+
+      console.log('Inserting order data:', orderData);
+
+      const { data: createdOrder, error: orderError } = await supabase
+        .from('orders')
+        .insert(orderData)
+        .select()
+        .single();
+
+      if (orderError) {
+        console.error('Supabase order creation error:', orderError);
+        console.error('Error details:', {
+          code: orderError.code,
+          message: orderError.message,
+          details: orderError.details,
+          hint: orderError.hint
+        });
+        throw new Error(`Order creation failed: ${orderError.message}`);
+      }
+
+      if (!createdOrder) {
+        console.error('No order data returned from Supabase');
+        throw new Error('Order creation failed: No data returned');
+      }
+
+      console.log('Order created successfully:', createdOrder);
+
+      // Create order items
+      const orderItems = cartItems.map(item => ({
+        order_id: createdOrder.id,
+        product_id: item.product_id,
+        product_name: item.product.name,
+        quantity: item.quantity,
+        price: item.product.price
+      }));
+
+      console.log('Creating order items:', orderItems);
+
+      const { error: itemsError } = await supabase
+        .from('order_items')
+        .insert(orderItems);
+
+      if (itemsError) {
+        console.error('Order items creation error:', itemsError);
+        throw new Error(`Order items creation failed: ${itemsError.message}`);
+      }
+
+      console.log('Order items created successfully');
+
+      // Update coupon usage count if coupon was applied
+      if (appliedCoupon) {
+        console.log('Updating coupon usage for:', appliedCoupon.code);
+        try {
+          const { error: couponError } = await supabase.functions.invoke('increment-coupon-usage', {
+            body: { coupon_code: appliedCoupon.code }
+          });
+          
+          if (couponError) {
+            console.error('Error updating coupon usage:', couponError);
+          }
+        } catch (couponErr) {
+          console.error('Failed to update coupon usage:', couponErr);
+          // Don't fail the order if coupon update fails
+        }
+      }
+
+      // Track user purchase history
+      console.log('Updating user purchase history');
+      try {
+        await supabase
+          .from('user_purchase_history')
+          .upsert({
+            user_id: user.id,
+            email: user.email!,
+            first_order_date: new Date().toISOString(),
+            total_orders: 1
+          }, {
+            onConflict: 'email',
+            ignoreDuplicates: false
+          });
+      } catch (historyErr) {
+        console.error('Failed to update purchase history:', historyErr);
+        // Don't fail the order if history update fails
+      }
+
+      // Send order confirmation emails
+      try {
+        console.log('Sending order confirmation emails');
+        
+        // Send detailed confirmation email
+        await supabase.functions.invoke('send-order-confirmation-email', {
+          body: {
+            orderId: createdOrder.id,
+            customerEmail: user.email!,
+            customerName: shippingInfo.full_name,
+            orderTotal: totalAmount,
+            orderItems: orderItems.map(item => ({
+              name: item.product_name,
+              quantity: item.quantity,
+              price: item.price
+            }))
+          }
+        });
+
+        // Send backup notification
+        await supabase.functions.invoke('send-order-confirmation', {
+          body: {
+            orderId: createdOrder.id,
+            customerEmail: user.email!,
+            customerName: shippingInfo.full_name,
+            customerPhone: shippingInfo.phone
+          }
+        });
+        
+        console.log('Order confirmation emails sent successfully');
+      } catch (notificationError) {
+        console.error('Error sending confirmation emails:', notificationError);
+        // Don't fail the order if email fails
+      }
+
+      console.log('Order process completed successfully, clearing cart');
+      clearCart();
+      
+      toast.success('Order placed successfully!');
+      navigate(`/order-confirmation/${createdOrder.id}`);
+      
+      return createdOrder.id;
+    } catch (error) {
+      console.error('Order creation failed with error:', error);
+      
+      let errorMessage = 'Failed to create your order. Please try again.';
+      
+      if (error instanceof Error) {
+        errorMessage = error.message;
+        console.error('Error stack:', error.stack);
+      }
+      
+      toast.error(errorMessage);
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     const checkCodAvailability = async () => {
       if (cartItems.length === 0) return;
@@ -170,167 +368,6 @@ const Checkout = () => {
         }
       }
       setCurrentStep(2);
-    }
-  };
-
-  const createOrder = async () => {
-    if (!user || !cartItems.length) {
-      toast.error('Please login and add items to cart');
-      return null;
-    }
-
-    console.log('Creating order with payment method:', paymentMethod);
-    setLoading(true);
-    
-    try {
-      const finalTotal = subtotal - (appliedCoupon?.discount || 0);
-      const tax = finalTotal * 0.18;
-      const totalAmount = finalTotal + tax;
-
-      console.log('Order totals:', { finalTotal, tax, totalAmount });
-
-      // Convert ShippingAddress to Json format
-      const shippingAddressJson = {
-        full_name: shippingInfo.full_name,
-        street_address: shippingInfo.street_address,
-        city: shippingInfo.city,
-        state: shippingInfo.state,
-        postal_code: shippingInfo.postal_code,
-        country: shippingInfo.country,
-        phone: shippingInfo.phone
-      };
-
-      console.log('Creating order with data:', {
-        customer_name: shippingInfo.full_name,
-        customer_email: user.email,
-        user_id: user.id,
-        total_amount: totalAmount,
-        payment_method: paymentMethod,
-        shipping_address: shippingAddressJson
-      });
-
-      // Create order in database
-      const { data: orderData, error: orderError } = await supabase
-        .from('orders')
-        .insert({
-          customer_name: shippingInfo.full_name,
-          customer_email: user.email!,
-          user_id: user.id,
-          total_amount: totalAmount,
-          shipping_address: shippingAddressJson,
-          coupon_code: appliedCoupon?.code || null,
-          coupon_discount: appliedCoupon?.discount || 0,
-          is_first_order: appliedCoupon?.code === 'FIRST50',
-          status: 'pending',
-          payment_status: 'pending',
-          payment_method: paymentMethod
-        })
-        .select()
-        .single();
-
-      if (orderError) {
-        console.error('Order creation error:', orderError);
-        throw orderError;
-      }
-
-      console.log('Order created successfully:', orderData);
-
-      // Create order items
-      const orderItems = cartItems.map(item => ({
-        order_id: orderData.id,
-        product_id: item.product_id,
-        product_name: item.product.name,
-        quantity: item.quantity,
-        price: item.product.price
-      }));
-
-      console.log('Creating order items:', orderItems);
-
-      const { error: itemsError } = await supabase
-        .from('order_items')
-        .insert(orderItems);
-
-      if (itemsError) {
-        console.error('Order items creation error:', itemsError);
-        throw itemsError;
-      }
-
-      console.log('Order items created successfully');
-
-      // Update coupon usage count if coupon was applied
-      if (appliedCoupon) {
-        console.log('Updating coupon usage for:', appliedCoupon.code);
-        const { error: couponError } = await supabase.functions.invoke('increment-coupon-usage', {
-          body: { coupon_code: appliedCoupon.code }
-        });
-        
-        if (couponError) {
-          console.error('Error updating coupon usage:', couponError);
-        }
-      }
-
-      // Track user purchase history
-      console.log('Updating user purchase history');
-      await supabase
-        .from('user_purchase_history')
-        .upsert({
-          user_id: user.id,
-          email: user.email!,
-          first_order_date: new Date().toISOString(),
-          total_orders: 1
-        }, {
-          onConflict: 'email',
-          ignoreDuplicates: false
-        });
-
-      // Send order confirmation email
-      try {
-        console.log('Sending order confirmation email');
-        await supabase.functions.invoke('send-order-confirmation-email', {
-          body: {
-            orderId: orderData.id,
-            customerEmail: user.email!,
-            customerName: shippingInfo.full_name,
-            orderTotal: totalAmount,
-            orderItems: orderItems.map(item => ({
-              name: item.product_name,
-              quantity: item.quantity,
-              price: item.price
-            }))
-          }
-        });
-      } catch (notificationError) {
-        console.error('Error sending confirmation email:', notificationError);
-        // Don't fail the order if email fails
-      }
-
-      // Send original notification as backup
-      try {
-        console.log('Sending backup notification');
-        await supabase.functions.invoke('send-order-confirmation', {
-          body: {
-            orderId: orderData.id,
-            customerEmail: user.email!,
-            customerName: shippingInfo.full_name,
-            customerPhone: shippingInfo.phone
-          }
-        });
-      } catch (notificationError) {
-        console.error('Error sending notifications:', notificationError);
-        // Don't fail the order if notification fails
-      }
-
-      console.log('Order process completed successfully, clearing cart');
-      clearCart();
-      navigate(`/order-confirmation/${orderData.id}`);
-      
-      return orderData.id;
-    } catch (error) {
-      console.error('Error creating order:', error);
-      toast.error('Failed to create your order. Please try again.');
-      return null;
-    } finally {
-      setLoading(false);
     }
   };
 
