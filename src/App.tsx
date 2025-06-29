@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -36,6 +35,7 @@ import ShippingInfo from "./pages/ShippingInfo";
 import BestSellers from "./pages/BestSellers";
 import NewArrivals from "./pages/NewArrivals";
 import NotFound from "./pages/NotFound";
+import ThankYou from "./pages/ThankYou";
 
 const queryClient = new QueryClient({
   defaultOptions: {
