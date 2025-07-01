@@ -9,6 +9,30 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      analytics: {
+        Row: {
+          created_at: string | null
+          date: string
+          id: string
+          metric_name: string
+          metric_value: number
+        }
+        Insert: {
+          created_at?: string | null
+          date?: string
+          id?: string
+          metric_name: string
+          metric_value: number
+        }
+        Update: {
+          created_at?: string | null
+          date?: string
+          id?: string
+          metric_name?: string
+          metric_value?: number
+        }
+        Relationships: []
+      }
       applied_coupons: {
         Row: {
           applied_at: string
@@ -322,6 +346,83 @@ export type Database = {
           },
         ]
       }
+      email_notifications: {
+        Row: {
+          content: string | null
+          created_at: string
+          email_type: string
+          id: string
+          order_id: string | null
+          recipient_email: string
+          sent_at: string
+          status: string
+          subject: string
+        }
+        Insert: {
+          content?: string | null
+          created_at?: string
+          email_type: string
+          id?: string
+          order_id?: string | null
+          recipient_email: string
+          sent_at?: string
+          status?: string
+          subject: string
+        }
+        Update: {
+          content?: string | null
+          created_at?: string
+          email_type?: string
+          id?: string
+          order_id?: string | null
+          recipient_email?: string
+          sent_at?: string
+          status?: string
+          subject?: string
+        }
+        Relationships: []
+      }
+      inventory_movements: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          id: string
+          movement_type: string
+          product_id: string
+          quantity: number
+          reason: string | null
+          reference_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          movement_type: string
+          product_id: string
+          quantity: number
+          reason?: string | null
+          reference_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          movement_type?: string
+          product_id?: string
+          quantity?: number
+          reason?: string | null
+          reference_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inventory_movements_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       newsletter_subscriptions: {
         Row: {
           created_at: string
@@ -343,6 +444,42 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           subscribed_at?: string
+        }
+        Relationships: []
+      }
+      notifications: {
+        Row: {
+          created_at: string
+          id: string
+          is_read: boolean | null
+          message: string
+          reference_id: string | null
+          title: string
+          type: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_read?: boolean | null
+          message: string
+          reference_id?: string | null
+          title: string
+          type: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_read?: boolean | null
+          message?: string
+          reference_id?: string | null
+          title?: string
+          type?: string
+          updated_at?: string
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -436,6 +573,7 @@ export type Database = {
           customer_name: string
           estimated_delivery_date: string | null
           id: string
+          image_urls: string[] | null
           is_first_order: boolean | null
           order_notes: string | null
           payment_method: string | null
@@ -459,6 +597,7 @@ export type Database = {
           customer_name: string
           estimated_delivery_date?: string | null
           id?: string
+          image_urls?: string[] | null
           is_first_order?: boolean | null
           order_notes?: string | null
           payment_method?: string | null
@@ -482,6 +621,7 @@ export type Database = {
           customer_name?: string
           estimated_delivery_date?: string | null
           id?: string
+          image_urls?: string[] | null
           is_first_order?: boolean | null
           order_notes?: string | null
           payment_method?: string | null
@@ -680,6 +820,53 @@ export type Database = {
         }
         Relationships: []
       }
+      shipments: {
+        Row: {
+          actual_delivery_date: string | null
+          carrier: string
+          created_at: string | null
+          estimated_delivery_date: string | null
+          id: string
+          notes: string | null
+          order_id: string
+          status: string | null
+          tracking_number: string
+          updated_at: string | null
+        }
+        Insert: {
+          actual_delivery_date?: string | null
+          carrier: string
+          created_at?: string | null
+          estimated_delivery_date?: string | null
+          id?: string
+          notes?: string | null
+          order_id: string
+          status?: string | null
+          tracking_number: string
+          updated_at?: string | null
+        }
+        Update: {
+          actual_delivery_date?: string | null
+          carrier?: string
+          created_at?: string | null
+          estimated_delivery_date?: string | null
+          id?: string
+          notes?: string | null
+          order_id?: string
+          status?: string | null
+          tracking_number?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shipments_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       support_messages: {
         Row: {
           created_at: string
@@ -789,6 +976,14 @@ export type Database = {
       is_first_time_buyer: {
         Args: { user_email: string }
         Returns: boolean
+      }
+      keep_alive: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      update_daily_analytics: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
       }
       validate_coupon: {
         Args:
