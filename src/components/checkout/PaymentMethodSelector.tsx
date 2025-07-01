@@ -1,70 +1,89 @@
 
-import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import React from 'react';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { CreditCard, Banknote, Smartphone } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 interface PaymentMethodSelectorProps {
   loading: boolean;
-  onPaymentMethodChange?: (method: string) => void;
-  codAvailable?: boolean;
 }
 
-const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({ 
-  loading, 
-  onPaymentMethodChange,
-  codAvailable = true 
-}) => {
-  const [selectedMethod, setSelectedMethod] = useState(codAvailable ? 'cod' : 'razorpay');
-
-  const handleMethodChange = (value: string) => {
-    setSelectedMethod(value);
-    onPaymentMethodChange?.(value);
-  };
-
+const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({ loading }) => {
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-lg font-medium">Payment Method</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <RadioGroup value={selectedMethod} onValueChange={handleMethodChange}>
-          {codAvailable && (
-            <div className="flex items-center space-x-3 p-3 border rounded-lg">
-              <RadioGroupItem value="cod" id="cod" />
-              <Label htmlFor="cod" className="flex items-center space-x-3 cursor-pointer flex-1">
-                <Banknote className="h-5 w-5 text-green-600" />
-                <div>
-                  <div className="font-medium">Cash on Delivery</div>
-                  <div className="text-sm text-gray-500">Pay when you receive your order</div>
-                </div>
-              </Label>
-            </div>
-          )}
-          
-          <div className="flex items-center space-x-3 p-3 border rounded-lg">
-            <RadioGroupItem value="razorpay" id="razorpay" />
-            <Label htmlFor="razorpay" className="flex items-center space-x-3 cursor-pointer flex-1">
-              <CreditCard className="h-5 w-5 text-blue-600" />
-              <div>
-                <div className="font-medium">Online Payment</div>
-                <div className="text-sm text-gray-500">Credit/Debit Card, UPI, Net Banking</div>
-              </div>
-            </Label>
-          </div>
-        </RadioGroup>
+    <div className="bg-white p-6 rounded-lg shadow-sm border">
+      <h2 className="text-lg font-medium mb-4">Payment Method</h2>
+      <Tabs defaultValue="card">
+        <TabsList className="grid grid-cols-3 mb-4">
+          <TabsTrigger value="card">Credit Card</TabsTrigger>
+          <TabsTrigger value="upi">UPI</TabsTrigger>
+          <TabsTrigger value="cod">Cash on Delivery</TabsTrigger>
+        </TabsList>
         
-        {!codAvailable && (
-          <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-            <p className="text-sm text-yellow-800">
-              <Banknote className="h-4 w-4 inline mr-1" />
-              Cash on Delivery is not available for this order (some products don't support COD)
+        <TabsContent value="card" className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="card_number">Card Number</Label>
+              <Input 
+                id="card_number" 
+                placeholder="1234 5678 9012 3456"
+                disabled={loading}
+              />
+            </div>
+            <div>
+              <Label htmlFor="card_name">Name on Card</Label>
+              <Input 
+                id="card_name" 
+                placeholder="John Doe"
+                disabled={loading}
+              />
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="expiry">Expiry Date</Label>
+              <Input 
+                id="expiry" 
+                placeholder="MM/YY"
+                disabled={loading}
+              />
+            </div>
+            <div>
+              <Label htmlFor="cvv">CVV</Label>
+              <Input 
+                id="cvv" 
+                placeholder="123"
+                disabled={loading}
+              />
+            </div>
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="upi">
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="upi_id">UPI ID</Label>
+              <Input 
+                id="upi_id" 
+                placeholder="name@upi"
+                disabled={loading}
+              />
+            </div>
+            <p className="text-sm text-muted-foreground">
+              You'll receive a payment request on your UPI app when you place the order
             </p>
           </div>
-        )}
-      </CardContent>
-    </Card>
+        </TabsContent>
+        
+        <TabsContent value="cod">
+          <div className="p-4 bg-heartfelt-cream/20 rounded-md">
+            <p className="font-medium mb-2">Cash on Delivery</p>
+            <p className="text-sm text-muted-foreground">
+              Pay with cash when your order is delivered. Additional ₹40 fee applies.
+            </p>
+          </div>
+        </TabsContent>
+      </Tabs>
+    </div>
   );
 };
 

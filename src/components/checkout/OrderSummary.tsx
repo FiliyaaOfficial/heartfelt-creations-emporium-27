@@ -10,24 +10,18 @@ interface OrderSummaryProps {
   subtotal: number;
   loading: boolean;
   handleSubmit: (e: React.FormEvent) => Promise<void>;
-  couponDiscount?: number;
-  appliedCouponCode?: string;
-  showPlaceOrderButton?: boolean;
 }
 
 const OrderSummary: React.FC<OrderSummaryProps> = ({ 
   cartItems, 
   subtotal, 
   loading, 
-  handleSubmit,
-  couponDiscount = 0,
-  appliedCouponCode,
-  showPlaceOrderButton = true
+  handleSubmit 
 }) => {
   const { formatCurrency } = useCurrency();
   const shippingCost = 0;
-  const tax = (subtotal - couponDiscount) * 0.18;
-  const total = subtotal + shippingCost + tax - couponDiscount;
+  const tax = subtotal * 0.18;
+  const total = subtotal + shippingCost + tax;
 
   return (
     <div className="bg-white p-6 rounded-lg shadow-sm border sticky top-24">
@@ -36,7 +30,7 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
       <div className="space-y-4">
         <div className="max-h-80 overflow-y-auto pr-2">
           {cartItems.map((item) => (
-            <div key={item.id} className="flex items-start py-3 border-b">
+            <div key={item.id} className="flex items-center py-3 border-b">
               <div className="h-16 w-16 rounded overflow-hidden flex-shrink-0">
                 <img 
                   src={item.product.image_url} 
@@ -48,33 +42,6 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
               <div className="ml-3 flex-grow">
                 <h3 className="text-sm font-medium">{item.product.name}</h3>
                 <div className="text-xs text-muted-foreground">Qty: {item.quantity}</div>
-                
-                {/* Show customization details */}
-                {item.customization && (
-                  <div className="mt-1 p-2 bg-blue-50 rounded text-xs">
-                    <p className="font-medium text-blue-800 mb-1">Custom:</p>
-                    <p className="text-blue-700 line-clamp-2">{item.customization}</p>
-                    {item.selected_options?.customizationImages && 
-                     Array.isArray(item.selected_options.customizationImages) && 
-                     item.selected_options.customizationImages.length > 0 && (
-                      <div className="mt-1 flex gap-1">
-                        {(item.selected_options.customizationImages as string[]).slice(0, 2).map((imageUrl: string, index: number) => (
-                          <img 
-                            key={index}
-                            src={imageUrl} 
-                            alt={`Custom ${index + 1}`}
-                            className="w-6 h-6 object-cover rounded border"
-                          />
-                        ))}
-                        {(item.selected_options.customizationImages as string[]).length > 2 && (
-                          <div className="w-6 h-6 bg-gray-200 rounded border flex items-center justify-center text-xs">
-                            +{(item.selected_options.customizationImages as string[]).length - 2}
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                )}
               </div>
               <div className="font-medium text-right ml-2">
                 <div className="flex items-center">
@@ -90,13 +57,6 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
             <span className="text-muted-foreground">Subtotal</span>
             <span>{formatCurrency(subtotal)}</span>
           </div>
-
-          {couponDiscount > 0 && appliedCouponCode && (
-            <div className="flex justify-between text-green-600">
-              <span className="text-sm">Coupon ({appliedCouponCode})</span>
-              <span>-{formatCurrency(couponDiscount)}</span>
-            </div>
-          )}
           
           <div className="flex justify-between">
             <span className="text-muted-foreground">GST (18%)</span>
@@ -118,30 +78,28 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
           </div>
         </div>
         
-        {showPlaceOrderButton && (
-          <div className="mt-6">
-            <Button 
-              type="submit" 
-              onClick={handleSubmit}
-              className="w-full bg-heartfelt-burgundy hover:bg-heartfelt-dark py-6 text-lg"
-              disabled={loading}
-            >
-              {loading ? (
-                <>
-                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                  Processing...
-                </>
-              ) : (
-                <>Place Order</>
-              )}
-            </Button>
-            
-            <div className="flex items-center justify-center mt-4 text-xs text-muted-foreground gap-1">
-              <Shield size={14} />
-              <span>Secure checkout with 100% purchase protection</span>
-            </div>
+        <div className="mt-6">
+          <Button 
+            type="submit" 
+            onClick={handleSubmit}
+            className="w-full bg-heartfelt-burgundy hover:bg-heartfelt-dark py-6 text-lg"
+            disabled={loading}
+          >
+            {loading ? (
+              <>
+                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                Processing...
+              </>
+            ) : (
+              <>Place Order</>
+            )}
+          </Button>
+          
+          <div className="flex items-center justify-center mt-4 text-xs text-muted-foreground gap-1">
+            <Shield size={14} />
+            <span>Secure checkout with 100% purchase protection</span>
           </div>
-        )}
+        </div>
         
         <div className="pt-3 border-t flex items-center justify-between text-xs text-muted-foreground">
           <div className="flex items-center">

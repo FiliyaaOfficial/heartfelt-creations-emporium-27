@@ -9,69 +9,6 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      analytics: {
-        Row: {
-          created_at: string | null
-          date: string
-          id: string
-          metric_name: string
-          metric_value: number
-        }
-        Insert: {
-          created_at?: string | null
-          date?: string
-          id?: string
-          metric_name: string
-          metric_value: number
-        }
-        Update: {
-          created_at?: string | null
-          date?: string
-          id?: string
-          metric_name?: string
-          metric_value?: number
-        }
-        Relationships: []
-      }
-      applied_coupons: {
-        Row: {
-          applied_at: string
-          coupon_id: string | null
-          discount_amount: number
-          id: string
-          order_id: string | null
-        }
-        Insert: {
-          applied_at?: string
-          coupon_id?: string | null
-          discount_amount: number
-          id?: string
-          order_id?: string | null
-        }
-        Update: {
-          applied_at?: string
-          coupon_id?: string | null
-          discount_amount?: number
-          id?: string
-          order_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "applied_coupons_coupon_id_fkey"
-            columns: ["coupon_id"]
-            isOneToOne: false
-            referencedRelation: "coupon_codes"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "applied_coupons_order_id_fkey"
-            columns: ["order_id"]
-            isOneToOne: false
-            referencedRelation: "orders"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       blog_posts: {
         Row: {
           author: string
@@ -302,127 +239,6 @@ export type Database = {
         }
         Relationships: []
       }
-      customer_testimonials: {
-        Row: {
-          created_at: string
-          customer_image: string | null
-          customer_name: string
-          id: string
-          is_featured: boolean | null
-          is_published: boolean | null
-          product_id: string | null
-          rating: number | null
-          testimonial_text: string
-        }
-        Insert: {
-          created_at?: string
-          customer_image?: string | null
-          customer_name: string
-          id?: string
-          is_featured?: boolean | null
-          is_published?: boolean | null
-          product_id?: string | null
-          rating?: number | null
-          testimonial_text: string
-        }
-        Update: {
-          created_at?: string
-          customer_image?: string | null
-          customer_name?: string
-          id?: string
-          is_featured?: boolean | null
-          is_published?: boolean | null
-          product_id?: string | null
-          rating?: number | null
-          testimonial_text?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "customer_testimonials_product_id_fkey"
-            columns: ["product_id"]
-            isOneToOne: false
-            referencedRelation: "products"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      email_notifications: {
-        Row: {
-          content: string | null
-          created_at: string
-          email_type: string
-          id: string
-          order_id: string | null
-          recipient_email: string
-          sent_at: string
-          status: string
-          subject: string
-        }
-        Insert: {
-          content?: string | null
-          created_at?: string
-          email_type: string
-          id?: string
-          order_id?: string | null
-          recipient_email: string
-          sent_at?: string
-          status?: string
-          subject: string
-        }
-        Update: {
-          content?: string | null
-          created_at?: string
-          email_type?: string
-          id?: string
-          order_id?: string | null
-          recipient_email?: string
-          sent_at?: string
-          status?: string
-          subject?: string
-        }
-        Relationships: []
-      }
-      inventory_movements: {
-        Row: {
-          created_at: string | null
-          created_by: string | null
-          id: string
-          movement_type: string
-          product_id: string
-          quantity: number
-          reason: string | null
-          reference_id: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          created_by?: string | null
-          id?: string
-          movement_type: string
-          product_id: string
-          quantity: number
-          reason?: string | null
-          reference_id?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          created_by?: string | null
-          id?: string
-          movement_type?: string
-          product_id?: string
-          quantity?: number
-          reason?: string | null
-          reference_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "inventory_movements_product_id_fkey"
-            columns: ["product_id"]
-            isOneToOne: false
-            referencedRelation: "products"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       newsletter_subscriptions: {
         Row: {
           created_at: string
@@ -444,42 +260,6 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           subscribed_at?: string
-        }
-        Relationships: []
-      }
-      notifications: {
-        Row: {
-          created_at: string
-          id: string
-          is_read: boolean | null
-          message: string
-          reference_id: string | null
-          title: string
-          type: string
-          updated_at: string
-          user_id: string | null
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          is_read?: boolean | null
-          message: string
-          reference_id?: string | null
-          title: string
-          type: string
-          updated_at?: string
-          user_id?: string | null
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          is_read?: boolean | null
-          message?: string
-          reference_id?: string | null
-          title?: string
-          type?: string
-          updated_at?: string
-          user_id?: string | null
         }
         Relationships: []
       }
@@ -528,54 +308,13 @@ export type Database = {
           },
         ]
       }
-      order_status_history: {
-        Row: {
-          created_at: string
-          created_by: string | null
-          id: string
-          order_id: string
-          status: string
-          status_message: string | null
-        }
-        Insert: {
-          created_at?: string
-          created_by?: string | null
-          id?: string
-          order_id: string
-          status: string
-          status_message?: string | null
-        }
-        Update: {
-          created_at?: string
-          created_by?: string | null
-          id?: string
-          order_id?: string
-          status?: string
-          status_message?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "order_status_history_order_id_fkey"
-            columns: ["order_id"]
-            isOneToOne: false
-            referencedRelation: "orders"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       orders: {
         Row: {
-          coupon_code: string | null
-          coupon_discount: number | null
           created_at: string
           currency: string | null
           customer_email: string
           customer_name: string
-          estimated_delivery_date: string | null
           id: string
-          image_urls: string[] | null
-          is_first_order: boolean | null
-          order_notes: string | null
           payment_method: string | null
           payment_status: string | null
           razorpay_order_id: string | null
@@ -584,22 +323,15 @@ export type Database = {
           status: string | null
           stripe_session_id: string | null
           total_amount: number
-          tracking_number: string | null
           updated_at: string
           user_id: string | null
         }
         Insert: {
-          coupon_code?: string | null
-          coupon_discount?: number | null
           created_at?: string
           currency?: string | null
           customer_email: string
           customer_name: string
-          estimated_delivery_date?: string | null
           id?: string
-          image_urls?: string[] | null
-          is_first_order?: boolean | null
-          order_notes?: string | null
           payment_method?: string | null
           payment_status?: string | null
           razorpay_order_id?: string | null
@@ -608,22 +340,15 @@ export type Database = {
           status?: string | null
           stripe_session_id?: string | null
           total_amount: number
-          tracking_number?: string | null
           updated_at?: string
           user_id?: string | null
         }
         Update: {
-          coupon_code?: string | null
-          coupon_discount?: number | null
           created_at?: string
           currency?: string | null
           customer_email?: string
           customer_name?: string
-          estimated_delivery_date?: string | null
           id?: string
-          image_urls?: string[] | null
-          is_first_order?: boolean | null
-          order_notes?: string | null
           payment_method?: string | null
           payment_status?: string | null
           razorpay_order_id?: string | null
@@ -632,77 +357,16 @@ export type Database = {
           status?: string | null
           stripe_session_id?: string | null
           total_amount?: number
-          tracking_number?: string | null
           updated_at?: string
           user_id?: string | null
         }
         Relationships: []
-      }
-      product_reviews: {
-        Row: {
-          comment: string
-          created_at: string
-          helpful_count: number | null
-          id: string
-          is_approved: boolean | null
-          is_verified_purchase: boolean | null
-          product_id: string
-          rating: number
-          review_images: string[] | null
-          reviewer_email: string
-          reviewer_name: string
-          title: string | null
-          updated_at: string
-          user_id: string | null
-        }
-        Insert: {
-          comment: string
-          created_at?: string
-          helpful_count?: number | null
-          id?: string
-          is_approved?: boolean | null
-          is_verified_purchase?: boolean | null
-          product_id: string
-          rating: number
-          review_images?: string[] | null
-          reviewer_email: string
-          reviewer_name: string
-          title?: string | null
-          updated_at?: string
-          user_id?: string | null
-        }
-        Update: {
-          comment?: string
-          created_at?: string
-          helpful_count?: number | null
-          id?: string
-          is_approved?: boolean | null
-          is_verified_purchase?: boolean | null
-          product_id?: string
-          rating?: number
-          review_images?: string[] | null
-          reviewer_email?: string
-          reviewer_name?: string
-          title?: string | null
-          updated_at?: string
-          user_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "product_reviews_product_id_fkey"
-            columns: ["product_id"]
-            isOneToOne: false
-            referencedRelation: "products"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       products: {
         Row: {
           badges: string[] | null
           care_instructions: string | null
           category: string
-          cod_available: boolean | null
           compare_at_price: number | null
           created_at: string
           description: string | null
@@ -729,7 +393,6 @@ export type Database = {
           badges?: string[] | null
           care_instructions?: string | null
           category: string
-          cod_available?: boolean | null
           compare_at_price?: number | null
           created_at?: string
           description?: string | null
@@ -756,7 +419,6 @@ export type Database = {
           badges?: string[] | null
           care_instructions?: string | null
           category?: string
-          cod_available?: boolean | null
           compare_at_price?: number | null
           created_at?: string
           description?: string | null
@@ -785,87 +447,31 @@ export type Database = {
         Row: {
           avatar_url: string | null
           created_at: string | null
-          email_verified: boolean | null
           first_name: string | null
           id: string
           last_name: string | null
           phone: string | null
-          phone_verified: boolean | null
-          shipping_address: Json | null
           updated_at: string | null
         }
         Insert: {
           avatar_url?: string | null
           created_at?: string | null
-          email_verified?: boolean | null
           first_name?: string | null
           id: string
           last_name?: string | null
           phone?: string | null
-          phone_verified?: boolean | null
-          shipping_address?: Json | null
           updated_at?: string | null
         }
         Update: {
           avatar_url?: string | null
           created_at?: string | null
-          email_verified?: boolean | null
           first_name?: string | null
           id?: string
           last_name?: string | null
           phone?: string | null
-          phone_verified?: boolean | null
-          shipping_address?: Json | null
           updated_at?: string | null
         }
         Relationships: []
-      }
-      shipments: {
-        Row: {
-          actual_delivery_date: string | null
-          carrier: string
-          created_at: string | null
-          estimated_delivery_date: string | null
-          id: string
-          notes: string | null
-          order_id: string
-          status: string | null
-          tracking_number: string
-          updated_at: string | null
-        }
-        Insert: {
-          actual_delivery_date?: string | null
-          carrier: string
-          created_at?: string | null
-          estimated_delivery_date?: string | null
-          id?: string
-          notes?: string | null
-          order_id: string
-          status?: string | null
-          tracking_number: string
-          updated_at?: string | null
-        }
-        Update: {
-          actual_delivery_date?: string | null
-          carrier?: string
-          created_at?: string | null
-          estimated_delivery_date?: string | null
-          id?: string
-          notes?: string | null
-          order_id?: string
-          status?: string | null
-          tracking_number?: string
-          updated_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "shipments_order_id_fkey"
-            columns: ["order_id"]
-            isOneToOne: false
-            referencedRelation: "orders"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       support_messages: {
         Row: {
@@ -901,36 +507,6 @@ export type Database = {
           order_id?: string | null
           status?: string | null
           subject?: string
-          updated_at?: string
-          user_id?: string | null
-        }
-        Relationships: []
-      }
-      user_purchase_history: {
-        Row: {
-          created_at: string
-          email: string
-          first_order_date: string
-          id: string
-          total_orders: number | null
-          updated_at: string
-          user_id: string | null
-        }
-        Insert: {
-          created_at?: string
-          email: string
-          first_order_date?: string
-          id?: string
-          total_orders?: number | null
-          updated_at?: string
-          user_id?: string | null
-        }
-        Update: {
-          created_at?: string
-          email?: string
-          first_order_date?: string
-          id?: string
-          total_orders?: number | null
           updated_at?: string
           user_id?: string | null
         }
@@ -973,28 +549,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      is_first_time_buyer: {
-        Args: { user_email: string }
-        Returns: boolean
-      }
-      keep_alive: {
-        Args: Record<PropertyKey, never>
-        Returns: string
-      }
-      update_daily_analytics: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
-      validate_coupon: {
-        Args:
-          | { coupon_code_input: string; order_amount: number }
-          | {
-              coupon_code_input: string
-              order_amount: number
-              user_email?: string
-            }
-        Returns: Json
-      }
+      [_ in never]: never
     }
     Enums: {
       [_ in never]: never

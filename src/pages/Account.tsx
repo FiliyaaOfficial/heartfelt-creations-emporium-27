@@ -10,8 +10,6 @@ import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { getUserProfile, updateUserProfile, createUserProfile, type UserProfile } from '@/utils/profileUtils';
 import { User, Package, MessageCircle, LogOut, Edit } from 'lucide-react';
-import OrderTracking from '@/components/account/OrderTracking';
-import OrderSupport from '@/components/account/OrderSupport';
 
 const Account = () => {
   const { user, signOut } = useAuth();
@@ -21,7 +19,6 @@ const Account = () => {
   const [orders, setOrders] = useState<any[]>([]);
   const [customOrders, setCustomOrders] = useState<any[]>([]);
   const [supportMessages, setSupportMessages] = useState<any[]>([]);
-  const [selectedOrderForSupport, setSelectedOrderForSupport] = useState<string | null>(null);
 
   // Form states
   const [firstName, setFirstName] = useState('');
@@ -247,29 +244,23 @@ const Account = () => {
               {orders.length === 0 ? (
                 <p className="text-center text-gray-500 py-8">No orders found</p>
               ) : (
-                <div className="space-y-6">
+                <div className="space-y-4">
                   {orders.map((order) => (
-                    <div key={order.id} className="space-y-4">
-                      <OrderTracking order={order} />
-                      
-                      <div className="flex gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => setSelectedOrderForSupport(
-                            selectedOrderForSupport === order.id ? null : order.id
-                          )}
-                        >
-                          <MessageCircle className="w-4 h-4 mr-1" />
-                          {selectedOrderForSupport === order.id ? 'Hide Support' : 'Get Support'}
-                        </Button>
+                    <div key={order.id} className="border rounded-lg p-4">
+                      <div className="flex justify-between items-start mb-2">
+                        <div>
+                          <p className="font-semibold">Order #{order.id.slice(0, 8)}</p>
+                          <p className="text-sm text-gray-600">
+                            {new Date(order.created_at).toLocaleDateString()}
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-semibold">₹{order.total_amount}</p>
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                            {order.status}
+                          </span>
+                        </div>
                       </div>
-
-                      {selectedOrderForSupport === order.id && (
-                        <OrderSupport orderId={order.id} />
-                      )}
-                      
-                      <hr className="my-6" />
                     </div>
                   ))}
                 </div>

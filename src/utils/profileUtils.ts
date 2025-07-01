@@ -1,6 +1,5 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import type { Json } from '@/integrations/supabase/types';
 
 export interface UserProfile {
   id: string;
@@ -8,9 +7,6 @@ export interface UserProfile {
   last_name?: string;
   phone?: string;
   avatar_url?: string;
-  shipping_address?: Json;
-  phone_verified?: boolean;
-  email_verified?: boolean;
   created_at?: string;
   updated_at?: string;
 }
@@ -35,22 +31,15 @@ export const getUserProfile = async (userId: string): Promise<UserProfile | null
   }
 };
 
-export const updateUserProfile = async (userId: string, profile: Partial<Omit<UserProfile, 'id' | 'created_at'>>): Promise<boolean> => {
+export const updateUserProfile = async (userId: string, profile: Partial<UserProfile>): Promise<boolean> => {
   try {
-    const updateData: any = {
-      id: userId,
-      ...profile,
-      updated_at: new Date().toISOString()
-    };
-
-    // Handle shipping_address conversion if needed
-    if (profile.shipping_address && typeof profile.shipping_address === 'object') {
-      updateData.shipping_address = profile.shipping_address as Json;
-    }
-
     const { error } = await supabase
       .from('profiles')
-      .upsert(updateData);
+      .upsert({
+        id: userId,
+        ...profile,
+        updated_at: new Date().toISOString()
+      });
 
     return !error;
   } catch (error) {
@@ -59,23 +48,16 @@ export const updateUserProfile = async (userId: string, profile: Partial<Omit<Us
   }
 };
 
-export const createUserProfile = async (userId: string, profile: Partial<Omit<UserProfile, 'id' | 'created_at' | 'updated_at'>>): Promise<boolean> => {
+export const createUserProfile = async (userId: string, profile: Partial<UserProfile>): Promise<boolean> => {
   try {
-    const insertData: any = {
-      id: userId,
-      ...profile,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
-    };
-
-    // Handle shipping_address conversion if needed
-    if (profile.shipping_address && typeof profile.shipping_address === 'object') {
-      insertData.shipping_address = profile.shipping_address as Json;
-    }
-
     const { error } = await supabase
       .from('profiles')
-      .insert(insertData);
+      .insert({
+        id: userId,
+        ...profile,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      });
 
     return !error;
   } catch (error) {

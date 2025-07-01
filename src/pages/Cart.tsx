@@ -46,105 +46,65 @@ const Cart = () => {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100">
-                    {cartItems.map((item) => {
-                      // Safely handle customization images
-                      const customizationImages = item.selected_options?.customizationImages;
-                      let imageArray: string[] = [];
-                      
-                      if (Array.isArray(customizationImages)) {
-                        imageArray = customizationImages;
-                      } else if (typeof customizationImages === 'string') {
-                        imageArray = [customizationImages];
-                      }
-                      
-                      return (
-                        <tr key={item.id} className="py-4">
-                          <td className="py-4">
-                            <div className="flex items-start space-x-3">
-                              <img 
-                                src={item.product.image_url} 
-                                alt={item.product.name} 
-                                className="h-16 w-16 object-cover rounded flex-shrink-0"
-                                loading="lazy"
-                              />
-                              <div className="flex-grow">
-                                <h3 className="font-medium">{item.product.name}</h3>
-                                <p className="text-sm text-muted-foreground">{item.product.category}</p>
-                                <p className="text-sm text-filiyaa-peach-600 font-medium sm:hidden">
-                                  {formatCurrency(item.product.price)}
-                                </p>
-                                
-                                {/* Show customization details */}
-                                {item.customization && (
-                                  <div className="mt-2 p-2 bg-blue-50 rounded-md">
-                                    <p className="text-xs font-medium text-blue-800 mb-1">Customization:</p>
-                                    <p className="text-xs text-blue-700">{item.customization}</p>
-                                    
-                                    {/* Show customization images if available */}
-                                    {imageArray.length > 0 && (
-                                      <div className="mt-2 flex gap-1">
-                                        {imageArray.slice(0, 3).map((imageUrl, index) => (
-                                          <div key={index} className="relative">
-                                            <img 
-                                              src={imageUrl} 
-                                              alt={`Customization ${index + 1}`}
-                                              className="w-8 h-8 object-cover rounded border"
-                                            />
-                                            {index === 2 && imageArray.length > 3 && (
-                                              <div className="absolute inset-0 bg-black bg-opacity-50 rounded flex items-center justify-center">
-                                                <span className="text-white text-xs">+{imageArray.length - 3}</span>
-                                              </div>
-                                            )}
-                                          </div>
-                                        ))}
-                                      </div>
-                                    )}
-                                  </div>
-                                )}
-                              </div>
+                    {cartItems.map((item) => (
+                      <tr key={item.id} className="py-4">
+                        <td className="py-4">
+                          <div className="flex items-center space-x-3">
+                            <img 
+                              src={item.product.image_url} 
+                              alt={item.product.name} 
+                              className="h-16 w-16 object-cover rounded"
+                              loading="lazy"
+                            />
+                            <div>
+                              <h3 className="font-medium">{item.product.name}</h3>
+                              <p className="text-sm text-muted-foreground">{item.product.category}</p>
+                              <p className="text-sm text-filiyaa-peach-600 font-medium sm:hidden">
+                                {formatCurrency(item.product.price)}
+                              </p>
                             </div>
-                          </td>
-                          <td className="text-center hidden sm:table-cell">
-                            {formatCurrency(item.product.price)}
-                          </td>
-                          <td className="py-4">
-                            <div className="flex items-center justify-center">
-                              <button 
-                                onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                                disabled={item.quantity <= 1}
-                                className="p-1 rounded-l border border-gray-200 disabled:opacity-50"
-                                aria-label="Decrease quantity"
-                              >
-                                <Minus size={16} />
-                              </button>
-                              <div className="px-4 py-1 border-t border-b border-gray-200 min-w-[40px] text-center">
-                                {item.quantity}
-                              </div>
-                              <button 
-                                onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                                disabled={item.quantity >= item.product.stock_quantity}
-                                className="p-1 rounded-r border border-gray-200 disabled:opacity-50"
-                                aria-label="Increase quantity"
-                              >
-                                <Plus size={16} />
-                              </button>
-                            </div>
-                          </td>
-                          <td className="text-right hidden sm:table-cell">
-                            {formatCurrency(item.product.price * item.quantity)}
-                          </td>
-                          <td className="py-4 text-right">
+                          </div>
+                        </td>
+                        <td className="text-center hidden sm:table-cell">
+                          {formatCurrency(item.product.price)}
+                        </td>
+                        <td className="py-4">
+                          <div className="flex items-center justify-center">
                             <button 
-                              onClick={() => removeFromCart(item.id)}
-                              className="text-gray-500 hover:text-filiyaa-peach-500"
-                              aria-label="Remove item"
+                              onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                              disabled={item.quantity <= 1}
+                              className="p-1 rounded-l border border-gray-200 disabled:opacity-50"
+                              aria-label="Decrease quantity"
                             >
-                              <Trash2 size={18} />
+                              <Minus size={16} />
                             </button>
-                          </td>
-                        </tr>
-                      );
-                    })}
+                            <div className="px-4 py-1 border-t border-b border-gray-200 min-w-[40px] text-center">
+                              {item.quantity}
+                            </div>
+                            <button 
+                              onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                              disabled={item.quantity >= item.product.stock_quantity}
+                              className="p-1 rounded-r border border-gray-200 disabled:opacity-50"
+                              aria-label="Increase quantity"
+                            >
+                              <Plus size={16} />
+                            </button>
+                          </div>
+                        </td>
+                        <td className="text-right hidden sm:table-cell">
+                          {formatCurrency(item.product.price * item.quantity)}
+                        </td>
+                        <td className="py-4 text-right">
+                          <button 
+                            onClick={() => removeFromCart(item.id)}
+                            className="text-gray-500 hover:text-filiyaa-peach-500"
+                            aria-label="Remove item"
+                          >
+                            <Trash2 size={18} />
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
                   </tbody>
                 </table>
               </div>

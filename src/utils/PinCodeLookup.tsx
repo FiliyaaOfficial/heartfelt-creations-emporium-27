@@ -1,79 +1,63 @@
 
 import React, { useState } from 'react';
-import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { toast } from 'sonner';
+import { Label } from '@/components/ui/label';
 
 interface PinCodeLookupProps {
-  onCityStateChange: (city: string, state: string, postalCode: string) => void;
+  onCityStateChange: (city: string, state: string) => void;
 }
 
 const PinCodeLookup: React.FC<PinCodeLookupProps> = ({ onCityStateChange }) => {
-  const [pinCode, setPinCode] = useState('');
+  const [pincode, setPincode] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  const fetchPinCodeDetails = async (pin: string) => {
-    if (pin.length !== 6) {
-      toast.error('Please enter a valid 6-digit PIN code');
-      return;
-    }
-
-    setIsLoading(true);
-    try {
-      const response = await fetch(`https://api.postalpincode.in/pincode/${pin}`);
-      const data = await response.json();
-      
-      if (data[0].Status === 'Success' && data[0].PostOffice && data[0].PostOffice.length > 0) {
-        const postOffice = data[0].PostOffice[0];
-        const city = postOffice.District;
-        const state = postOffice.State;
-        
-        onCityStateChange(city, state, pin);
-        toast.success('PIN code details fetched successfully');
-      } else {
-        toast.error('Invalid PIN code or details not found');
-      }
-    } catch (error) {
-      console.error('Error fetching PIN code details:', error);
-      toast.error('Failed to fetch PIN code details');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handlePinCodeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value.replace(/\D/g, '').slice(0, 6);
-    setPinCode(value);
+  const handlePincodeChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setPincode(value);
+    setError('');
     
     if (value.length === 6) {
-      fetchPinCodeDetails(value);
+      setIsLoading(true);
+      try {
+        const response = await fetch(`https://api.postalpincode.in/pincode/${value}`);
+        const data = await response.json();
+        
+        if (data[0].Status === 'Success') {
+          const postOffice = data[0].PostOffice[0];
+          onCityStateChange(postOffice.District, postOffice.State);
+        } else {
+          setError('Invalid PIN code');
+          onCityStateChange('', '');
+        }
+      } catch (err) {
+        setError('Failed to fetch location data');
+        onCityStateChange('', '');
+      } finally {
+        setIsLoading(false);
+      }
+    } else if (value.length > 0) {
+      onCityStateChange('', '');
     }
   };
 
   return (
-    <div>
-      <Label htmlFor="postal_code">PIN Code *</Label>
-      <div className="flex gap-2">
-        <Input 
-          id="postal_code"
-          name="postal_code"
-          value={pinCode}
-          onChange={handlePinCodeChange}
-          placeholder="Enter 6-digit PIN code"
-          maxLength={6}
-          required
-        />
-        <Button
-          type="button"
-          onClick={() => fetchPinCodeDetails(pinCode)}
-          disabled={isLoading || pinCode.length !== 6}
-          variant="outline"
-          size="sm"
-        >
-          {isLoading ? 'Checking...' : 'Verify'}
-        </Button>
-      </div>
+    <div className="space-y-2">
+      <Label htmlFor="pincode">PIN Code</Label>
+      <Input
+        id="pincode"
+        type="text"
+        placeholder="Enter 6-digit PIN code"
+        value={pincode}
+        onChange={handlePincodeChange}
+        maxLength={6}
+        className={error ? 'border-red-500' : ''}
+      />
+      {isLoading && <p className="text-xs text-muted-foreground">Looking up location...</p>}
+      {error && <p className="text-xs text-red-500">{error}</p>}
+      {!error && pincode.length === 6 && !isLoading && (
+        <p className="text-xs text-green-600">PIN code found</p>
+      )}
     </div>
   );
 };
