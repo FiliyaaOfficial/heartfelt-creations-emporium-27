@@ -8,7 +8,7 @@ import PinCodeLookup from '@/utils/PinCodeLookup';
 interface ShippingFormProps {
   shippingInfo: ShippingAddress;
   handleInputChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
-  handleCityStateChange: (city: string, state: string) => void;
+  handleCityStateChange: (city: string, state: string, postalCode: string) => void;
 }
 
 const ShippingForm: React.FC<ShippingFormProps> = ({ 
@@ -81,6 +81,7 @@ const ShippingForm: React.FC<ShippingFormProps> = ({
               onChange={handleInputChange}
               required
               readOnly
+              placeholder="Auto-filled from PIN code"
             />
           </div>
           <div>
@@ -92,6 +93,7 @@ const ShippingForm: React.FC<ShippingFormProps> = ({
               onChange={handleInputChange}
               required
               readOnly
+              placeholder="Auto-filled from PIN code"
             />
           </div>
         </div>

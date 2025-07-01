@@ -1,4 +1,3 @@
-
 // Application constants and configuration
 export const APP_CONFIG = {
   // Domain configuration
@@ -67,3 +66,23 @@ export const PAYMENT_STATUS = {
   FAILED: 'failed',
   REFUNDED: 'refunded'
 } as const;
+
+// Domain configuration for Filiyaa
+export const DOMAIN_CONFIG = {
+  domain: 'www.filiyaa.com',
+  url: 'https://www.filiyaa.com',
+  name: 'Filiyaa',
+  description: 'Handcrafted gifts and personalized items',
+  social: {
+    instagram: 'https://instagram.com/filiyaa',
+    facebook: 'https://facebook.com/filiyaa',
+    twitter: 'https://twitter.com/filiyaa'
+  }
+};
+
+// SEO and sitemap configuration
+export const SEO_CONFIG = {
+  sitemap: `${DOMAIN_CONFIG.url}/sitemap.xml`,
+  robots: `${DOMAIN_CONFIG.url}/robots.txt`,
+  canonical: DOMAIN_CONFIG.url
+};
